@@ -27,13 +27,13 @@ export const UpdateModal = () => {
     return 0;
   }
 
-  //const message = `A new version of AudioScape is available!\n\nPlease update to version ${latestVersion} to get the latest features and bug fixes.\n\nDownload and install the latest version from "Assets" section from : https://github.com/ankushcodes69/AudioScape/releases/latest`;
+  //const message = `A new version of AudioScape is available!\n\nPlease update to version ${latestVersion} to get the latest features and bug fixes.\n\nDownload and install the latest version from "Assets" section from : https://github.com/ankrypht/AudioScape/releases/latest`;
 
   useEffect(() => {
     const fetchMessage = async () => {
       try {
         const response = await fetch(
-          "https://api.github.com/repos/ankushcodes69/AudioScape/releases/latest",
+          "https://api.github.com/repos/ankrypht/AudioScape/releases/latest",
           {
             headers: {
               Accept: "application/vnd.github.v3+json",

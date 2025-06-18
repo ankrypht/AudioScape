@@ -4,18 +4,18 @@
 
 **An Android Application For Streaming Music From YouTube Music Build With React-Native Using Expo.**
 
-![GitHub Release](https://img.shields.io/github/v/release/ankushcodes69/AudioScape?label=Latest%20Release&logo=github&logoColor=white)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/ankushcodes69/AudioScape/total?label=Downloads&logo=refinedgithub&logoColor=white)
-![GitHub commits since latest release](https://img.shields.io/github/commits-since/ankushcodes69/AudioScape/latest)
-![GitHub License](https://img.shields.io/github/license/ankushcodes69/AudioScape?label=License&logo=gnu&logoColor=white)
-![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/ankushcodes69/AudioScape?label=Code%20Quality&logo=codefactor&logoColor=white)
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/ankushcodes69/AudioScape/main?label=Last%20Commit&logo=Git&logoColor=white)
-![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/ankushcodes69/AudioScape?label=Total%20Commits)
-![GitHub top language](https://img.shields.io/github/languages/top/ankushcodes69/AudioScape?label=TypeScript&logo=typescript&logoColor=white)
-![GitHub language count](https://img.shields.io/github/languages/count/ankushcodes69/AudioScape?label=Languages%20Used)
-![GitHub issues](https://img.shields.io/github/issues/ankushcodes69/AudioScape?label=Issues)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/ankushcodes69/AudioScape?label=Pull%20Requests)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/ankushcodes69/AudioScape?label=Code%20Size)
+![GitHub Release](https://img.shields.io/github/v/release/ankrypht/AudioScape?label=Latest%20Release&logo=github&logoColor=white)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/ankrypht/AudioScape/total?label=Downloads&logo=refinedgithub&logoColor=white)
+![GitHub commits since latest release](https://img.shields.io/github/commits-since/ankrypht/AudioScape/latest)
+![GitHub License](https://img.shields.io/github/license/ankrypht/AudioScape?label=License&logo=gnu&logoColor=white)
+![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/ankrypht/AudioScape?label=Code%20Quality&logo=codefactor&logoColor=white)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/ankrypht/AudioScape/main?label=Last%20Commit&logo=Git&logoColor=white)
+![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/ankrypht/AudioScape?label=Total%20Commits)
+![GitHub top language](https://img.shields.io/github/languages/top/ankrypht/AudioScape?label=TypeScript&logo=typescript&logoColor=white)
+![GitHub language count](https://img.shields.io/github/languages/count/ankrypht/AudioScape?label=Languages%20Used)
+![GitHub issues](https://img.shields.io/github/issues/ankrypht/AudioScape?label=Issues)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/ankrypht/AudioScape?label=Pull%20Requests)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/ankrypht/AudioScape?label=Code%20Size)
 
 **Built With The Tools & Technologies:**
 
@@ -58,13 +58,13 @@
 
 ## 📲 Installation
 
-[<img src="./assets/images/getItGithub.png" alt="GitHub" height="80">](https://github.com/ankushcodes69/AudioScape/releases/latest)
+[<img src="./assets/images/getItGithub.png" alt="GitHub" height="80">](https://github.com/ankrypht/AudioScape/releases/latest)
 
 ## 🤝 Contributing
 
 **You need a YouTube 'po token' api to develop the app yourself**
 
-- You can find the code for the api at: https://github.com/ankushcodes69/YouTubeApi
+- You can find the code for the api at: https://github.com/ankrypht/YouTubeApi
 
 - You can either host the api locally or use "https://render.com/" to host the api (recommended), either way add the link to a **.env** (reffer to .env.example) file and **don't forget to give '/data' at the end of the api link**.
 
