@@ -333,7 +333,6 @@ const styles = ScaledSheet.create({
   },
   dismissButton: {
     marginTop: -11,
-    backgroundColor: "red",
     elevation: 3,
   },
   songTitle: {
