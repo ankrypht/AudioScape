@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, useWindowDimensions, ViewStyle } from "react-native";
 import { useProgress, useActiveTrack } from "react-native-track-player";
-import { usePlayerBackground } from "@/hooks/usePlayerBackground";
+import { useImageColors } from "@/hooks/useImageColors";
 import { Colors } from "@/constants/Colors";
 import Lyrics from "@/components/Lyrics";
 import Animated, {
@@ -43,7 +43,7 @@ export default function LyricsModal() {
   const halfScrollComponentHeight = 0.3 * height;
 
   const activeTrack = useActiveTrack();
-  const { imageColors } = usePlayerBackground(
+  const { imageColors } = useImageColors(
     activeTrack?.artwork ?? "https://placehold.co/50",
   );
 

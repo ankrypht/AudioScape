@@ -6,7 +6,7 @@ import {
 import { PlayerProgressBar } from "@/components/PlayerProgressbar";
 import { screenPadding } from "@/constants/tokens";
 import { Colors } from "@/constants/Colors";
-import { usePlayerBackground } from "@/hooks/usePlayerBackground";
+import { useImageColors } from "@/hooks/useImageColors";
 import { useTrackPlayerFavorite } from "@/hooks/useTrackPlayerFavorite";
 import { defaultStyles } from "@/styles";
 import { LinearGradient } from "expo-linear-gradient";
@@ -28,7 +28,7 @@ const PlayerScreen = () => {
   const activeTrack = useActiveTrack();
   const router = useRouter();
 
-  const { imageColors } = usePlayerBackground(
+  const { imageColors } = useImageColors(
     activeTrack?.artwork ?? "https://placehold.co/50",
   );
 

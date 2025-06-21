@@ -9,14 +9,14 @@ import { View, ViewProps, TouchableOpacity } from "react-native";
 import FastImage from "@d11/react-native-fast-image";
 import color from "color";
 import { useActiveTrack } from "react-native-track-player";
-import { usePlayerBackground } from "@/hooks/usePlayerBackground";
+import { useImageColors } from "@/hooks/useImageColors";
 import { MovingText } from "@/components/MovingText";
 import { ScaledSheet, scale } from "react-native-size-matters/extend";
 
 export const FloatingPlayer = ({ style }: ViewProps) => {
   const lastActiveTrack = useLastActiveTrack();
   const activeTrack = useActiveTrack();
-  const { imageColors } = usePlayerBackground(
+  const { imageColors } = useImageColors(
     activeTrack?.artwork ?? "https://placehold.co/50",
   );
   const dominantColor = activeTrack ? imageColors?.dominant : "#101010";

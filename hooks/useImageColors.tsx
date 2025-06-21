@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getColors } from "react-native-image-colors";
 import { AndroidImageColors } from "react-native-image-colors/build/types";
 
-export const usePlayerBackground = (imageUrl: string) => {
+export const useImageColors = (imageUrl: string) => {
   const [imageColors, setImageColors] = useState<AndroidImageColors | null>(
     null,
   );
