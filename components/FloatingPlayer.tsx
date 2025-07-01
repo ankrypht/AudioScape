@@ -17,7 +17,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
   const lastActiveTrack = useLastActiveTrack();
   const activeTrack = useActiveTrack();
   const { imageColors } = useImageColors(
-    activeTrack?.artwork ?? "https://placehold.co/50"
+    activeTrack?.artwork ?? "https://placehold.co/50",
   );
   const dominantColor = activeTrack ? imageColors?.dominant : "#101010";
   const darkerColor =

@@ -27,7 +27,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({
     if (!playlistName.trim()) {
       ToastAndroid.show(
         "Please enter a valid playlist name.",
-        ToastAndroid.LONG
+        ToastAndroid.LONG,
       );
       return;
     }

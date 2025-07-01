@@ -29,7 +29,7 @@ const PlayerScreen = () => {
   const router = useRouter();
 
   const { imageColors } = useImageColors(
-    activeTrack?.artwork ?? "https://placehold.co/50"
+    activeTrack?.artwork ?? "https://placehold.co/50",
   );
 
   const { top, bottom } = useSafeAreaInsets();

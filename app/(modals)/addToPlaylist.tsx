@@ -58,7 +58,7 @@ export default function AddToPlaylistModal() {
 
   const renderPlaylistItem = (
     { item }: { item: { name: string; thumbnail: string | null } },
-    handleDismiss: () => void
+    handleDismiss: () => void,
   ) => {
     return (
       <TouchableOpacity

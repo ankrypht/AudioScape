@@ -47,7 +47,7 @@ export const MessageModal = () => {
 
   const handleLinkPress = (url: string) => {
     Linking.openURL(url).catch((err) =>
-      console.error("Failed to open URL:", err)
+      console.error("Failed to open URL:", err),
     );
   };
 
@@ -78,7 +78,7 @@ export const MessageModal = () => {
                   </Text>
                 ) : (
                   <Text key={index}>{part}</Text>
-                )
+                ),
               )}
           </Text>
 

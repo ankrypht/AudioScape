@@ -38,7 +38,7 @@ export const UpdateModal = () => {
             headers: {
               Accept: "application/vnd.github.v3+json",
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -48,13 +48,13 @@ export const UpdateModal = () => {
         const data = await response.json();
 
         setMessage(
-          `A new version of AudioScape is available!\n\nPlease update to version ${data.tag_name} to get the latest features and bug fixes.\n\nDownload and install the latest version from the link below:\n${data.assets[0].browser_download_url}`
+          `A new version of AudioScape is available!\n\nPlease update to version ${data.tag_name} to get the latest features and bug fixes.\n\nDownload and install the latest version from the link below:\n${data.assets[0].browser_download_url}`,
         );
 
         if (
           compareVersions(
             `${Application.nativeApplicationVersion}`,
-            data.tag_name
+            data.tag_name,
           ) === -1
         ) {
           setIsModalVisible(true);
@@ -71,7 +71,7 @@ export const UpdateModal = () => {
 
   const handleLinkPress = (url: string) => {
     Linking.openURL(url).catch((err) =>
-      console.error("Failed to open URL:", err)
+      console.error("Failed to open URL:", err),
     );
   };
 
@@ -102,7 +102,7 @@ export const UpdateModal = () => {
                   </Text>
                 ) : (
                   <Text key={index}>{part}</Text>
-                )
+                ),
               )}
           </Text>
 

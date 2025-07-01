@@ -51,7 +51,7 @@ export default function QueueModal() {
   // Listen for track changes to update in real-time
   useTrackPlayerEvents(
     [Event.PlaybackQueueEnded, Event.PlaybackActiveTrackChanged],
-    fetchQueue
+    fetchQueue,
   );
 
   const handleSongSelect = async (song: Track) => {
