@@ -6,7 +6,6 @@ import { useActiveTrack } from "react-native-track-player";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { ScaledSheet } from "react-native-size-matters/extend";
-import { Song } from "@/types/songItem";
 
 interface QuickPicksSectionProps {
   results: Song[];
@@ -96,24 +95,24 @@ const styles = ScaledSheet.create({
     marginBottom: "10@vs",
   },
   itemContainer: {
-    marginRight: 10,
-    width: "100@s",
-    height: "145@s",
+    marginRight: "10@ms",
+    width: "100@ms",
+    height: "145@ms",
   },
   imageContainer: {
     position: "relative",
   },
   thumbnail: {
     borderRadius: 12,
-    width: "100@s",
-    height: "100@s",
+    width: "100@ms",
+    height: "100@ms",
   },
   trackPlayingIconIndicator: {
     position: "absolute",
-    top: "35@s",
-    left: "35@s",
-    width: "30@s",
-    height: "30@s",
+    top: "35@ms",
+    left: "35@ms",
+    width: "30@ms",
+    height: "30@ms",
   },
   title: {
     color: Colors.text,

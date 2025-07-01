@@ -24,7 +24,6 @@ import {
   moderateScale,
   verticalScale,
 } from "react-native-size-matters/extend";
-import { Song } from "@/types/songItem";
 
 const gradientIndex = Math.floor(Math.random() * 12);
 
@@ -192,6 +191,7 @@ const FavoritesScreen = () => {
         {formattedTracks.length > 0 && (
           <FAB
             style={{
+              borderRadius: 50,
               position: "absolute",
               marginRight: 16,
               marginBottom:
@@ -200,6 +200,7 @@ const FavoritesScreen = () => {
               bottom: 0,
               backgroundColor: "white",
             }}
+            customSize={moderateScale(56)}
             theme={{ roundness: 7 }}
             icon="play"
             color="black"
@@ -235,7 +236,7 @@ const styles = ScaledSheet.create({
   songItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: "10@ms",
     paddingLeft: 20,
     paddingRight: 30,
   },
@@ -244,17 +245,17 @@ const styles = ScaledSheet.create({
     alignItems: "center",
   },
   resultThumbnail: {
-    width: "55@s",
-    height: "55@s",
+    width: "55@ms",
+    height: "55@ms",
     marginRight: 10,
     borderRadius: 8,
   },
   trackPlayingIconIndicator: {
     position: "absolute",
-    top: "18@s",
-    left: "19@s",
-    width: "20@s",
-    height: "20@s",
+    top: "18@ms",
+    left: "19@ms",
+    width: "20@ms",
+    height: "20@ms",
   },
   resultText: {
     flex: 1,

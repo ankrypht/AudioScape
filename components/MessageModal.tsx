@@ -47,7 +47,7 @@ export const MessageModal = () => {
 
   const handleLinkPress = (url: string) => {
     Linking.openURL(url).catch((err) =>
-      console.error("Failed to open URL:", err),
+      console.error("Failed to open URL:", err)
     );
   };
 
@@ -78,7 +78,7 @@ export const MessageModal = () => {
                   </Text>
                 ) : (
                   <Text key={index}>{part}</Text>
-                ),
+                )
               )}
           </Text>
 
@@ -102,8 +102,8 @@ const styles = ScaledSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.3)",
   },
   modalContent: {
-    width: "300@s",
-    padding: 10,
+    width: "300@ms",
+    padding: "10@ms",
     backgroundColor: Colors.background,
     borderRadius: 10,
     alignItems: "center",
@@ -126,8 +126,8 @@ const styles = ScaledSheet.create({
   },
   modalButton: {
     backgroundColor: "white",
-    paddingVertical: "8@s",
-    paddingHorizontal: "16@s",
+    paddingVertical: "8@ms",
+    paddingHorizontal: "16@ms",
     borderRadius: 50,
     flex: 1,
     marginHorizontal: 5,

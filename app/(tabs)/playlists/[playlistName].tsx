@@ -19,7 +19,6 @@ import {
   verticalScale,
   scale,
 } from "react-native-size-matters/extend";
-import { Song } from "@/types/songItem";
 
 const gradientIndex = Math.floor(Math.random() * 12);
 
@@ -59,7 +58,7 @@ const PlaylistView = () => {
             style={{
               position: "absolute",
               left: 0,
-              paddingTop: top,
+              paddingTop: top - 8,
               paddingLeft: 15,
             }}
             onPress={() => router.back()}
@@ -175,6 +174,7 @@ const PlaylistView = () => {
         {playlist.length > 0 && (
           <FAB
             style={{
+              borderRadius: 50,
               position: "absolute",
               marginRight: 16,
               marginBottom:
@@ -183,6 +183,7 @@ const PlaylistView = () => {
               bottom: 0,
               backgroundColor: "white",
             }}
+            customSize={moderateScale(56)}
             theme={{ roundness: 7 }}
             icon="play"
             color="black"
@@ -214,6 +215,7 @@ const styles = ScaledSheet.create({
     fontSize: "24@ms",
     fontWeight: "bold",
     color: Colors.text,
+    textAlign: "center",
     marginHorizontal: scale(30) + 15,
   },
   headerScrolled: {
@@ -227,13 +229,13 @@ const styles = ScaledSheet.create({
     shadowRadius: 11,
     borderRadius: 12,
     alignSelf: "center",
-    height: "240@s",
-    width: "240@s",
+    height: "240@ms",
+    width: "240@ms",
     marginBottom: 30,
   },
   artworkImage: {
-    width: "240@s",
-    height: "240@s",
+    width: "240@ms",
+    height: "240@ms",
     resizeMode: "cover",
     borderRadius: 12,
   },
@@ -248,17 +250,17 @@ const styles = ScaledSheet.create({
     width: scale(360) - 60,
   },
   resultThumbnail: {
-    width: "55@s",
-    height: "55@s",
+    width: "55@ms",
+    height: "55@ms",
     marginRight: 10,
     borderRadius: 8,
   },
   trackPlayingIconIndicator: {
     position: "absolute",
-    top: "18@s",
-    left: "19@s",
-    width: "20@s",
-    height: "20@s",
+    top: "18@ms",
+    left: "19@ms",
+    width: "20@ms",
+    height: "20@ms",
   },
   resultText: {
     flex: 1,

@@ -10,7 +10,7 @@ import {
 import FastImage from "@d11/react-native-fast-image";
 import LoaderKit from "react-native-loader-kit";
 import Entypo from "@expo/vector-icons/Entypo";
-import { Divider, AnimatedFAB } from "react-native-paper";
+import { Divider, FAB } from "react-native-paper";
 import { unknownTrackImageUri } from "@/constants/images";
 import { useRouter } from "expo-router";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
@@ -218,7 +218,7 @@ const DownloadsScreen = () => {
         )}
 
         {formattedTracks.length > 0 && (
-          <AnimatedFAB
+          <FAB
             style={[
               styles.fab,
               {
@@ -228,11 +228,10 @@ const DownloadsScreen = () => {
               },
             ]}
             theme={{ roundness: 1 }}
+            customSize={moderateScale(56)}
             icon="play"
             label="Play All"
             color="black"
-            extended={!isScrolling}
-            animateFrom={"right"}
             onPress={handlePlayAllDownloads}
           />
         )}
@@ -261,7 +260,7 @@ const styles = ScaledSheet.create({
   songItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: "10@ms",
     paddingLeft: 20,
     paddingRight: 30,
   },
@@ -270,18 +269,18 @@ const styles = ScaledSheet.create({
     alignItems: "center",
   },
   resultThumbnail: {
-    width: "55@s",
-    height: "55@s",
+    width: "55@ms",
+    height: "55@ms",
     marginRight: 10,
     borderRadius: 8,
     backgroundColor: "rgba(255,255,255,0.1)", // Placeholder bg for image
   },
   trackPlayingIconIndicator: {
     position: "absolute",
-    top: "18@s",
-    left: "19@s",
-    width: "20@s",
-    height: "20@s",
+    top: "18@ms",
+    left: "19@ms",
+    width: "20@ms",
+    height: "20@ms",
   },
   resultText: {
     flex: 1,
@@ -312,6 +311,7 @@ const styles = ScaledSheet.create({
     fontSize: "15@ms",
   },
   fab: {
+    borderRadius: 20,
     position: "absolute",
     marginRight: 16,
     right: 0,

@@ -17,11 +17,7 @@ import { unknownTrackImageUri } from "@/constants/images";
 import VerticalDismiss from "@/components/navigation/VerticalArrowDismiss";
 import CreatePlaylistModal from "@/app/(modals)/createPlaylist";
 import { Entypo } from "@expo/vector-icons";
-import {
-  ScaledSheet,
-  moderateScale,
-  verticalScale,
-} from "react-native-size-matters/extend";
+import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 
 export default function AddToPlaylistModal() {
   const { playlists, addTrackToPlaylist, createNewPlaylist } = usePlaylists();
@@ -62,7 +58,7 @@ export default function AddToPlaylistModal() {
 
   const renderPlaylistItem = (
     { item }: { item: { name: string; thumbnail: string | null } },
-    handleDismiss: () => void,
+    handleDismiss: () => void
   ) => {
     return (
       <TouchableOpacity
@@ -156,10 +152,10 @@ const styles = ScaledSheet.create({
   },
   modalContent: {
     backgroundColor: "#101010",
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
+    borderTopLeftRadius: "25@ms",
+    borderTopRightRadius: "25@ms",
     paddingVertical: 20,
-    maxHeight: verticalScale(736 * 0.6),
+    maxHeight: "60%",
   },
   header: {
     flexDirection: "row",
@@ -168,14 +164,16 @@ const styles = ScaledSheet.create({
     paddingHorizontal: 20,
   },
   dismissButton: {
-    marginTop: -11,
+    position: "absolute",
+    left: 20,
+    top: "3@vs",
   },
   modalTitle: {
     fontSize: "18@ms",
     fontWeight: "bold",
     color: Colors.text,
     marginBottom: 10,
-    marginLeft: "-20@s",
+    marginLeft: "35@s",
   },
   playlistItem: {
     flexDirection: "row",
@@ -184,8 +182,8 @@ const styles = ScaledSheet.create({
     paddingHorizontal: 30,
   },
   thumbnail: {
-    width: "50@s",
-    height: "50@s",
+    width: "50@ms",
+    height: "50@ms",
     borderRadius: 8,
     marginRight: 15,
   },
@@ -195,9 +193,9 @@ const styles = ScaledSheet.create({
   },
   createButton: {
     backgroundColor: "white",
-    paddingVertical: 9,
-    paddingHorizontal: 18,
-    borderRadius: 100,
+    paddingVertical: "9@ms",
+    paddingHorizontal: "18@ms",
+    borderRadius: 20,
     marginBottom: 10,
   },
   createButtonText: {

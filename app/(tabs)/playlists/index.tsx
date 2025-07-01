@@ -5,7 +5,7 @@ import { Colors } from "@/constants/Colors";
 import { unknownTrackImageUri } from "@/constants/images";
 import { usePlaylists } from "@/store/library";
 import { useRouter } from "expo-router";
-import { AnimatedFAB, Divider } from "react-native-paper";
+import { FAB, Divider } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import { useActiveTrack } from "react-native-track-player";
@@ -162,8 +162,9 @@ export default function PlaylistScreen() {
           )}
         </ScrollView>
 
-        <AnimatedFAB
+        <FAB
           style={{
+            borderRadius: 20,
             position: "absolute",
             marginRight: 16,
             marginBottom:
@@ -174,10 +175,9 @@ export default function PlaylistScreen() {
           }}
           theme={{ roundness: 1 }}
           icon="plus"
+          customSize={moderateScale(56)}
           label="Create Playlist"
           color="black"
-          extended={!isScrolling}
-          animateFrom={"right"}
           onPress={() => setModalVisible(true)}
         />
 
@@ -209,7 +209,7 @@ const styles = ScaledSheet.create({
   playlistItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: "10@ms",
     paddingLeft: 20,
     paddingRight: 30,
   },
@@ -218,8 +218,8 @@ const styles = ScaledSheet.create({
     alignItems: "center",
   },
   thumbnail: {
-    width: "55@s",
-    height: "55@s",
+    width: "55@ms",
+    height: "55@ms",
     borderRadius: 8,
     marginRight: 15,
   },

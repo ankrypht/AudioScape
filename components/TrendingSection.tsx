@@ -7,7 +7,6 @@ import { useRouter } from "expo-router";
 import { useActiveTrack } from "react-native-track-player";
 import { Colors } from "@/constants/Colors";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
-import { Song } from "@/types/songItem";
 
 interface TrendingSectionProps {
   results: Song[];
@@ -120,12 +119,12 @@ const styles = ScaledSheet.create({
   },
   row: {
     flexDirection: "row",
-    marginBottom: "8@vs",
+    marginBottom: 5,
   },
   itemContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: "28@s",
+    marginRight: "25@s",
     width: "280@s",
     height: "72@vs",
   },
@@ -139,23 +138,23 @@ const styles = ScaledSheet.create({
   },
   rankText: {
     color: "#888",
-    fontSize: "28@ms",
+    fontSize: "26@ms",
     fontWeight: "bold",
   },
   imageContainer: {
     marginRight: "12@s",
   },
   thumbnail: {
-    width: "55@s",
-    height: "55@s",
+    width: "72@ms",
+    height: "40.5@ms",
     borderRadius: 8,
   },
   trackPlayingIconIndicator: {
     position: "absolute",
-    top: "18@vs",
-    left: "19@s",
-    width: "20@s",
-    height: "20@s",
+    top: "9@vs",
+    left: "27@ms",
+    width: "20@ms",
+    height: "20@ms",
   },
   textContainer: {
     flex: 1,

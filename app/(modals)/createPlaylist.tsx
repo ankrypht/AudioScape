@@ -27,7 +27,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({
     if (!playlistName.trim()) {
       ToastAndroid.show(
         "Please enter a valid playlist name.",
-        ToastAndroid.LONG,
+        ToastAndroid.LONG
       );
       return;
     }
@@ -82,9 +82,9 @@ const styles = ScaledSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: "288@s",
+    width: "288@ms",
     backgroundColor: "#101010",
-    padding: 20,
+    padding: "20@ms",
     borderRadius: 10,
   },
   modalTitle: {
@@ -96,6 +96,7 @@ const styles = ScaledSheet.create({
   },
   input: {
     height: "40@ms",
+    fontSize: "16@ms",
     borderColor: "#333",
     borderWidth: 1,
     borderRadius: 5,

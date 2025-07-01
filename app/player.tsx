@@ -29,7 +29,7 @@ const PlayerScreen = () => {
   const router = useRouter();
 
   const { imageColors } = useImageColors(
-    activeTrack?.artwork ?? "https://placehold.co/50",
+    activeTrack?.artwork ?? "https://placehold.co/50"
   );
 
   const { top, bottom } = useSafeAreaInsets();
@@ -201,8 +201,8 @@ const styles = ScaledSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 11,
     borderRadius: 12,
-    width: "310@s",
-    height: "310@s",
+    width: "310@ms",
+    height: "310@ms",
     alignSelf: "center",
   },
   artworkImage: {

@@ -15,11 +15,7 @@ import FastImage from "@d11/react-native-fast-image";
 import { Divider } from "react-native-paper";
 import VerticalDismiss from "@/components/navigation/VerticalArrowDismiss";
 import { Entypo } from "@expo/vector-icons";
-import {
-  ScaledSheet,
-  moderateScale,
-  verticalScale,
-} from "react-native-size-matters/extend";
+import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 
 export default function QueueModal() {
   const [queue, setQueue] = useState<Track[]>([]);
@@ -55,7 +51,7 @@ export default function QueueModal() {
   // Listen for track changes to update in real-time
   useTrackPlayerEvents(
     [Event.PlaybackQueueEnded, Event.PlaybackActiveTrackChanged],
-    fetchQueue,
+    fetchQueue
   );
 
   const handleSongSelect = async (song: Track) => {
@@ -186,10 +182,10 @@ const styles = ScaledSheet.create({
   },
   modalContent: {
     backgroundColor: "#101010",
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
+    borderTopLeftRadius: "25@ms",
+    borderTopRightRadius: "25@ms",
     paddingVertical: 15,
-    maxHeight: verticalScale(736 * 0.6),
+    maxHeight: "60%",
   },
   header: {
     flexDirection: "row",
@@ -210,7 +206,7 @@ const styles = ScaledSheet.create({
   songItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: "10@ms",
     paddingHorizontal: 5,
     marginHorizontal: 5,
   },
@@ -223,7 +219,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
   },
   indexContainer: {
-    width: "40@s",
+    width: "40@ms",
     alignItems: "center",
   },
   indexText: {
@@ -232,17 +228,17 @@ const styles = ScaledSheet.create({
     fontWeight: "bold",
   },
   thumbnail: {
-    width: "50@s",
-    height: "50@s",
+    width: "50@ms",
+    height: "50@ms",
     borderRadius: 8,
     marginRight: 15,
   },
   trackPlayingIconIndicator: {
     position: "absolute",
-    top: "15@s",
-    left: "56@s",
-    width: "20@s",
-    height: "20@s",
+    top: "15@ms",
+    left: "56@ms",
+    width: "20@ms",
+    height: "20@ms",
   },
   songText: {
     flex: 1,

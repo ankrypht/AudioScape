@@ -11,13 +11,13 @@ import color from "color";
 import { useActiveTrack } from "react-native-track-player";
 import { useImageColors } from "@/hooks/useImageColors";
 import { MovingText } from "@/components/MovingText";
-import { ScaledSheet, scale } from "react-native-size-matters/extend";
+import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 
 export const FloatingPlayer = ({ style }: ViewProps) => {
   const lastActiveTrack = useLastActiveTrack();
   const activeTrack = useActiveTrack();
   const { imageColors } = useImageColors(
-    activeTrack?.artwork ?? "https://placehold.co/50",
+    activeTrack?.artwork ?? "https://placehold.co/50"
   );
   const dominantColor = activeTrack ? imageColors?.dominant : "#101010";
   const darkerColor =
@@ -68,9 +68,9 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
         activeOpacity={0.5}
         style={styles.trackControlsContainer}
       >
-        <SkipToPreviousButton iconSize={scale(25)} />
-        <PlayPauseButton iconSize={scale(25)} />
-        <SkipToNextButton iconSize={scale(25)} />
+        <SkipToPreviousButton iconSize={moderateScale(25)} />
+        <PlayPauseButton iconSize={moderateScale(25)} />
+        <SkipToNextButton iconSize={moderateScale(25)} />
       </TouchableOpacity>
     </View>
   );
@@ -80,6 +80,7 @@ const styles = ScaledSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: "8@s",
     paddingVertical: "8@vs",
     borderRadius: 12,
@@ -87,11 +88,11 @@ const styles = ScaledSheet.create({
   touchableArea: {
     flexDirection: "row",
     alignItems: "center",
-    width: "235@s",
+    flex: 1,
   },
   trackArtworkImage: {
-    width: "50@s",
-    height: "50@s",
+    width: "50@ms",
+    height: "50@ms",
     borderRadius: 8,
   },
   trackTitleContainer: {
