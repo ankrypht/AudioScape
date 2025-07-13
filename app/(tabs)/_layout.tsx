@@ -51,7 +51,7 @@ function TabLayoutContent() {
         }}
       >
         <Tabs.Screen
-          name="index"
+          name="home"
           options={{
             title: "Home",
             tabBarIcon: ({ color, focused }) => (
@@ -98,7 +98,7 @@ function TabLayoutContent() {
             ),
           }}
         />
-        <Tabs.Screen name="search" options={{ href: null }} />
+        <Tabs.Screen name="index" options={{ href: null }} />
       </Tabs>
       <FloatingPlayer
         style={{

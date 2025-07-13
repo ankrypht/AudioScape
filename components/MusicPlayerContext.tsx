@@ -6,7 +6,7 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import innertube from "@/services/youtube";
+import { innertube, getInfo } from "@/services/youtube";
 import TrackPlayer, {
   State,
   Track,
@@ -16,7 +16,6 @@ import { Helpers } from "youtubei.js";
 import { Alert } from "react-native";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { DownloadedSongMetadata } from "@/store/library";
-import { Song } from "@/types/songItem";
 
 // Interface for the Music Player Context
 interface MusicPlayerContextType {
@@ -57,54 +56,6 @@ export const useMusicPlayer = () => {
 
 interface MusicPlayerProviderProps {
   children: ReactNode;
-}
-
-export async function getInfo(
-  inid: string,
-  title?: string,
-  author?: string,
-): Promise<Track | null> {
-  try {
-    const yt = await innertube;
-    const info = await yt.getBasicInfo(inid, "MWEB");
-
-    if (info.playability_status?.status !== "OK") {
-      console.log(
-        `[MusicPlayer] Video ${inid} is not available: ${info.playability_status?.reason}`,
-      );
-      return null;
-    }
-
-    const format = info.chooseFormat({ type: "audio", quality: "best" });
-    if (!format) {
-      console.log(`[MusicPlayer] No suitable audio format found for ${inid}`);
-      return null;
-    }
-
-    const streamUrl = `${format.decipher(yt.session.player)}`;
-    const item = info.basic_info;
-
-    const res: Track = {
-      id: inid,
-      url: streamUrl,
-      title: title || item.title || "Unknown title",
-      artist:
-        author || item.author?.replace(" - Topic", "") || "Unknown artist",
-      artwork:
-        item.thumbnail && item.thumbnail[0]
-          ? item.thumbnail[0].url
-          : "https://placehold.co/512x512/000000/FFFFFF?text=Music",
-      duration: item.duration,
-    };
-    return res;
-  } catch (error) {
-    console.log(
-      `[MusicPlayer] Error getting info for ${inid}: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`,
-    );
-    return null;
-  }
 }
 
 export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({

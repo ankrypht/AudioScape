@@ -1,7 +1,6 @@
 import { createSlice, configureStore, PayloadAction } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 import * as FileSystem from "expo-file-system";
-import { Song } from "@/types/songItem";
 
 interface LibraryState {
   favoriteTracks: Song[];

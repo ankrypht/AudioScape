@@ -14,7 +14,8 @@ import { unknownTrackImageUri } from "@/constants/images";
 import FastImage from "@d11/react-native-fast-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { usePlaylists } from "@/store/library";
-import { useMusicPlayer, getInfo } from "@/components/MusicPlayerContext";
+import { useMusicPlayer } from "@/components/MusicPlayerContext";
+import { getInfo, innertube, processAlbumPageData } from "@/services/youtube";
 import VerticalSwipeGesture from "@/components/navigation/VerticalGesture";
 import {
   removeDownloadedSong,
@@ -28,16 +29,17 @@ import {
   scale,
   verticalScale,
 } from "react-native-size-matters/extend";
-import { Song } from "@/types/songItem";
 
 export default function MenuModal() {
   const { bottom } = useSafeAreaInsets();
-  const { songData, type, playlistName, playlistData } = useLocalSearchParams<{
-    songData: string;
-    playlistData: string;
-    type: string;
-    playlistName: string;
-  }>();
+  const { songData, type, playlistName, playlistData, albumData } =
+    useLocalSearchParams<{
+      songData: string;
+      playlistData: string;
+      type: string;
+      playlistName: string;
+      albumData: string;
+    }>();
   const { playNext, playAudio, playPlaylist } = useMusicPlayer();
   const { playlists, removeTrackFromPlaylist } = usePlaylists();
   const router = useRouter();
@@ -47,6 +49,12 @@ export default function MenuModal() {
   const selectedSong: Song | null = songData ? JSON.parse(songData) : null;
   const selectedPlaylist: { name: string; thumbnail: string | null } | null =
     playlistData ? JSON.parse(playlistData) : null;
+  const selectedAlbum: {
+    name: string;
+    id: string;
+    artist: string;
+    thumbnail: string | null;
+  } | null = albumData ? JSON.parse(albumData) : null;
 
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -92,7 +100,9 @@ export default function MenuModal() {
   const renderPlaylistItem = ({
     item,
   }: {
-    item: { name: string; thumbnail: string | null };
+    item:
+      | { name: string; thumbnail: string | null }
+      | { name: string; id: string; artist: string; thumbnail: string | null };
   }) => (
     <View style={styles.menuHeaderItem}>
       <FastImage
@@ -302,6 +312,61 @@ export default function MenuModal() {
         router.back();
       },
     },
+    {
+      types: ["album"],
+      label: "Play album",
+      icon: (
+        <MaterialIcons
+          name="playlist-play"
+          size={moderateScale(26)}
+          color={Colors.text}
+        />
+      ),
+      onPress: async () => {
+        if (selectedAlbum) {
+          const yt = await innertube;
+          const album = await yt.music.getAlbum(selectedAlbum.id);
+          const albumData = processAlbumPageData(album);
+          const playableSongList =
+            albumData?.songs?.map(({ duration, ...rest }) => ({
+              ...rest,
+              artist: selectedAlbum.artist,
+              thumbnail: albumData?.thumbnail ?? unknownTrackImageUri,
+            })) ?? [];
+          if (playableSongList.length === 0) return;
+          await playPlaylist(playableSongList);
+        }
+        router.back();
+      },
+    },
+    {
+      types: ["album"],
+      label: "Play next",
+      icon: (
+        <MaterialIcons
+          name="playlist-play"
+          size={moderateScale(26)}
+          color={Colors.text}
+        />
+      ),
+      onPress: async () => {
+        if (selectedAlbum) {
+          const yt = await innertube;
+          const album = await yt.music.getAlbum(selectedAlbum.id);
+          const albumData = processAlbumPageData(album);
+          const playableSongList =
+            albumData?.songs?.map(({ duration, ...rest }) => ({
+              ...rest,
+              artist: selectedAlbum.artist,
+              thumbnail: albumData?.thumbnail ?? unknownTrackImageUri,
+            })) ?? [];
+          if (playableSongList.length === 0) return;
+          ToastAndroid.show("Album will play next", ToastAndroid.SHORT);
+          router.back();
+          playNext(playableSongList ? playableSongList : null);
+        }
+      },
+    },
   ];
 
   return (
@@ -315,7 +380,9 @@ export default function MenuModal() {
                 ? renderSongItem(selectedSong)
                 : selectedPlaylist !== null && type === "playlist"
                   ? renderPlaylistItem({ item: selectedPlaylist })
-                  : null}
+                  : selectedAlbum !== null && type === "album"
+                    ? renderPlaylistItem({ item: selectedAlbum })
+                    : null}
               <Divider
                 style={{
                   backgroundColor: "rgba(255,255,255,0.3)",

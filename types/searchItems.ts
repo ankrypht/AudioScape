@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 interface BaseItem {
   id: string;
   thumbnail: string;
