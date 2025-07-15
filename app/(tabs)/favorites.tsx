@@ -1,3 +1,11 @@
+/**
+ * This file defines the `FavoritesScreen` component, which displays a list of
+ * songs marked as favorites by the user. It allows users to play individual favorite songs
+ * or play all of them, and provides options to manage their favorite status.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState, useEffect } from "react";
 import { useFavorites } from "@/store/library";
 import { defaultStyles } from "@/styles";
@@ -25,8 +33,13 @@ import {
   verticalScale,
 } from "react-native-size-matters/extend";
 
+// Randomly select a gradient background for the screen.
 const gradientIndex = Math.floor(Math.random() * 12);
 
+/**
+ * `FavoritesScreen` component.
+ * Displays a list of favorite songs.
+ */
 const FavoritesScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
@@ -37,10 +50,13 @@ const FavoritesScreen = () => {
   const activeTrack = useActiveTrack();
   const router = useRouter();
 
+  // Fetch favorite tracks from the Redux store.
   const favoritesTracks = useFavorites().favoriteTracks;
 
+  // Determine if the floating player should be visible.
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
+  // Effect to fetch and format favorite tracks when the `favoritesTracks` state changes.
   useEffect(() => {
     const fetchFavoriteTracks = async () => {
       setIsLoading(true);
@@ -57,6 +73,10 @@ const FavoritesScreen = () => {
     fetchFavoriteTracks();
   }, [favoritesTracks]);
 
+  /**
+   * Handles playing a single favorite song.
+   * @param song - The `Song` object to play.
+   */
   const handleSongSelect = (song: Song) => {
     playAudio(song, formattedTracks);
   };
@@ -64,7 +84,7 @@ const FavoritesScreen = () => {
   return (
     <FullScreenGradientBackground index={gradientIndex}>
       <View style={defaultStyles.container}>
-        {/* Header */}
+        {/* Header with screen title */}
         <Text
           style={[
             styles.header,
@@ -75,6 +95,7 @@ const FavoritesScreen = () => {
           Favorites
         </Text>
 
+        {/* Divider that appears when scrolling */}
         {isScrolling && (
           <Divider
             style={{ backgroundColor: "rgba(255,255,255,0.3)", height: 0.3 }}
@@ -99,6 +120,7 @@ const FavoritesScreen = () => {
             }}
             scrollEventThrottle={16}
           >
+            {/* Message when no favorites are added */}
             {formattedTracks.length === 0 ? (
               <View
                 style={{
@@ -119,6 +141,7 @@ const FavoritesScreen = () => {
                 </Text>
               </View>
             ) : (
+              // Map and render each favorite song item.
               formattedTracks.map((item) => (
                 <View key={item.id} style={styles.songItem}>
                   <TouchableOpacity
@@ -129,6 +152,7 @@ const FavoritesScreen = () => {
                       source={{ uri: item.thumbnail }}
                       style={styles.resultThumbnail}
                     />
+                    {/* Playing indicator for the active track */}
                     {activeTrack?.id === item.id && (
                       <LoaderKit
                         style={styles.trackPlayingIconIndicator}
@@ -146,10 +170,11 @@ const FavoritesScreen = () => {
                     </View>
                   </TouchableOpacity>
 
+                  {/* Options menu button for the song */}
                   <TouchableOpacity
                     activeOpacity={0.5}
                     onPress={() => {
-                      // Convert the song object to a JSON string
+                      // Prepare song data for the menu modal.
                       const songData = JSON.stringify({
                         id: item.id,
                         title: item.title,
@@ -157,6 +182,7 @@ const FavoritesScreen = () => {
                         thumbnail: item.thumbnail,
                       });
 
+                      // Navigate to the menu modal.
                       router.push({
                         pathname: "/(modals)/menu",
                         params: { songData: songData, type: "song" },
@@ -173,6 +199,7 @@ const FavoritesScreen = () => {
                 </View>
               ))
             )}
+            {/* Display total number of favorite tracks */}
             {formattedTracks.length !== 0 && (
               <Text
                 style={{
@@ -188,6 +215,7 @@ const FavoritesScreen = () => {
           </ScrollView>
         )}
 
+        {/* Floating Action Button to play all favorite songs */}
         {formattedTracks.length > 0 && (
           <FAB
             style={{
@@ -218,6 +246,7 @@ const FavoritesScreen = () => {
 
 export default FavoritesScreen;
 
+// Styles for the FavoritesScreen component.
 const styles = ScaledSheet.create({
   header: {
     fontSize: "24@ms",

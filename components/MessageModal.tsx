@@ -1,3 +1,11 @@
+/**
+ * This file defines the `MessageModal` component, which displays a dynamic message
+ * fetched from a Firebase Firestore database. The modal can be configured to show once per message ID
+ * and supports clickable links within its content.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState, useEffect } from "react";
 import { Modal, View, Text, TouchableOpacity, Linking } from "react-native";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
@@ -6,7 +14,7 @@ import { storage } from "@/storage";
 import { Colors } from "@/constants/Colors";
 import { ScaledSheet } from "react-native-size-matters/extend";
 
-// Firebase config
+// Firebase configuration for initializing the app.
 const firebaseConfig = {
   apiKey: "AIzaSyDMQ-6wcbIxzO_J8rqVT_AFgGXB3DZXnUM",
   authDomain: "audioscape-ankushsarkar.firebaseapp.com",
@@ -17,13 +25,23 @@ const firebaseConfig = {
   measurementId: "G-CFXR04RLEH",
 };
 
+// Initialize Firebase with the provided configuration.
 initializeApp(firebaseConfig);
 
+/**
+ * `MessageModal` component.
+ * Fetches and displays a message from Firestore. The message can be dismissed
+ * and will not reappear if `showOnce` is true and it has been seen.
+ */
 export const MessageModal = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    /**
+     * Fetches the active message from Firestore.
+     * @returns {Promise<void>} A promise that resolves when the message is fetched.
+     */
     const fetchMessage = async () => {
       const db = getFirestore();
       const docRef = doc(db, "appData", "activeMessage");
@@ -33,10 +51,12 @@ export const MessageModal = () => {
         const data = docSnap.data();
         const storedMessageId = storage.getString("lastSeenMessageId");
 
+        // Check if the message is new or if it should always be shown.
         if (storedMessageId !== data.id || !data.showOnce) {
           setMessage(data.content);
           setIsModalVisible(true);
 
+          // Store the ID of the message that was just shown.
           storage.set("lastSeenMessageId", data.id);
         }
       }
@@ -45,12 +65,17 @@ export const MessageModal = () => {
     fetchMessage();
   }, []);
 
+  /**
+   * Handles opening URLs found within the message text.
+   * @param url - The URL string to open.
+   */
   const handleLinkPress = (url: string) => {
     Linking.openURL(url).catch((err) =>
       console.error("Failed to open URL:", err),
     );
   };
 
+  // If no message is loaded, render nothing.
   if (!message) return null;
 
   return (
@@ -64,9 +89,10 @@ export const MessageModal = () => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalText}>
+            {/* Process message content to replace \n with newlines and make URLs clickable */}
             {message
               .replace(/\\n/g, "\n")
-              .split(/(https?:\/\/\S+)/)
+              .split(/(https?:\/\/\S+)/) // Split by URL patterns
               .map((part, index) =>
                 /^https?:\/\//.test(part) ? (
                   <Text
@@ -94,6 +120,7 @@ export const MessageModal = () => {
   );
 };
 
+// Styles for the MessageModal component.
 const styles = ScaledSheet.create({
   modalOverlay: {
     flex: 1,

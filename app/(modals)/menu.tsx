@@ -1,3 +1,11 @@
+/**
+ * This file defines the `MenuModal` component, a context-sensitive modal
+ * that provides various actions for songs, playlists, and albums. Actions include
+ * playing, adding to queue, downloading, and deleting, dynamically displayed based on the item type.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useEffect, useState } from "react";
 import { Text, View, TouchableOpacity, ToastAndroid } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -30,6 +38,12 @@ import {
   verticalScale,
 } from "react-native-size-matters/extend";
 
+/**
+ * `MenuModal` component.
+ * Displays a context-sensitive menu for various media types (song, playlist, album).
+ * Actions are dynamically shown based on the `type` parameter.
+ * @returns The rendered menu modal component.
+ */
 export default function MenuModal() {
   const { bottom } = useSafeAreaInsets();
   const { songData, type, playlistName, playlistData, albumData } =
@@ -69,6 +83,11 @@ export default function MenuModal() {
     fetchFavoriteStatus();
   }, [selectedSong?.id, checkIfFavorite]);
 
+  /**
+   * Renders the header for a song item in the menu.
+   * @param song The song object to display.
+   * @returns JSX for the song header.
+   */
   const renderSongItem = (song: Song) => (
     <View style={styles.menuHeaderItem}>
       <FastImage
@@ -84,6 +103,7 @@ export default function MenuModal() {
         </Text>
       </View>
 
+      {/* Favorite button in the header */}
       <FontAwesome
         name={isFavorite ? "heart" : "heart-o"}
         size={moderateScale(22)}
@@ -97,6 +117,11 @@ export default function MenuModal() {
     </View>
   );
 
+  /**
+   * Renders the header for a playlist or album item in the menu.
+   * @param item - The playlist or album item to display.
+   * @returns JSX for the playlist/album header.
+   */
   const renderPlaylistItem = ({
     item,
   }: {
@@ -117,6 +142,7 @@ export default function MenuModal() {
     </View>
   );
 
+  // Define all possible menu items and their associated actions and types.
   const menuItems = [
     {
       types: ["song", "playlistSong", "queueSong"],
@@ -374,8 +400,10 @@ export default function MenuModal() {
       <VerticalSwipeGesture duration={400}>
         <View style={[styles.modalOverlay, { paddingBottom: bottom + 60 }]}>
           <View style={styles.modalContent}>
+            {/* Dismiss symbol at the top of the modal */}
             <DismissMenuModalSymbol />
             <View style={{ paddingBottom: bottom }}>
+              {/* Render header based on the type of item */}
               {selectedSong !== null
                 ? renderSongItem(selectedSong)
                 : selectedPlaylist !== null && type === "playlist"
@@ -390,6 +418,7 @@ export default function MenuModal() {
                 }}
               />
 
+              {/* Render menu items filtered by the item type */}
               {menuItems
                 .filter((item) => item.types.includes(type))
                 .map((item, index) => (
@@ -410,6 +439,12 @@ export default function MenuModal() {
   );
 }
 
+/**
+ * `DismissMenuModalSymbol` component.
+ * Displays a small horizontal bar at the top of the menu modal,
+ * indicating that the modal can be dismissed by swiping down.
+ * @returns The rendered dismiss symbol component.
+ */
 const DismissMenuModalSymbol = () => {
   return (
     <View
@@ -436,6 +471,7 @@ const DismissMenuModalSymbol = () => {
   );
 };
 
+// Styles for the MenuModal component.
 const styles = ScaledSheet.create({
   modalBackground: {
     flex: 1,

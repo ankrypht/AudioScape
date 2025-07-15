@@ -1,15 +1,34 @@
+/**
+ * This file defines the `UpdateModal` component, which checks for new application
+ * versions available on GitHub and prompts the user to update if a newer version is found.
+ * It fetches release information from the GitHub API and displays a modal with update details.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState, useEffect } from "react";
 import { Modal, View, Text, TouchableOpacity, Linking } from "react-native";
 import * as Application from "expo-application";
 import { Colors } from "@/constants/Colors";
 import { ScaledSheet } from "react-native-size-matters/extend";
 
+/**
+ * `UpdateModal` component.
+ * Checks for new app versions on GitHub and displays a modal if an update is available.
+ */
 export const UpdateModal = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isUpToDate, setIsUpToDate] = useState(false);
   const [message, setMessage] = useState<string>("");
 
+  /**
+   * Compares two version strings (e.g., "1.0.0", "v1.0.1").
+   * @param v1 - The first version string.
+   * @param v2 - The second version string.
+   * @returns {number} 1 if v1 > v2, -1 if v1 < v2, 0 if v1 === v2.
+   */
   function compareVersions(v1: string, v2: string): number {
+    // Normalize version strings by removing leading 'v' and splitting by '.'.
     const normalizeVersion = (version: string) => {
       return version.startsWith("v") ? version.slice(1) : version;
     };
@@ -21,15 +40,18 @@ export const UpdateModal = () => {
       .split(".")
       .map(Number);
 
+    // Compare major, minor, and patch versions.
     if (major1 !== major2) return major1 > major2 ? 1 : -1;
     if (minor1 !== minor2) return minor1 > minor2 ? 1 : -1;
     if (patch1 !== patch2) return patch1 > patch2 ? 1 : -1;
     return 0;
   }
 
-  //const message = `A new version of AudioScape is available!\n\nPlease update to version ${latestVersion} to get the latest features and bug fixes.\n\nDownload and install the latest version from "Assets" section from : https://github.com/ankrypht/AudioScape/releases/latest`;
-
   useEffect(() => {
+    /**
+     * Fetches the latest release information from the GitHub API.
+     * @returns {Promise<void>} A promise that resolves when the message is fetched.
+     */
     const fetchMessage = async () => {
       try {
         const response = await fetch(
@@ -47,19 +69,21 @@ export const UpdateModal = () => {
 
         const data = await response.json();
 
+        // Construct the update message with the latest version and download URL.
         setMessage(
           `A new version of AudioScape is available!\n\nPlease update to version ${data.tag_name} to get the latest features and bug fixes.\n\nDownload and install the latest version from the link below:\n${data.assets[0].browser_download_url}`,
         );
 
+        // Compare the current app version with the latest release version.
         if (
           compareVersions(
             `${Application.nativeApplicationVersion}`,
             data.tag_name,
           ) === -1
         ) {
-          setIsModalVisible(true);
+          setIsModalVisible(true); // Show modal if a newer version is available.
         } else {
-          setIsUpToDate(true);
+          setIsUpToDate(true); // Mark as up-to-date.
         }
       } catch (err: any) {
         console.error(err.message);
@@ -69,12 +93,17 @@ export const UpdateModal = () => {
     fetchMessage();
   }, []);
 
+  /**
+   * Handles opening URLs found within the message text.
+   * @param url The URL string to open.
+   */
   const handleLinkPress = (url: string) => {
     Linking.openURL(url).catch((err) =>
       console.error("Failed to open URL:", err),
     );
   };
 
+  // If the app is up-to-date, render nothing.
   if (isUpToDate) return null;
 
   return (
@@ -88,9 +117,10 @@ export const UpdateModal = () => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalText}>
+            {/* Process message content to replace \n with newlines and make URLs clickable */}
             {message
               .replace(/\\n/g, "\n")
-              .split(/(https?:\/\/\S+)/)
+              .split(/(https?:\/\/\S+)/) // Split by URL patterns
               .map((part, index) =>
                 /^https?:\/\//.test(part) ? (
                   <Text
@@ -118,6 +148,7 @@ export const UpdateModal = () => {
   );
 };
 
+// Styles for the UpdateModal component.
 const styles = ScaledSheet.create({
   modalOverlay: {
     flex: 1,

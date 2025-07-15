@@ -1,3 +1,11 @@
+/**
+ * This file defines the `AddToPlaylistModal` component, a modal screen
+ * that allows users to add the currently playing or selected song to an existing playlist
+ * or create a new one. It integrates with the Redux store for playlist management.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState, useMemo } from "react";
 import {
   Text,
@@ -19,6 +27,13 @@ import CreatePlaylistModal from "@/app/(modals)/createPlaylist";
 import { Entypo } from "@expo/vector-icons";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 
+/**
+ * `AddToPlaylistModal` component.
+ * Displays a list of existing playlists and an option to create a new one.
+ * Allows adding the current or a specified song to a selected playlist.
+ *
+ * @returns The rendered modal component.
+ */
 export default function AddToPlaylistModal() {
   const { playlists, addTrackToPlaylist, createNewPlaylist } = usePlaylists();
   const { bottom } = useSafeAreaInsets();
@@ -27,11 +42,16 @@ export default function AddToPlaylistModal() {
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // Convert the playlists object into an array for FlatList rendering.
   const playlistArray = Object.entries(playlists).map(([name, tracks]) => ({
     name,
     thumbnail: tracks.length > 0 ? tracks[0].thumbnail : null,
   }));
 
+  /**
+   * Handles the creation of a new playlist.
+   * @param playlistName - The name of the new playlist.
+   */
   const handleCreatePlaylist = (playlistName: string) => {
     if (playlists[playlistName]) {
       console.warn("A playlist with this name already exists.");
@@ -41,6 +61,7 @@ export default function AddToPlaylistModal() {
     setModalVisible(false);
   };
 
+  // Determine the track to add: either from navigation params or the active track.
   const trackFromParams = useMemo(() => {
     return params?.track ? JSON.parse(params.track as string) : null;
   }, [params]);
@@ -56,6 +77,12 @@ export default function AddToPlaylistModal() {
         }
       : undefined);
 
+  /**
+   * Renders an individual playlist item in the FlatList.
+   * @param item - The playlist item to render.
+   * @param handleDismiss - Function to dismiss the modal.
+   * @returns A TouchableOpacity component representing a playlist.
+   */
   const renderPlaylistItem = (
     { item }: { item: { name: string; thumbnail: string | null } },
     handleDismiss: () => void,
@@ -66,7 +93,7 @@ export default function AddToPlaylistModal() {
         onPress={() => {
           ToastAndroid.show(`Added song to ${item.name}`, ToastAndroid.SHORT);
           if (track) addTrackToPlaylist(track, item.name);
-          handleDismiss();
+          handleDismiss(); // Dismiss the modal after adding.
           console.log(`Selected playlist: ${item.name}`);
         }}
       >
@@ -85,6 +112,7 @@ export default function AddToPlaylistModal() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.header}>
+              {/* Dismiss button */}
               <Entypo
                 name="chevron-down"
                 size={moderateScale(28)}
@@ -96,6 +124,7 @@ export default function AddToPlaylistModal() {
 
               <Text style={styles.modalTitle}>Choose a playlist</Text>
 
+              {/* Button to create a new playlist */}
               <TouchableOpacity
                 style={styles.createButton}
                 onPress={() => setModalVisible(true)}
@@ -104,6 +133,7 @@ export default function AddToPlaylistModal() {
               </TouchableOpacity>
             </View>
 
+            {/* Divider that appears when scrolling */}
             {isScrolling && (
               <Divider
                 style={{
@@ -113,6 +143,7 @@ export default function AddToPlaylistModal() {
               />
             )}
 
+            {/* List of playlists */}
             <View>
               <FlatList
                 data={playlistArray}
@@ -132,6 +163,7 @@ export default function AddToPlaylistModal() {
               />
             </View>
 
+            {/* Modal for creating a new playlist */}
             <CreatePlaylistModal
               visible={modalVisible}
               onCreate={handleCreatePlaylist}
@@ -144,6 +176,7 @@ export default function AddToPlaylistModal() {
   );
 }
 
+// Styles for the AddToPlaylistModal component.
 const styles = ScaledSheet.create({
   modalOverlay: {
     flex: 1,

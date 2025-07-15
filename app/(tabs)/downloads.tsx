@@ -1,3 +1,11 @@
+/**
+ * This file defines the `DownloadsScreen` component, which displays a list of
+ * songs that have been downloaded to the device. It allows users to play downloaded songs,
+ * view active downloads with progress, and manage their local music library.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState, useMemo } from "react";
 import { defaultStyles } from "@/styles";
 import {
@@ -30,8 +38,13 @@ import {
   useActiveDownloads,
 } from "@/store/library";
 
+// Randomly select a gradient background for the screen.
 const gradientIndex = Math.floor(Math.random() * 12);
 
+/**
+ * `DownloadsScreen` component.
+ * Displays a list of downloaded songs and active downloads.
+ */
 const DownloadsScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
@@ -41,34 +54,48 @@ const DownloadsScreen = () => {
   const activeTrack = useActiveTrack();
   const router = useRouter();
 
-  // Fetch downloaded tracks from Redux store
+  // Fetch downloaded tracks and active downloads from the Redux store.
   const downloadedTracksMeta = useDownloadedTracks();
   const activeDownloads = useActiveDownloads();
 
+  // Determine if the floating player should be visible.
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
-  // Format downloaded metadata into DownloadedSongMetadata objects for rendering and playback
+  // Memoize and format downloaded tracks for rendering.
   const formattedTracks: DownloadedSongMetadata[] = useMemo(() => {
     setIsLoading(true);
-    const tracks = [...downloadedTracksMeta].reverse();
+    const tracks = [...downloadedTracksMeta].reverse(); // Display newest first.
     setIsLoading(false);
     return tracks;
   }, [downloadedTracksMeta]);
 
+  /**
+   * Handles playing a single downloaded song.
+   * @param song - The `DownloadedSongMetadata` of the song to play.
+   */
   const handleSongSelect = (song: DownloadedSongMetadata) => {
     playDownloadedSong(song, formattedTracks);
   };
 
+  /**
+   * Handles playing all downloaded songs.
+   */
   const handlePlayAllDownloads = async () => {
     if (formattedTracks.length === 0) return;
     await playAllDownloadedSongs(formattedTracks);
     await router.navigate("/player");
   };
 
+  /**
+   * Handles opening the menu for a specific downloaded song.
+   * @param song - The `DownloadedSongMetadata` of the song to open the menu for.
+   */
   const handleOpenMenu = (song: DownloadedSongMetadata) => {
+    // Find the original metadata to ensure all necessary fields are passed.
     const originalMetadata = downloadedTracksMeta.find((m) => m.id === song.id);
     if (!originalMetadata) return;
 
+    // Prepare song data for the menu modal.
     const songDataForMenu = JSON.stringify({
       id: originalMetadata.id,
       title: originalMetadata.title,
@@ -78,6 +105,7 @@ const DownloadsScreen = () => {
       duration: originalMetadata.duration,
     });
 
+    // Navigate to the menu modal.
     router.push({
       pathname: "/(modals)/menu",
       params: { songData: songDataForMenu, type: "downloadedSong" },
@@ -87,6 +115,7 @@ const DownloadsScreen = () => {
   return (
     <FullScreenGradientBackground index={gradientIndex}>
       <View style={defaultStyles.container}>
+        {/* Header with screen title */}
         <Text
           style={[
             styles.header,
@@ -97,12 +126,14 @@ const DownloadsScreen = () => {
           Downloads
         </Text>
 
+        {/* Divider that appears when scrolling */}
         {isScrolling && (
           <Divider
             style={{ backgroundColor: "rgba(255,255,255,0.3)", height: 0.3 }}
           />
         )}
 
+        {/* Loading indicator */}
         {isLoading ? (
           <View style={styles.centeredMessageContainer}>
             <ActivityIndicator color={Colors.text} size="large" />
@@ -124,6 +155,7 @@ const DownloadsScreen = () => {
             }}
             scrollEventThrottle={16}
           >
+            {/* Message when no songs are downloaded */}
             {formattedTracks.length === 0 && activeDownloads.length === 0 ? (
               <Text style={styles.centeredMessageText}>
                 No songs downloaded yet! {"\n"}Find songs and tap the download
@@ -131,6 +163,7 @@ const DownloadsScreen = () => {
               </Text>
             ) : (
               <>
+                {/* Display active downloads */}
                 {activeDownloads.length > 0 && (
                   <View style={{ marginBottom: 10 }}>
                     {activeDownloads.map((song) => (
@@ -148,7 +181,7 @@ const DownloadsScreen = () => {
                           <Text style={styles.resultArtist}>
                             {song.progress.toFixed(0)}%
                           </Text>
-                          {/* A simple progress bar */}
+                          {/* Simple progress bar for active downloads */}
                           <View style={styles.progressBarBackground}>
                             <View
                               style={[
@@ -162,6 +195,7 @@ const DownloadsScreen = () => {
                     ))}
                   </View>
                 )}
+                {/* Display downloaded songs */}
                 {formattedTracks.map((item) => (
                   <View key={item.id} style={styles.songItem}>
                     <TouchableOpacity
@@ -174,6 +208,7 @@ const DownloadsScreen = () => {
                         }}
                         style={styles.resultThumbnail}
                       />
+                      {/* Playing indicator for downloaded active track */}
                       {activeTrack?.id === item.id &&
                         activeTrack.url === item.localTrackUri && (
                           <LoaderKit
@@ -192,6 +227,7 @@ const DownloadsScreen = () => {
                       </View>
                     </TouchableOpacity>
 
+                    {/* Options menu button for downloaded song */}
                     <TouchableOpacity
                       activeOpacity={0.5}
                       onPress={() => handleOpenMenu(item)}
@@ -208,6 +244,7 @@ const DownloadsScreen = () => {
               </>
             )}
 
+            {/* Display total number of downloaded tracks */}
             {formattedTracks.length > 0 && (
               <Text style={styles.trackCountText}>
                 {formattedTracks.length}{" "}
@@ -217,6 +254,7 @@ const DownloadsScreen = () => {
           </ScrollView>
         )}
 
+        {/* Floating Action Button to play all downloaded songs */}
         {formattedTracks.length > 0 && (
           <FAB
             style={[
@@ -242,6 +280,7 @@ const DownloadsScreen = () => {
 
 export default DownloadsScreen;
 
+// Styles for the DownloadsScreen component.
 const styles = ScaledSheet.create({
   header: {
     fontSize: "24@ms",
@@ -273,7 +312,7 @@ const styles = ScaledSheet.create({
     height: "55@ms",
     marginRight: 10,
     borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.1)", // Placeholder bg for image
+    backgroundColor: "rgba(255,255,255,0.1)", // Placeholder bg for image.
   },
   trackPlayingIconIndicator: {
     position: "absolute",

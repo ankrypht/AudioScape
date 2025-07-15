@@ -1,3 +1,12 @@
+/**
+ * This file defines a React Context and a custom hook for managing and providing
+ * song lyrics throughout the application. It fetches synchronized lyrics from the `lrclib-api`
+ * based on the currently active track and makes them available to any component wrapped
+ * within the `LyricsProvider`.
+ *
+ * @packageDocumentation
+ */
+
 import React, {
   createContext,
   useState,
@@ -12,27 +21,35 @@ import {
 } from "react-native-track-player";
 import { Client, Query } from "lrclib-api";
 
-// Create a client instance
+// Create a new client instance for the lyrics API.
 const client = new Client();
 
-// Define types
-type LyricLine = {
+/**
+ * Represents a single line of a song's lyrics.
+ */
+export type LyricLine = {
   text: string;
-  startTime?: number;
+  startTime?: number; // The time in seconds when the line should be displayed.
 };
 
-type LyricsContextType = {
-  lyrics: LyricLine[];
-  isLyricsLoaded: boolean;
-  heights: number[];
-  updateHeight: (index: number, height: number) => void;
-  resetHeights: (length: number) => void;
+/**
+ * Defines the shape of the data and functions provided by the LyricsContext.
+ */
+export type LyricsContextType = {
+  lyrics: LyricLine[]; // The array of lyric lines for the current track.
+  isLyricsLoaded: boolean; // A flag indicating if the lyrics have been loaded.
+  heights: number[]; // An array to store the rendered height of each lyric line.
+  updateHeight: (index: number, height: number) => void; // Function to update a specific line's height.
+  resetHeights: (length: number) => void; // Function to reset the heights array.
 };
 
-// Create context
+// Create the React Context for the lyrics.
 const LyricsContext = createContext<LyricsContextType | undefined>(undefined);
 
-// Provider component
+/**
+ * A React component that provides the lyrics context to its children.
+ * It fetches lyrics for the active track and manages the lyrics state.
+ */
 export const LyricsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -45,18 +62,18 @@ export const LyricsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const activeTrack = useActiveTrack();
 
+  /**
+   * Fetches lyrics for the currently active track.
+   */
   const fetchLyrics = useCallback(async () => {
     if (!activeTrack) return;
 
-    // Skip fetching if we've already loaded lyrics for this track
+    // Avoid refetching if lyrics for the current track are already loaded.
     if (lastLoadedTrackId === activeTrack.id) {
       return;
     }
 
-    // Update the last loaded track ID
     setLastLoadedTrackId(activeTrack.id);
-
-    // Reset loading state
     setIsLyricsLoaded(false);
 
     try {
@@ -66,44 +83,38 @@ export const LyricsProvider: React.FC<{ children: React.ReactNode }> = ({
           artist_name: activeTrack.artist,
         };
 
-        // Add duration only if it's defined
         if (activeTrack.duration !== undefined) {
-          searchParams.duration = activeTrack.duration * 1000;
+          searchParams.duration = activeTrack.duration * 1000; // Convert to milliseconds.
         }
 
         const syncedLyrics = await client.getSynced(searchParams);
 
-        // Make sure we have valid lyrics with startTime
         if (syncedLyrics && syncedLyrics.length > 0) {
-          // Sort lyrics by startTime to ensure proper ordering
           const sortedLyrics = [...syncedLyrics].sort(
             (a, b) => (a.startTime || 0) - (b.startTime || 0),
           );
-
           setLyrics(sortedLyrics);
-          // Reset heights array to match lyrics length
           setHeights(new Array(sortedLyrics.length).fill(0));
-          setIsLyricsLoaded(true);
         } else {
-          // Set a fallback for tracks without lyrics
-          const fallbackLyrics = [
-            { text: "No lyrics available", startTime: 0 },
-          ];
-          setLyrics(fallbackLyrics);
+          setLyrics([{ text: "No lyrics available", startTime: 0 }]);
           setHeights([0]);
-          setIsLyricsLoaded(true);
         }
+      } else {
+        setLyrics([{ text: "No lyrics available", startTime: 0 }]);
+        setHeights([0]);
       }
     } catch (error) {
       console.error("Error fetching lyrics:", error);
-      const fallbackLyrics = [{ text: "Error loading lyrics", startTime: 0 }];
-      setLyrics(fallbackLyrics);
+      setLyrics([{ text: "Error loading lyrics", startTime: 0 }]);
       setHeights([0]);
+    } finally {
       setIsLyricsLoaded(true);
     }
   }, [activeTrack, lastLoadedTrackId]);
 
-  // Function to update a specific height
+  /**
+   * Updates the height of a specific lyric line at a given index.
+   */
   const updateHeight = useCallback((index: number, height: number) => {
     setHeights((prevHeights) => {
       const newHeights = [...prevHeights];
@@ -112,19 +123,21 @@ export const LyricsProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, []);
 
-  // Function to reset heights array
+  /**
+   * Resets the heights array to a new length, initialized with zeros.
+   */
   const resetHeights = useCallback((length: number) => {
     setHeights(new Array(length).fill(0));
   }, []);
 
-  // Fetch lyrics when active track changes
+  // Fetch lyrics when the active track changes.
   useEffect(() => {
     if (activeTrack?.id && activeTrack.id !== lastLoadedTrackId) {
       fetchLyrics();
     }
   }, [activeTrack?.id, fetchLyrics, lastLoadedTrackId]);
 
-  // Register for track change events
+  // Also fetch lyrics on the track change event for robustness.
   useTrackPlayerEvents([Event.PlaybackActiveTrackChanged], async (event) => {
     if (event.type === Event.PlaybackActiveTrackChanged && event.track) {
       if (event.track.id !== lastLoadedTrackId) {
@@ -148,7 +161,11 @@ export const LyricsProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-// Hook to use the lyrics context
+/**
+ * A custom hook to easily access the lyrics context.
+ * Throws an error if used outside of a `LyricsProvider`.
+ * @returns The lyrics context.
+ */
 export const useLyricsContext = () => {
   const context = useContext(LyricsContext);
   if (context === undefined) {

@@ -1,3 +1,11 @@
+/**
+ * This file defines the `FloatingPlayer` component, a mini-player that appears
+ * at the bottom of the screen to provide quick access to playback controls and track information.
+ * It displays the currently active or last active track and allows navigation to the full player screen.
+ *
+ * @packageDocumentation
+ */
+
 import {
   PlayPauseButton,
   SkipToNextButton,
@@ -13,13 +21,24 @@ import { useImageColors } from "@/hooks/useImageColors";
 import { MovingText } from "@/components/MovingText";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 
+/**
+ * `FloatingPlayer` component displays a compact music player at the bottom of the screen.
+ * It shows the current track's artwork, title, artist, and basic playback controls.
+ * @param {ViewProps} { style } Props for the container View.
+ */
 export const FloatingPlayer = ({ style }: ViewProps) => {
+  // Hook to get the last active track, useful when no track is currently playing.
   const lastActiveTrack = useLastActiveTrack();
+  // Hook to get the currently active track from `react-native-track-player`.
   const activeTrack = useActiveTrack();
+  // Hook to extract dominant colors from the track's artwork.
   const { imageColors } = useImageColors(
     activeTrack?.artwork ?? "https://placehold.co/50",
   );
+
+  // Determine the dominant color for the player's background.
   const dominantColor = activeTrack ? imageColors?.dominant : "#101010";
+  // Darken the dominant color for a subtle background effect.
   const darkerColor =
     dominantColor === "#101010"
       ? "#101010"
@@ -27,12 +46,17 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
 
   const router = useRouter();
 
+  // Prioritize the active track; if none, use the last active track.
   const displayedTrack = activeTrack ?? lastActiveTrack;
 
+  /**
+   * Handles the press event on the floating player, navigating to the full player screen.
+   */
   const handlePress = () => {
     router.navigate("/player");
   };
 
+  // If no track is available to display, render nothing.
   if (!displayedTrack) return null;
 
   return (
@@ -42,6 +66,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
         activeOpacity={0.5}
         style={styles.touchableArea}
       >
+        {/* Track artwork */}
         <FastImage
           source={{
             uri: displayedTrack.artwork,
@@ -50,6 +75,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
           style={styles.trackArtworkImage}
         />
 
+        {/* Track title and artist, using MovingText for marquee effect */}
         <View style={styles.trackTitleContainer}>
           <MovingText
             style={styles.trackTitle}
@@ -64,6 +90,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
         </View>
       </TouchableOpacity>
 
+      {/* Playback controls */}
       <TouchableOpacity
         activeOpacity={0.5}
         style={styles.trackControlsContainer}
@@ -76,6 +103,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
   );
 };
 
+// Styles for the FloatingPlayer component.
 const styles = ScaledSheet.create({
   container: {
     flexDirection: "row",

@@ -1,3 +1,11 @@
+/**
+ * This file defines the `QueueModal` component, a modal screen that displays
+ * the current playback queue of songs. Users can view the order of upcoming tracks,
+ * see the currently playing song, and jump to any song in the queue.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState, useEffect, useCallback } from "react";
 import { Text, TouchableOpacity, View, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,6 +25,11 @@ import VerticalDismiss from "@/components/navigation/VerticalArrowDismiss";
 import { Entypo } from "@expo/vector-icons";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 
+/**
+ * `QueueModal` component.
+ * Displays the current music playback queue.
+ * @returns The rendered queue modal component.
+ */
 export default function QueueModal() {
   const [queue, setQueue] = useState<Track[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -25,6 +38,10 @@ export default function QueueModal() {
   const router = useRouter();
   const { bottom } = useSafeAreaInsets();
 
+  /**
+   * Fetches the current queue and active track index from TrackPlayer.
+   * @returns A promise that resolves when the queue is fetched.
+   */
   const fetchQueue = useCallback(async () => {
     const currentQueue = await TrackPlayer.getQueue();
     setQueue(currentQueue);
@@ -35,48 +52,61 @@ export default function QueueModal() {
     else setActiveIndex(0);
   }, []);
 
-  // Fetch queue on mount
+  // Fetch queue on component mount.
   useEffect(() => {
     fetchQueue();
   }, [fetchQueue]);
 
-  // Set up polling to check for queue changes
+  // Set up polling to check for queue changes periodically.
   useEffect(() => {
-    const intervalId = setInterval(fetchQueue, 2000); // Check every 2 seconds
+    const intervalId = setInterval(fetchQueue, 2000); // Check every 2 seconds.
 
-    // Clean up interval on component unmount
+    // Clean up interval on component unmount.
     return () => clearInterval(intervalId);
   }, [fetchQueue]);
 
-  // Listen for track changes to update in real-time
+  // Listen for TrackPlayer events to update the queue in real-time.
   useTrackPlayerEvents(
     [Event.PlaybackQueueEnded, Event.PlaybackActiveTrackChanged],
     fetchQueue,
   );
 
+  /**
+   * Handles selecting a song from the queue, skipping to that song.
+   * @param song - The selected song from the queue.
+   */
   const handleSongSelect = async (song: Track) => {
     await TrackPlayer.skip(queue.indexOf(song));
   };
 
+  /**
+   * Renders an individual song item in the FlatList.
+   * @param item - The song item to render.
+   * @param index - Its index in the queue.
+   * @returns A View component representing a song in the queue.
+   */
   const renderSongItem = ({ item, index }: { item: Track; index: number }) => (
     <View
       key={item.id}
       style={[
         styles.songItem,
-        activeTrack?.id === item.id && styles.activeSongItem,
+        activeTrack?.id === item.id && styles.activeSongItem, // Highlight active song.
       ]}
     >
       <TouchableOpacity
         style={styles.songItemTouchableArea}
         onPress={() => handleSongSelect(item)}
       >
+        {/* Song index in the queue */}
         <View style={styles.indexContainer}>
           <Text style={styles.indexText}>{index + 1}</Text>
         </View>
+        {/* Song artwork */}
         <FastImage
           source={{ uri: item.artwork ?? unknownTrackImageUri }}
           style={styles.thumbnail}
         />
+        {/* Playing indicator for the active track */}
         {activeTrack?.id === item.id && (
           <LoaderKit
             style={styles.trackPlayingIconIndicator}
@@ -84,6 +114,7 @@ export default function QueueModal() {
             color={"white"}
           />
         )}
+        {/* Song title and artist */}
         <View style={styles.songText}>
           <Text style={styles.songTitle} numberOfLines={1}>
             {item.title}
@@ -93,10 +124,11 @@ export default function QueueModal() {
           </Text>
         </View>
 
+        {/* Options menu button for the song */}
         <TouchableOpacity
           activeOpacity={0.5}
           onPress={() => {
-            // Convert the song object to a JSON string
+            // Prepare song data for the menu modal.
             const songData = JSON.stringify({
               id: item.id,
               title: item.title,
@@ -104,6 +136,7 @@ export default function QueueModal() {
               thumbnail: item.artwork ?? unknownTrackImageUri,
             });
 
+            // Navigate to the menu modal with song details.
             router.push({
               pathname: "/(modals)/menu",
               params: { songData: songData, type: "queueSong" },
@@ -127,6 +160,7 @@ export default function QueueModal() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.header}>
+              {/* Dismiss button */}
               <Entypo
                 name="chevron-down"
                 size={moderateScale(28)}
@@ -135,11 +169,13 @@ export default function QueueModal() {
                 color={Colors.text}
                 onPress={handleDismiss}
               />
+              {/* Modal title showing current song index and total queue length */}
               <Text style={styles.modalTitle}>
                 Queue ({activeIndex + 1}/{queue.length})
               </Text>
             </View>
 
+            {/* Divider that appears when scrolling */}
             {isScrolling && (
               <Divider
                 style={{
@@ -149,6 +185,7 @@ export default function QueueModal() {
               />
             )}
 
+            {/* FlatList to display the song queue */}
             <View>
               <FlatList
                 data={queue}
@@ -174,6 +211,7 @@ export default function QueueModal() {
   );
 }
 
+// Styles for the QueueModal component.
 const styles = ScaledSheet.create({
   modalOverlay: {
     flex: 1,
@@ -211,7 +249,7 @@ const styles = ScaledSheet.create({
     marginHorizontal: 5,
   },
   activeSongItem: {
-    backgroundColor: "rgba(255, 255, 255, 0.045)", // Subtle highlight for active track
+    backgroundColor: "rgba(255, 255, 255, 0.045)", // Subtle highlight for active track.
     borderRadius: 16,
   },
   songItemTouchableArea: {

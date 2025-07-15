@@ -1,3 +1,11 @@
+/**
+ * This file defines the `PlaylistView` component, which displays the contents
+ * of a specific playlist. It shows the playlist's name, its songs, and allows users to
+ * play individual songs or the entire playlist. It also provides options to manage songs within the playlist.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState } from "react";
 import { Text, View, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -20,8 +28,13 @@ import {
   scale,
 } from "react-native-size-matters/extend";
 
+// Randomly select a gradient background for the screen.
 const gradientIndex = Math.floor(Math.random() * 12);
 
+/**
+ * `PlaylistView` component.
+ * Displays the songs within a specific playlist.
+ */
 const PlaylistView = () => {
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
   const { top, bottom } = useSafeAreaInsets();
@@ -29,14 +42,22 @@ const PlaylistView = () => {
   const lastActiveTrack = useLastActiveTrack();
   const activeTrack = useActiveTrack();
   const { playAudio, playPlaylist } = useMusicPlayer();
+  // Get the playlist name from local search parameters.
   const { playlistName } = useLocalSearchParams<{ playlistName: string }>();
 
+  // Fetch playlists from the Redux store.
   const { playlists } = usePlaylists();
 
+  // Get the specific playlist data.
   const playlist = playlists[playlistName];
 
+  // Determine if the floating player should be visible.
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
+  /**
+   * Handles playing a selected song from the playlist.
+   * @param song - The `Song` object to play.
+   */
   const handleSongSelect = (song: Song) => {
     playAudio(song, playlist);
   };
@@ -44,6 +65,7 @@ const PlaylistView = () => {
   return (
     <FullScreenGradientBackground index={gradientIndex}>
       <View style={styles.container}>
+        {/* Header with back button and playlist name */}
         <View
           style={[
             styles.header,
@@ -66,6 +88,7 @@ const PlaylistView = () => {
           <Text style={styles.headerText}>{playlistName}</Text>
         </View>
 
+        {/* Divider that appears when scrolling */}
         {isScrolling && (
           <Divider
             style={{
@@ -89,7 +112,7 @@ const PlaylistView = () => {
           }}
           scrollEventThrottle={16}
         >
-          {/* Artwork Image */}
+          {/* Playlist artwork (first song's thumbnail) */}
           <View style={styles.artworkImageContainer}>
             <FastImage
               source={{
@@ -100,6 +123,7 @@ const PlaylistView = () => {
             />
           </View>
 
+          {/* List of songs in the playlist */}
           <View>
             {playlist.map((item: Song) => (
               <View key={item.id} style={styles.songItem}>
@@ -111,6 +135,7 @@ const PlaylistView = () => {
                     source={{ uri: item.thumbnail }}
                     style={styles.resultThumbnail}
                   />
+                  {/* Playing indicator for the active track */}
                   {activeTrack?.id === item.id && (
                     <LoaderKit
                       style={styles.trackPlayingIconIndicator}
@@ -127,10 +152,11 @@ const PlaylistView = () => {
                     </Text>
                   </View>
                 </TouchableOpacity>
+                {/* Options menu button for the song */}
                 <TouchableOpacity
                   activeOpacity={0.5}
                   onPress={() => {
-                    // Convert the song object to a JSON string
+                    // Prepare song data for the menu modal.
                     const songData = JSON.stringify({
                       id: item.id,
                       title: item.title,
@@ -138,6 +164,7 @@ const PlaylistView = () => {
                       thumbnail: item.thumbnail,
                     });
 
+                    // Navigate to the menu modal.
                     router.push({
                       pathname: "/(modals)/menu",
                       params: {
@@ -158,6 +185,7 @@ const PlaylistView = () => {
               </View>
             ))}
           </View>
+          {/* Display total number of tracks in the playlist */}
           {playlist.length !== 0 && (
             <Text
               style={{
@@ -171,6 +199,7 @@ const PlaylistView = () => {
           )}
         </ScrollView>
 
+        {/* Floating Action Button to play the entire playlist */}
         {playlist.length > 0 && (
           <FAB
             style={{
@@ -201,6 +230,7 @@ const PlaylistView = () => {
 
 export default PlaylistView;
 
+// Styles for the PlaylistView component.
 const styles = ScaledSheet.create({
   container: {
     flex: 1,

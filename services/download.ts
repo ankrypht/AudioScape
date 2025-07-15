@@ -1,3 +1,11 @@
+/**
+ * This file manages the downloading and local storage of songs and their artwork.
+ * It handles file system operations, interacts with the device's MediaLibrary, sends download
+ * progress notifications, and updates the Redux store to reflect the state of downloaded tracks.
+ *
+ * @packageDocumentation
+ */
+
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import * as Notifications from "expo-notifications";
@@ -11,7 +19,9 @@ import {
 } from "@/store/library";
 import { DownloadedSongMetadata } from "@/store/library";
 
-// Interface for the song object
+/**
+ * Defines the structure for a song object that is available for download.
+ */
 export interface RemoteSong {
   id: string;
   url: string;
@@ -22,28 +32,33 @@ export interface RemoteSong {
   mimeType?: string; // e.g., "audio/mp4", "audio/mpeg"
 }
 
-const ARTWORK_FOLDER = "Artworks"; // Folder name within documentDirectory
+// Folder name within the app's document directory to store artwork.
+const ARTWORK_FOLDER = "Artworks";
 
+/**
+ * Sanitizes a string to be used as a safe filename.
+ * @param name - The string to sanitize.
+ * @returns A safe filename string.
+ */
 const makeSafeFilename = (name: string): string => {
   return (
     name
-      // Replace characters that are illegal in Android filenames
-      // Android illegal: / \ : * ? " < > | and control chars
+      // Replace characters that are illegal in Android filenames.
       .replace(/[/\\?%*:|"<>]/g, "_")
-      // Replace multiple spaces with a single underscore
+      // Replace multiple spaces with a single underscore.
       .replace(/\s+/g, "_")
-      // Trim leading/trailing underscores
+      // Trim leading/trailing underscores.
       .replace(/^_+|_+$/g, "")
-      // Limit length to avoid issues, e.g. 200 chars for name part
+      // Limit the length to prevent filesystem errors.
       .substring(0, 200)
   );
 };
 
 /**
- * Attempts to determine a file extension from a URL or MIME type.
- * @param {string} url The URL of the content.
- * @param {string} [explicitMimeType] An explicitly provided MIME type.
- * @returns {string} A file extension (e.g., 'mp3', 'm4a').
+ * Attempts to determine a file extension from a URL or an explicit MIME type.
+ * @param url - The URL of the content.
+ * @param explicitMimeType - An optional, explicitly provided MIME type.
+ * @returns A file extension string (e.g., 'mp3', 'm4a', 'jpg').
  */
 const getFileExtensionFromUrlOrMime = (
   url: string,
@@ -51,6 +66,7 @@ const getFileExtensionFromUrlOrMime = (
 ): string => {
   let mimeType = explicitMimeType;
 
+  // Attempt to extract MIME type from URL parameters if not explicitly provided.
   if (!mimeType) {
     try {
       const urlObj = new URL(url);
@@ -63,6 +79,7 @@ const getFileExtensionFromUrlOrMime = (
     }
   }
 
+  // Determine extension based on MIME type.
   if (mimeType) {
     if (mimeType.includes("audio/mp4") || mimeType.includes("audio/aac"))
       return "m4a";
@@ -70,12 +87,12 @@ const getFileExtensionFromUrlOrMime = (
     if (mimeType.includes("audio/ogg")) return "ogg";
     if (mimeType.includes("audio/wav")) return "wav";
     if (mimeType.includes("audio/webm")) return "webm";
-    // For images based on common types from URLs
     if (mimeType.includes("image/jpeg")) return "jpg";
     if (mimeType.includes("image/png")) return "png";
     if (mimeType.includes("image/webp")) return "webp";
   }
 
+  // As a fallback, try to extract the extension from the URL path.
   try {
     const path = new URL(url).pathname;
     const lastDot = path.lastIndexOf(".");
@@ -102,36 +119,36 @@ const getFileExtensionFromUrlOrMime = (
     console.warn("Could not parse URL to find file extension:", e);
   }
 
-  // Default based on typical content if still unknown
-  if (url.includes("audio")) return "mp3"; // Generic audio fallback
+  // If still unknown, make a final guess based on URL content or default.
+  if (url.includes("audio")) return "mp3";
   if (url.includes("image") || explicitMimeType?.includes("image"))
-    return "jpg"; // Generic image fallback
+    return "jpg";
 
   console.warn(
     `Could not determine specific file extension for URL: ${url} (MIME: ${
       mimeType || "unknown"
-    }). Defaulting based on content or to 'dat'.`,
+    }). Defaulting based on content.`,
   );
-  // If it's artwork and still unknown, default to jpg, otherwise to mp3 for audio
   return explicitMimeType?.startsWith("image/") ? "jpg" : "mp3";
 };
 
 const NOTIFICATION_CHANNEL_ID = "download_channel_audioscape";
 
 /**
- * Sets up the notification channel for Android.
+ * Sets up the notification channel for download notifications on Android.
  * This should be called once when the app initializes.
  */
 export async function setupNotificationChannel(): Promise<void> {
   await Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNEL_ID, {
     name: "Download Notifications",
-    importance: Notifications.AndroidImportance.LOW, // Using LOW to avoid sound/vibration for progress
+    importance: Notifications.AndroidImportance.LOW, // Use LOW to avoid sound/vibration for progress updates.
   });
   console.log("Notification channel for downloads set up.");
 }
 
 /**
  * Requests notification permissions from the user.
+ * @returns A promise that resolves to true if permissions are granted, false otherwise.
  */
 export async function requestAppNotificationPermissions(): Promise<boolean> {
   const { status } = await Notifications.requestPermissionsAsync();
@@ -142,10 +159,12 @@ export async function requestAppNotificationPermissions(): Promise<boolean> {
   return true;
 }
 
+/**
+ * Requests media library (storage) permissions from the user.
+ * @returns A promise that resolves to true if permissions are granted, false otherwise.
+ */
 export const requestDownloadPermissions = async (): Promise<boolean> => {
-  console.log("Requesting media library permissions (for audio)...");
-
-  // For MediaLibrary (saving audio)
+  console.log("Requesting media library permissions...");
   const mediaLibraryPermissions = await MediaLibrary.requestPermissionsAsync();
   if (mediaLibraryPermissions.status !== "granted") {
     console.warn("Media library permission denied.");
@@ -155,12 +174,19 @@ export const requestDownloadPermissions = async (): Promise<boolean> => {
   return true;
 };
 
+/**
+ * Downloads a song and its artwork, saves them to the local file system and MediaLibrary,
+ * and updates the Redux store with the song's metadata.
+ * @param song The RemoteSong object to download.
+ * @returns A promise that resolves to the metadata of the downloaded song, or null if the download fails.
+ */
 export const downloadAndSaveSong = async (
   song: RemoteSong,
 ): Promise<DownloadedSongMetadata | null> => {
+  // Ensure necessary permissions are granted before proceeding.
   const hasStoragePermissions = await requestDownloadPermissions();
   if (!hasStoragePermissions) {
-    alert("Storage permissions are required to download songs and artwork.");
+    alert("Storage permissions are required to download songs.");
     return null;
   }
 
@@ -176,11 +202,10 @@ export const downloadAndSaveSong = async (
     mimeType: explicitMimeType,
   } = song;
 
+  // Check if the song is already downloaded.
   const existingDownload = getDownloadedSongMetadataById(id);
   if (existingDownload) {
-    console.log(
-      `Song "${title}" is already downloaded. Returning existing metadata.`,
-    );
+    console.log(`Song "${title}" is already downloaded.`);
     return existingDownload;
   }
 
@@ -188,6 +213,7 @@ export const downloadAndSaveSong = async (
 
   const notificationId = `download_song_${id}`;
 
+  // Prepare safe filenames and paths for the track and artwork.
   const safeTitle = makeSafeFilename(title);
   const trackFileExtension = getFileExtensionFromUrlOrMime(
     remoteTrackUrl,
@@ -210,6 +236,7 @@ export const downloadAndSaveSong = async (
     ? `${FileSystem.documentDirectory}${ARTWORK_FOLDER}/${artworkFileNameInDocs}`
     : undefined;
 
+  // Set up notification handler and schedule initial notification.
   if (hasNotificationPermissions) {
     await Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -233,10 +260,10 @@ export const downloadAndSaveSong = async (
     );
   }
 
-  let lastNotifiedProgressPercent = -1; // Initialize to a value that will trigger the first update
+  let lastNotifiedProgressPercent = -1;
 
+  // Callback to handle download progress updates.
   const downloadProgressCallback = (
-    // This callback is synchronous
     downloadProgress: FileSystem.DownloadProgressData,
   ) => {
     const progress =
@@ -244,10 +271,11 @@ export const downloadAndSaveSong = async (
       downloadProgress.totalBytesExpectedToWrite;
     const progressPercent = Math.round(progress * 100);
 
-    // Only log and attempt to update notification if the percentage has changed
+    // Throttle notifications to only update when the percentage changes.
     if (progressPercent > lastNotifiedProgressPercent) {
       lastNotifiedProgressPercent = progressPercent;
 
+      // Dispatch progress to Redux store.
       store.dispatch(
         setSongDownloading({
           song: {
@@ -260,8 +288,8 @@ export const downloadAndSaveSong = async (
         }),
       );
 
+      // Update the persistent notification with the new progress.
       if (hasNotificationPermissions) {
-        // Fire-and-forget the async notification update
         (async () => {
           try {
             await Notifications.scheduleNotificationAsync({
@@ -284,11 +312,12 @@ export const downloadAndSaveSong = async (
   try {
     console.log(`Starting audio download for: ${title} (as ${trackFileName})`);
 
+    // Create and start the track download.
     const trackDownloadResumable = FileSystem.createDownloadResumable(
       remoteTrackUrl,
       tempTrackUriInCache,
       {},
-      downloadProgressCallback, // Pass the synchronous callback
+      downloadProgressCallback,
     );
     const trackDownloadResult = await trackDownloadResumable.downloadAsync();
 
@@ -307,8 +336,8 @@ export const downloadAndSaveSong = async (
       trackDownloadResult.uri,
     );
 
+    // Download and save artwork if a URL is provided.
     let storedArtworkPath: string | undefined = undefined;
-
     if (remoteArtworkUrl && tempArtworkUriInCache && finalArtworkUriInDocs) {
       console.log(`Starting artwork download for: ${title}`);
       const artworkDownloadResumable = FileSystem.createDownloadResumable(
@@ -324,6 +353,7 @@ export const downloadAndSaveSong = async (
           "Artwork downloaded to temporary cache location:",
           artworkDownloadResult.uri,
         );
+        // Ensure the artwork directory exists.
         const artworkDir = `${FileSystem.documentDirectory}${ARTWORK_FOLDER}`;
         const dirInfo = await FileSystem.getInfoAsync(artworkDir);
         if (!dirInfo.exists) {
@@ -332,6 +362,7 @@ export const downloadAndSaveSong = async (
             intermediates: true,
           });
         }
+        // Move artwork from cache to permanent storage.
         await FileSystem.moveAsync({
           from: artworkDownloadResult.uri,
           to: finalArtworkUriInDocs,
@@ -351,6 +382,7 @@ export const downloadAndSaveSong = async (
       }
     }
 
+    // Create an asset in the device's MediaLibrary.
     const trackAsset = await MediaLibrary.createAssetAsync(
       trackDownloadResult.uri,
     );
@@ -361,9 +393,11 @@ export const downloadAndSaveSong = async (
       trackAsset.id,
     );
 
+    // Clean up the cached track file.
     console.log(`Deleting cached track file: ${trackDownloadResult.uri}`);
     await FileSystem.deleteAsync(trackDownloadResult.uri, { idempotent: true });
 
+    // Prepare the metadata for the downloaded song.
     const metadata: DownloadedSongMetadata = {
       id,
       title,
@@ -375,6 +409,7 @@ export const downloadAndSaveSong = async (
       downloadDate: new Date().toISOString(),
     };
 
+    // Show a completion notification.
     if (hasNotificationPermissions) {
       await Notifications.scheduleNotificationAsync({
         identifier: notificationId,
@@ -389,14 +424,14 @@ export const downloadAndSaveSong = async (
       );
     }
 
+    // Add the track to the Redux store.
     store.dispatch(addDownloadedTrack(metadata));
-    console.log(
-      `Successfully processed: ${title}. Metadata dispatched to Redux.`,
-    );
+    console.log(`Successfully processed: ${title}.`);
     return metadata;
   } catch (error) {
-    console.error(`Error during download and save for song ${title}:`, error);
+    console.error(`Error during download for ${title}:`, error);
 
+    // Show a failure notification.
     if (hasNotificationPermissions) {
       await Notifications.scheduleNotificationAsync({
         identifier: notificationId,
@@ -411,6 +446,7 @@ export const downloadAndSaveSong = async (
       );
     }
 
+    // Clean up any temporary files.
     await FileSystem.deleteAsync(tempTrackUriInCache, {
       idempotent: true,
     }).catch((e) => console.warn("Cleanup error for temp track in cache:", e));
@@ -430,15 +466,25 @@ export const downloadAndSaveSong = async (
     alert(`Failed to download ${title}`);
     return null;
   } finally {
+    // Always remove the song from the "downloading" state in Redux.
     store.dispatch(removeSongDownloading(id));
   }
 };
 
+/**
+ * Retrieves the metadata for all downloaded songs from the Redux store.
+ * @returns An array of DownloadedSongMetadata objects.
+ */
 export const getAllDownloadedSongsMetadata = (): DownloadedSongMetadata[] => {
   const state = store.getState();
   return state.library?.downloadedTracks || [];
 };
 
+/**
+ * Retrieves the metadata for a specific downloaded song by its ID.
+ * @param songId The ID of the song.
+ * @returns The DownloadedSongMetadata object for the song, or undefined if not found.
+ */
 export const getDownloadedSongMetadataById = (
   songId: string,
 ): DownloadedSongMetadata | undefined => {
@@ -446,26 +492,31 @@ export const getDownloadedSongMetadataById = (
   return downloadedSongs.find((s) => s.id === songId);
 };
 
+/**
+ * Deletes a downloaded song from the file system, MediaLibrary, and Redux store.
+ * @param songId The ID of the song to remove.
+ * @returns A promise that resolves to true if the deletion was successful, false otherwise.
+ */
 export const removeDownloadedSong = async (
   songId: string,
 ): Promise<boolean> => {
   try {
+    // Check for MediaLibrary permissions before attempting to delete.
     const mediaLibraryPermissions = await MediaLibrary.getPermissionsAsync();
     if (mediaLibraryPermissions.status !== "granted") {
       const requestedPermissions = await MediaLibrary.requestPermissionsAsync();
       if (requestedPermissions.status !== "granted") {
-        console.warn(
-          "MediaLibrary permissions not granted, cannot delete audio asset from MediaLibrary.",
-        );
+        console.warn("Cannot delete from MediaLibrary without permissions.");
       }
     }
 
     const songToRemove = getDownloadedSongMetadataById(songId);
     if (!songToRemove) {
-      console.log("Song not found in Redux metadata, cannot remove:", songId);
-      return true;
+      console.log("Song not found in metadata, cannot remove:", songId);
+      return true; // Already removed, so consider it a success.
     }
 
+    // Delete the local artwork file.
     if (songToRemove.localArtworkUri) {
       console.log("Deleting local artwork:", songToRemove.localArtworkUri);
       await FileSystem.deleteAsync(songToRemove.localArtworkUri, {
@@ -478,6 +529,7 @@ export const removeDownloadedSong = async (
       });
     }
 
+    // Delete the track from the MediaLibrary.
     const assetsToDeleteFromMediaLibrary: string[] = [];
     if (songToRemove.mediaLibraryAssetId) {
       assetsToDeleteFromMediaLibrary.push(songToRemove.mediaLibraryAssetId);
@@ -507,7 +559,7 @@ export const removeDownloadedSong = async (
           );
         }
       } catch (mediaError) {
-        console.error("Error deleting assets from MediaLibrary:", mediaError);
+        console.error("Error deleting asset from MediaLibrary:", mediaError);
       }
     } else if (assetsToDeleteFromMediaLibrary.length > 0) {
       console.warn(
@@ -515,6 +567,7 @@ export const removeDownloadedSong = async (
       );
     }
 
+    // Remove the track from the Redux store.
     store.dispatch(removeDownloadedTrack(songId));
     console.log("Dispatched removeDownloadedTrack for song:", songId);
     return true;
@@ -525,6 +578,11 @@ export const removeDownloadedSong = async (
   }
 };
 
+/**
+ * Checks if a song is downloaded by looking for it in the Redux store.
+ * @param id The ID of the song to check.
+ * @returns True if the song is downloaded, false otherwise.
+ */
 export const isSongDownloaded = (id: string): boolean => {
   const state = store.getState();
   return state.library.downloadedTracks.some((track) => track.id === id);

@@ -1,4 +1,15 @@
-// === START ===  Making Youtube.js work
+/**
+ * This file serves as a wrapper for the youtubei.js library, enabling interaction
+ * with YouTube's internal API (Innertube). It handles fetching video information, stream URLs,
+ * search results, and processing various page data types like albums and artists.
+ * It includes necessary polyfills to ensure compatibility with the React Native environment.
+ *
+ * @packageDocumentation
+ */
+
+// === START === Polyfills for youtubei.js in React Native
+// The following section includes polyfills and global assignments required for youtubei.js
+// to function correctly in a non-browser environment like React Native.
 import "event-target-polyfill";
 import "web-streams-polyfill";
 import "text-encoding-polyfill";
@@ -9,6 +20,7 @@ import Innertube, { UniversalCache } from "youtubei.js";
 import { Track } from "react-native-track-player";
 import { fetch } from "expo/fetch";
 
+// Polyfill for btoa and atob, which are not available in React Native's JavaScriptCore.
 if (!global.btoa) {
   global.btoa = encode;
 }
@@ -17,9 +29,14 @@ if (!global.atob) {
   global.atob = decode;
 }
 
+// Assign MMKV storage to the global scope for youtubei.js to use for caching.
 // @ts-expect-error
 global.mmkvStorage = MMKV as any;
 
+/**
+ * CustomEvent polyfill.
+ * The DOM 'CustomEvent' is not available in React Native, so this is a basic implementation.
+ */
 class CustomEvent extends Event {
   #detail;
 
@@ -34,19 +51,22 @@ class CustomEvent extends Event {
 }
 
 global.CustomEvent = CustomEvent as any;
+// === END === Polyfills for youtubei.js in React Native
 
-// === END === Making Youtube.js work
-
-// Create and export a promise that resolves to an Innertube instance
+/**
+ * A promise that resolves to a singleton Innertube instance.
+ * This is initialized asynchronously by fetching necessary tokens from a custom API.
+ * Using a promise ensures that any part of the app can access the instance
+ * without worrying about its initialization state.
+ */
 export const innertube: Promise<Innertube> = (async () => {
+  // Fetch the PO token and visitor data required to initialize Innertube.
   const res = await fetch(`${process.env.EXPO_PUBLIC_PO_TOKEN_API}`);
   const data = await res.json();
   const poToken = data.poToken;
   const visitorData = data.visitorData;
 
-  //console.log("poToken", poToken);
-  //console.log("visitorData", visitorData);
-
+  // Create the Innertube instance with the fetched credentials and a universal cache.
   return Innertube.create({
     po_token: poToken,
     visitor_data: visitorData,
@@ -55,15 +75,25 @@ export const innertube: Promise<Innertube> = (async () => {
   });
 })();
 
+/**
+ * Retrieves detailed information for a given YouTube video ID and formats it as a Track object.
+ * @param inid - The YouTube video ID.
+ * @param [title] - An optional title to override the fetched title.
+ * @param [author] - An optional author to override the fetched author.
+ * @returns {Promise<Track | null>} A promise that resolves to a Track object, or null if the video is unavailable or an error occurs.
+ */
 export async function getInfo(
   inid: string,
   title?: string,
   author?: string,
 ): Promise<Track | null> {
   try {
+    // Await the singleton Innertube instance.
     const yt = await innertube;
+    // Fetch basic video information.
     const info = await yt.getBasicInfo(inid, "MWEB");
 
+    // Check if the video is playable.
     if (info.playability_status?.status !== "OK") {
       console.log(
         `[MusicPlayer] Video ${inid} is not available: ${info.playability_status?.reason}`,
@@ -71,15 +101,18 @@ export async function getInfo(
       return null;
     }
 
+    // Select the best available audio format.
     const format = info.chooseFormat({ type: "audio", quality: "best" });
     if (!format) {
       console.log(`[MusicPlayer] No suitable audio format found for ${inid}`);
       return null;
     }
 
+    // Decipher the stream URL using the session player.
     const streamUrl = `${format.decipher(yt.session.player)}`;
     const item = info.basic_info;
 
+    // Construct the Track object with the fetched and provided data.
     const res: Track = {
       id: inid,
       url: streamUrl,
@@ -103,6 +136,13 @@ export async function getInfo(
   }
 }
 
+/**
+ * Processes a list of raw items from the YouTube API into a structured format.
+ * This function uses overloads to provide type safety based on the `type` parameter.
+ * @param items - An array of items from the YouTube API response.
+ * @param type - The type of items to process (e.g., "song", "video", "album", "artist").
+ * @returns {Song[] | Video[] | Album[] | Artist[]} A processed array of items with a standardized structure.
+ */
 export function processItems(items: any[], type: "song"): Song[];
 export function processItems(items: any[], type: "video"): Video[];
 export function processItems(items: any[], type: "album"): Album[];
@@ -112,7 +152,7 @@ export function processItems(
   type: "song" | "video" | "album" | "artist",
 ): (Song | Video | Album | Artist)[] {
   return items
-    .filter((item) => item?.id && (item.title || item.name))
+    .filter((item) => item?.id && (item.title || item.name)) // Filter out items that lack an ID or a title/name.
     .map((item) => {
       const baseItem: BaseItem = {
         id: item.id,
@@ -150,10 +190,16 @@ export function processItems(
           return null;
       }
     })
-    .filter((item): item is Song | Video | Album | Artist => item !== null);
+    .filter((item): item is Song | Video | Album | Artist => item !== null); // Filter out any null results from the map.
 }
 
+/**
+ * Processes the full response from a search query into a structured SearchPageData object.
+ * @param searchResultsAll - The raw search results object from the YouTube API.
+ * @returns {SearchPageData} A structured object containing the top result and categorized lists of songs, videos, albums, and artists.
+ */
 export function processSearchPageData(searchResultsAll: any): SearchPageData {
+  // Find the "Top result" section in the search response.
   const topResultSection = searchResultsAll.contents?.find(
     (c: any) => c.header?.title?.text === "Top result",
   );
@@ -175,6 +221,7 @@ export function processSearchPageData(searchResultsAll: any): SearchPageData {
     };
   }
 
+  // Process each category of search results.
   return {
     topResult,
     songs: processItems(searchResultsAll.songs?.contents || [], "song"),
@@ -184,6 +231,11 @@ export function processSearchPageData(searchResultsAll: any): SearchPageData {
   };
 }
 
+/**
+ * Processes the response from an album page query into a structured AlbumPageData object.
+ * @param albumResponse - The raw album page response from the YouTube API.
+ * @returns {AlbumPageData} A structured object containing album details and a list of its songs.
+ */
 export function processAlbumPageData(albumResponse: any): AlbumPageData {
   return {
     title: albumResponse?.header?.title?.text,
@@ -201,6 +253,12 @@ export function processAlbumPageData(albumResponse: any): AlbumPageData {
   };
 }
 
+/**
+ * A helper function to process items for an artist's page (albums or videos).
+ * @param items - The raw items to process.
+ * @param type - The type of item ("album" or "video").
+ * @returns A processed array of ArtistPageItem objects.
+ */
 function processArtistPageDataItem(
   items: any[],
   type: "album" | "video",
@@ -223,7 +281,17 @@ function processArtistPageDataItem(
     });
 }
 
+/**
+ * Processes the response from an artist page query into a structured ArtistPageData object.
+ * @param artistPage The raw artist page response from the YouTube API.
+ * @returns A structured object containing artist details and categorized lists of their work.
+ */
 export function processArtistPageData(artistPage: any): ArtistPageData {
+  /**
+   * Finds a specific section within the artist page data by its title.
+   * @param titles An array of possible section titles to look for.
+   * @returns The contents of the found section, or an empty array if not found.
+   */
   const findSection = (titles: string[]): any[] => {
     for (const title of titles) {
       const section = artistPage.sections.find(

@@ -1,3 +1,10 @@
+/**
+ * This file defines the `CreatePlaylistModal` component, a modal screen
+ * that allows users to create a new playlist by providing a name.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState } from "react";
 import {
   Modal,
@@ -10,12 +17,25 @@ import {
 import { Colors } from "@/constants/Colors";
 import { ScaledSheet } from "react-native-size-matters/extend";
 
-interface CreatePlaylistModalProps {
+/**
+ * Props for the `CreatePlaylistModal` component.
+ * @property visible - Controls the visibility of the modal.
+ * @property onCreate - Callback function when a new playlist is created.
+ * @property onCancel - Callback function when the modal is cancelled.
+ */
+export interface CreatePlaylistModalProps {
   visible: boolean;
   onCreate: (playlistName: string) => void;
   onCancel: () => void;
 }
 
+/**
+ * `CreatePlaylistModal` component.
+ * Provides an input field for the user to enter a new playlist name and buttons to create or cancel.
+ * @function
+ * @param props - The properties for the modal.
+ * @returns The rendered modal component.
+ */
 const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({
   visible,
   onCreate,
@@ -23,6 +43,10 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({
 }) => {
   const [playlistName, setPlaylistName] = useState("");
 
+  /**
+   * Handles the creation of the playlist.
+   * Validates the input and calls the `onCreate` callback.
+   */
   const handleCreate = () => {
     if (!playlistName.trim()) {
       ToastAndroid.show(
@@ -32,7 +56,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({
       return;
     }
     onCreate(playlistName.trim());
-    setPlaylistName("");
+    setPlaylistName(""); // Clear the input field after creation.
   };
 
   return (
@@ -74,6 +98,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({
 
 export default CreatePlaylistModal;
 
+// Styles for the CreatePlaylistModal component.
 const styles = ScaledSheet.create({
   modalContainer: {
     flex: 1,

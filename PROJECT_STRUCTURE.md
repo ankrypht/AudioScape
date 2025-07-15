@@ -21,6 +21,7 @@ The root directory contains essential configuration files and the main source co
 - `📄 package.json`: Lists all project dependencies and defines useful scripts.
 - `📄 package-lock.json`: Ensures consistent dependency versions across all environments.
 - `📄 tsconfig.json`: Configures the TypeScript compiler.
+- `📄 typedoc.json`: Configuration for TypeDoc, the documentation generator.
 
 ### Core Files & Folders
 
@@ -28,13 +29,13 @@ The root directory contains essential configuration files and the main source co
 - `📁 assets/`: Holds all static assets like fonts and images.
 - `📁 components/`: Home to reusable React components used throughout the app.
 - `📁 constants/`: Stores constant values like colors, tokens, and static data.
+- `📁 docs/`: Contains the generated documentation for the project.
 - `📁 helpers/`: Contains helper functions for various tasks.
 - `📁 hooks/`: Includes custom React hooks for shared logic.
 - `📁 services/`: Manages interactions with external APIs (e.g., YouTube).
 - `📁 store/`: Contains the Redux store for state management.
 - `📁 styles/`: Defines global styles for the application.
 - `📁 types/`: Holds all TypeScript type definitions.
-- `📁 youtubeUtils/`: Contains utility functions specifically for handling YouTube data.
 - `📄 storage.ts`: Defines functions for interacting with local device storage.
 - `📄 LICENSE`: The project's software license.
 - `📄 README.md`: The main project README with general information.
@@ -126,6 +127,10 @@ This directory contains reusable UI components.
 - `📄 playbackService.ts`: Service for handling audio playback.
 - `📄 tokens.ts`: Contains constants for design tokens.
 
+### `docs`
+
+This directory contains the generated documentation from TypeDoc. It is automatically generated and should not be edited manually.
+
 ### `helpers`
 
 - `📄 miscellaneous.ts`: A collection of miscellaneous helper functions.
@@ -162,8 +167,3 @@ This directory handles communication with external services and APIs.
 
 - `📄 index.d.ts`: Contains global TypeScript type definitions.
 - `📄 searchItems.ts`: Defines types for search results.
-
-### `youtubeUtils`
-
-- `📄 main.ts`: Main utility functions for YouTube data.
-- `📄 utils.js`: Additional utility functions for YouTube data.

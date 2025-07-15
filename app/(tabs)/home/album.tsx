@@ -1,3 +1,12 @@
+/**
+ * This file defines the `AlbumPageScreen` component, which displays detailed
+ * information about a specific music album. It fetches album data from YouTube Music,
+ * including its artwork, title, artist, and a list of its songs. Users can play
+ * individual songs or the entire album from this screen.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState, useEffect } from "react";
 import {
   Text,
@@ -77,6 +86,11 @@ export default function AlbumPageScreen() {
     fetchAlbumData();
   }, [id]);
 
+  /**
+   * Handles playing a selected song from the playlist.
+   * @param song - The `Song` object to play.
+   * @param playList - An optional list of songs to play after the selected song.
+   */
   const handleSongSelect = (song: Song, playList?: Song[]) => {
     playAudio(song, playList);
   };

@@ -1,3 +1,12 @@
+/**
+ * This file defines the `MusicPlayerContext` and `MusicPlayerProvider`,
+ * which encapsulate the core logic for music playback within the application.
+ * It manages the state of the music player, handles interactions with `react-native-track-player`,
+ * fetches song information, manages playlists (both online and downloaded), and handles network status.
+ *
+ * @packageDocumentation
+ */
+
 import React, {
   createContext,
   useState,
@@ -17,35 +26,54 @@ import { Alert } from "react-native";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { DownloadedSongMetadata } from "@/store/library";
 
-// Interface for the Music Player Context
-interface MusicPlayerContextType {
-  isPlaying: boolean;
-  isLoading: boolean;
-  playAudio: (songToPlay: Song, playlist?: Song[]) => Promise<void>;
-  playPlaylist: (songs: Song[]) => Promise<void>;
-  playNext: (songs: Song[] | null) => Promise<void>;
+/**
+ * Defines the shape of the context provided by `MusicPlayerProvider`.
+ * It exposes playback state and functions to control music playback.
+ */
+export interface MusicPlayerContextType {
+  isPlaying: boolean; // Indicates if a song is currently playing.
+  isLoading: boolean; // Indicates if the player is currently loading a song.
+  playAudio: (songToPlay: Song, playlist?: Song[]) => Promise<void>; // Plays an online song, optionally within a playlist.
+  playPlaylist: (songs: Song[]) => Promise<void>; // Plays a list of online songs.
+  playNext: (songs: Song[] | null) => Promise<void>; // Adds songs to the "Play Next" queue.
   playDownloadedSong: (
     songToPlay: DownloadedSongMetadata,
     playlist?: DownloadedSongMetadata[],
-  ) => Promise<void>;
-  playAllDownloadedSongs: (songs: DownloadedSongMetadata[]) => Promise<void>;
-  togglePlayPause: () => Promise<void>;
+  ) => Promise<void>; // Plays a downloaded song, optionally within a playlist.
+  playAllDownloadedSongs: (songs: DownloadedSongMetadata[]) => Promise<void>; // Plays a list of downloaded songs.
+  togglePlayPause: () => Promise<void>; // Toggles the play/pause state of the current song.
 }
 
+// Create the React Context for the music player.
 const MusicPlayerContext = createContext<MusicPlayerContextType | undefined>(
   undefined,
 );
 
+/**
+ * Helper function to create a delay.
+ * @param ms The number of milliseconds to delay.
+ * @returns A Promise that resolves after the specified delay.
+ */
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Type guard to check if an item from YouTube's "Up Next" list is a valid video item.
+ * @param item The item to check.
+ * @returns True if the item has a `video_id` property, false otherwise.
+ */
 const isValidUpNextItem = (
   item: Helpers.YTNode,
 ): item is Helpers.YTNode & { video_id: string } => {
   return "video_id" in item && typeof item.video_id === "string";
 };
 
+/**
+ * A custom hook to consume the `MusicPlayerContext`.
+ * Throws an error if used outside of a `MusicPlayerProvider`.
+ * @returns The `MusicPlayerContextType` object.
+ */
 export const useMusicPlayer = () => {
   const context = useContext(MusicPlayerContext);
   if (!context) {
@@ -54,31 +82,56 @@ export const useMusicPlayer = () => {
   return context;
 };
 
-interface MusicPlayerProviderProps {
+/**
+ * Props for the `MusicPlayerProvider` component.
+ */
+export interface MusicPlayerProviderProps {
   children: ReactNode;
 }
 
+/**
+ * Provides the music player context to its children.
+ * Manages playback state, interacts with `react-native-track-player`, and handles
+ * fetching and queuing of songs (both online and downloaded).
+ */
 export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
   children,
 }) => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  // Ref to keep track of the currently playing song's ID.
   const currentSongIdRef = useRef<string | null>(null);
   const activeTrack = useActiveTrack();
   const netInfo = useNetInfo();
+  // Ref to manage aborting background queue operations.
   const backgroundQueueOperationsAbortControllerRef =
     useRef<AbortController | null>(null);
 
+  /**
+   * Memoized logging function for consistent output.
+   * @param message - The message to log.
+   */
   const log = useCallback((message: string) => {
     console.log(`[MusicPlayer] ${message}`);
   }, []);
 
+  /**
+   * Resets the TrackPlayer state and clears the current song ID reference.
+   * @returns {Promise<void>} A promise that resolves when the player state is reset.
+   */
   const resetPlayerState = useCallback(async () => {
     log("Core Reset: TrackPlayer.reset() and clearing currentSongIdRef");
     await TrackPlayer.reset();
     currentSongIdRef.current = null;
   }, [log]);
 
+  /**
+   * Adds online songs to the TrackPlayer queue in the background, relative to the initial played song.
+   * This helps in pre-loading the playlist around the currently playing track.
+   * @param initialPlayedSong - The song that was initially played to set the context.
+   * @param fullPlaylist - The complete list of songs in the playlist.
+   * @param abortSignal - An AbortSignal to cancel the background operation.
+   */
   const addPlaylistTracksInBackground = useCallback(
     async (
       initialPlayedSong: Song,
@@ -102,10 +155,17 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
           return;
         }
 
+        /**
+         * Helper to add a track to the player queue if it's valid and not already present.
+         * @param songInfo - The song to add.
+         * @param position - Whether to add the song "before" or "after" the initial played song.
+         * @returns {Promise<boolean>} True if the track was processed (added or skipped as duplicate), false if aborted.
+         */
         const addTrackToPlayerIfValid = async (
           songInfo: Song,
           position: "before" | "after",
         ) => {
+          // Check for abortion or context change before fetching info.
           if (
             abortSignal.aborted ||
             currentSongIdRef.current !== initialPlayedSongId
@@ -116,11 +176,13 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
             return false;
           }
           try {
+            // Fetch detailed track info from YouTube.
             const trackInfo = await getInfo(
               songInfo.id,
               songInfo.title,
               songInfo.artist,
             );
+            // Check for abortion or context change after fetching info.
             if (
               abortSignal.aborted ||
               currentSongIdRef.current !== initialPlayedSongId
@@ -132,6 +194,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
             }
             if (trackInfo) {
               const queue = await TrackPlayer.getQueue();
+              // Only add if not already in queue.
               if (!queue.some((t) => t.id === trackInfo.id)) {
                 if (position === "after") {
                   await TrackPlayer.add(trackInfo);
@@ -139,6 +202,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
                     `BG Queue (Online): Added (after ${initialPlayedSongTitle}): ${trackInfo.title}`,
                   );
                 } else {
+                  // Insert before the currently playing track.
                   const indexOfPlayingTrack = queue.findIndex(
                     (t) => t.id === initialPlayedSongId,
                   );
@@ -166,9 +230,11 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
           return true;
         };
 
+        // Split playlist into songs before and after the initial played song.
         const songsAfter = fullPlaylist.slice(targetSongIndexInPlaylist + 1);
         const songsBefore = fullPlaylist.slice(0, targetSongIndexInPlaylist);
 
+        // Functions to add tracks sequentially with a small delay.
         const addAfterTracks = async () => {
           for (const song of songsAfter) {
             if (!(await addTrackToPlayerIfValid(song, "after"))) return;
@@ -183,6 +249,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
           }
         };
 
+        // Check for abortion before starting parallel additions.
         if (
           abortSignal.aborted ||
           currentSongIdRef.current !== initialPlayedSongId
@@ -190,6 +257,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
           return;
         }
 
+        // Run additions in parallel.
         await Promise.all([addAfterTracks(), addBeforeTracks()]);
 
         log(
@@ -204,6 +272,13 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
     [log],
   );
 
+  /**
+   * Adds downloaded songs to the TrackPlayer queue in the background.
+   * Similar to `addPlaylistTracksInBackground` but for local files.
+   * @param initialPlayedSong The downloaded song that was initially played.
+   * @param fullPlaylist The complete list of downloaded songs in the playlist.
+   * @param abortSignal An AbortSignal to cancel the background operation.
+   */
   const addDownloadedPlaylistTracksInBackground = useCallback(
     async (
       initialPlayedSong: DownloadedSongMetadata,
@@ -227,10 +302,17 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
           return;
         }
 
+        /**
+         * Helper to add a downloaded track to the player queue if it's valid and not already present.
+         * @param songMeta - The downloaded song metadata to add.
+         * @param position - Whether to add the song "before" or "after" the initial played song.
+         * @returns {Promise<boolean>} True if the track was processed (added or skipped as duplicate), false if aborted.
+         */
         const addTrackToPlayerIfValid = async (
           songMeta: DownloadedSongMetadata,
           position: "before" | "after",
         ) => {
+          // Check for abortion or context change.
           if (
             abortSignal.aborted ||
             currentSongIdRef.current !== initialPlayedSongId
@@ -240,6 +322,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
             );
             return false;
           }
+          // Construct a TrackPlayer Track object from downloaded song metadata.
           const trackInfo: Track = {
             id: songMeta.id,
             url: songMeta.localTrackUri,
@@ -249,6 +332,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
             duration: songMeta.duration,
           };
 
+          // Re-check for abortion or context change.
           if (
             abortSignal.aborted ||
             currentSongIdRef.current !== initialPlayedSongId
@@ -260,6 +344,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
           }
 
           const queue = await TrackPlayer.getQueue();
+          // Only add if not already in queue.
           if (!queue.some((t) => t.id === trackInfo.id)) {
             if (position === "after") {
               await TrackPlayer.add(trackInfo);
@@ -267,6 +352,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
                 `BG Queue (Downloaded): Added (after ${initialPlayedSongTitle}): ${trackInfo.title}`,
               );
             } else {
+              // Insert before the currently playing track.
               const indexOfPlayingTrack = queue.findIndex(
                 (t) => t.id === initialPlayedSongId,
               );
@@ -288,9 +374,11 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
           return true;
         };
 
+        // Split playlist into songs before and after the initial played song.
         const songsAfter = fullPlaylist.slice(targetSongIndexInPlaylist + 1);
         const songsBefore = fullPlaylist.slice(0, targetSongIndexInPlaylist);
 
+        // Functions to add tracks sequentially with a small delay.
         const addAfterTracks = async () => {
           for (const song of songsAfter) {
             if (!(await addTrackToPlayerIfValid(song, "after"))) return;
@@ -305,12 +393,14 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
           }
         };
 
+        // Check for abortion before starting parallel additions.
         if (
           abortSignal.aborted ||
           currentSongIdRef.current !== initialPlayedSongId
         )
           return;
 
+        // Run additions in parallel.
         await Promise.all([addAfterTracks(), addBeforeTracks()]);
 
         log(
@@ -325,6 +415,12 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
     [log],
   );
 
+  /**
+   * Fetches and adds "Up Next" songs from YouTube to the TrackPlayer queue.
+   * This is typically called when a single song is played without a predefined playlist.
+   * @param songId The ID of the song for which to fetch "Up Next" suggestions.
+   * @param abortSignal An AbortSignal to cancel the operation.
+   */
   const addUpNextSongs = useCallback(
     async (songId: string, abortSignal: AbortSignal) => {
       log(`Up Next: Starting for ${songId}`);
@@ -335,6 +431,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
 
       try {
         const yt = await innertube;
+        // Check for abortion or song change before API call.
         if (currentSongIdRef.current !== songId || abortSignal.aborted) {
           log(
             `Up Next: Aborted or song changed before API call for ${songId}.`,
@@ -344,6 +441,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
 
         const upNextResponse = await yt.music.getUpNext(songId);
 
+        // Check for abortion or song change after API call.
         if (abortSignal.aborted || currentSongIdRef.current !== songId) {
           log(`Up Next: Aborted or song changed after API call for ${songId}.`);
           return;
@@ -352,6 +450,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
         const upNext = upNextResponse?.contents;
         if (upNext && Array.isArray(upNext) && upNext.length > 0) {
           for (const item of upNext) {
+            // Check for abortion or song change during loop.
             if (abortSignal.aborted || currentSongIdRef.current !== songId) {
               log(
                 `Up Next: Aborted or song changed during loop for ${songId}.`,
@@ -361,6 +460,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
             if (isValidUpNextItem(item)) {
               try {
                 const queue = await TrackPlayer.getQueue();
+                // Skip if already in queue.
                 if (queue.some((track) => track.id === item.video_id)) {
                   log(
                     `Up Next: Skipping duplicate ${item.video_id} for ${songId}.`,
@@ -368,10 +468,12 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
                   continue;
                 }
 
+                // Re-check before fetching info.
                 if (abortSignal.aborted || currentSongIdRef.current !== songId)
                   break;
                 const info = await getInfo(item.video_id);
 
+                // Re-check before adding to player.
                 if (abortSignal.aborted || currentSongIdRef.current !== songId)
                   break;
                 if (info) {
@@ -384,7 +486,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
                 );
               }
             }
-            await delay(150);
+            await delay(150); // Small delay to prevent overwhelming the API/player.
           }
         }
       } catch (error) {
@@ -396,7 +498,14 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
     [log],
   );
 
+  /**
+   * Plays an online song. If a playlist is provided, it will also queue the rest of the playlist
+   * in the background. If no playlist, it will fetch and queue "Up Next" suggestions.
+   * @param songToPlay The `Song` object to play.
+   * @param playlist An optional array of `Song` objects representing the full playlist.
+   */
   const playAudio = async (songToPlay: Song, playlist?: Song[]) => {
+    // Check for internet connectivity.
     if (netInfo.isInternetReachable === false) {
       Alert.alert(
         "Network Error",
@@ -412,29 +521,35 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
       );
       setIsLoading(true);
 
+      // Abort any previous background queue operations.
       if (backgroundQueueOperationsAbortControllerRef.current) {
         log("Aborting previous background queue operation.");
         backgroundQueueOperationsAbortControllerRef.current.abort();
       }
+      // Create a new AbortController for the current playback session.
       backgroundQueueOperationsAbortControllerRef.current =
         new AbortController();
       const currentAbortSignal =
         backgroundQueueOperationsAbortControllerRef.current.signal;
 
+      // Reset the TrackPlayer queue.
       await resetPlayerState();
 
+      // Get detailed info for the target song.
       const targetSongInfo = await getInfo(
         songToPlay.id,
         songToPlay.title,
         songToPlay.artist,
       );
 
+      // Check if the operation was aborted during getInfo.
       if (currentAbortSignal.aborted) {
         log(`Playback for ${songToPlay.title} aborted during/after getInfo.`);
         setIsLoading(false);
         return;
       }
 
+      // Handle cases where song info cannot be retrieved.
       if (!targetSongInfo) {
         Alert.alert(
           "Playback Error",
@@ -444,12 +559,14 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
         return;
       }
 
+      // Add and play the song.
       await TrackPlayer.add(targetSongInfo);
       await TrackPlayer.play();
       setIsPlaying(true);
       currentSongIdRef.current = targetSongInfo.id;
       log(`Playing: ${targetSongInfo.title}`);
 
+      // If a playlist is provided, add remaining tracks in background.
       if (playlist && playlist.length > 0) {
         log(`Initiating background playlist addition for ${songToPlay.title}.`);
         addPlaylistTracksInBackground(
@@ -460,11 +577,13 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
           log(`Error in detached addPlaylistTracksInBackground call: ${e}`),
         );
       } else if (playlist === undefined) {
+        // If no playlist, fetch and add "Up Next" suggestions.
         log(`No playlist context. Initiating up-next for ${songToPlay.title}.`);
         addUpNextSongs(songToPlay.id, currentAbortSignal).catch((e) =>
           log(`Error in detached addUpNextSongs call: ${e}`),
         );
       } else {
+        // Empty playlist provided, no further queue additions.
         log(
           `Empty playlist provided for ${songToPlay.title}. No further queue additions.`,
         );
@@ -480,6 +599,12 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
     }
   };
 
+  /**
+   * Plays a downloaded song. If a playlist of downloaded songs is provided,
+   * it will queue the rest of the playlist in the background.
+   * @param songToPlay The `DownloadedSongMetadata` object to play.
+   * @param playlist An optional array of `DownloadedSongMetadata` objects representing the full playlist.
+   */
   const playDownloadedSong = async (
     songToPlay: DownloadedSongMetadata,
     playlist?: DownloadedSongMetadata[],
@@ -492,19 +617,23 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
       );
       setIsLoading(true);
 
+      // Abort any previous background queue operations.
       if (backgroundQueueOperationsAbortControllerRef.current) {
         log(
           "Aborting previous background queue operation (for downloaded song).",
         );
         backgroundQueueOperationsAbortControllerRef.current.abort();
       }
+      // Create a new AbortController for the current playback session.
       backgroundQueueOperationsAbortControllerRef.current =
         new AbortController();
       const currentAbortSignal =
         backgroundQueueOperationsAbortControllerRef.current.signal;
 
+      // Reset the TrackPlayer queue.
       await resetPlayerState();
 
+      // Construct a TrackPlayer Track object from the downloaded song metadata.
       const targetTrack: Track = {
         id: songToPlay.id,
         url: songToPlay.localTrackUri,
@@ -514,6 +643,7 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
         duration: songToPlay.duration,
       };
 
+      // Check if the operation was aborted before adding to player.
       if (currentAbortSignal.aborted) {
         log(
           `Playback for downloaded ${songToPlay.title} aborted before adding to player.`,
@@ -522,12 +652,14 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
         return;
       }
 
+      // Add and play the downloaded song.
       await TrackPlayer.add(targetTrack);
       await TrackPlayer.play();
       setIsPlaying(true);
       currentSongIdRef.current = targetTrack.id;
       log(`Playing downloaded: ${targetTrack.title}`);
 
+      // If a playlist is provided, add remaining downloaded tracks in background.
       if (playlist && playlist.length > 0) {
         log(
           `Initiating background downloaded playlist addition for ${songToPlay.title}.`,
@@ -555,6 +687,10 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
     }
   };
 
+  /**
+   * Plays an entire playlist of online songs, starting with the first song.
+   * @param songs An array of `Song` objects representing the playlist.
+   */
   const playPlaylist = async (songs: Song[]) => {
     log(`Play playlist request with ${songs.length} songs.`);
     if (!songs || songs.length === 0) {
@@ -564,6 +700,10 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
     await playAudio(songs[0], songs);
   };
 
+  /**
+   * Plays an entire playlist of downloaded songs, starting with the first song.
+   * @param songs An array of `DownloadedSongMetadata` objects representing the playlist.
+   */
   const playAllDownloadedSongs = async (songs: DownloadedSongMetadata[]) => {
     log(`Play all downloaded with ${songs.length} songs.`);
     if (!songs || songs.length === 0) {
@@ -573,6 +713,11 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
     await playDownloadedSong(songs[0], songs);
   };
 
+  /**
+   * Adds a list of songs to the TrackPlayer queue, prioritizing insertion after the current track.
+   * Handles removing duplicates and fetching song info.
+   * @param songsToAdd An array of `Song` objects to add to the queue.
+   */
   const playNext = async (songsToAdd: Song[] | null) => {
     if (!songsToAdd || songsToAdd.length === 0) {
       log("No songs for playNext");
@@ -585,34 +730,35 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
         await TrackPlayer.getActiveTrackIndex();
       let insertAtIndex: number | undefined;
 
+      // Determine the insertion index: after the current track, or at the end if no active track.
       if (typeof currentActivePlayerTrackIndex === "number") {
         insertAtIndex = currentActivePlayerTrackIndex + 1;
       } else {
-        // If no active track, or queue is empty, prepare to add to the end.
-        // TrackPlayer.add with undefined insertBeforeIndex adds to the end.
-        insertAtIndex = undefined;
+        insertAtIndex = undefined; // Adds to the end.
       }
 
       for (const song of songsToAdd) {
+        // Skip if the song is already the active track.
         if (song.id === activeTrackIdFromHook) {
-          // Check against the initially active track
           log(
             `PlayNext: Song "${song.title}" is (or was initially) the active track, skipping.`,
           );
           continue;
         }
 
-        // Get fresh queue state for accurate duplicate check and removal index
+        // Get fresh queue state to check for duplicates and adjust insertion index if needed.
         const currentQueue = await TrackPlayer.getQueue();
         const existingTrackIndex = currentQueue.findIndex(
           (t) => t.id === song.id,
         );
 
+        // If the song already exists in the queue, remove it to re-add at the desired position.
         if (existingTrackIndex !== -1) {
           log(
             `PlayNext: Removing ${song.title} from index ${existingTrackIndex} to re-add.`,
           );
           await TrackPlayer.remove(existingTrackIndex);
+          // Adjust insert index if the removed track was before the current insert point.
           if (
             insertAtIndex !== undefined &&
             existingTrackIndex < insertAtIndex
@@ -621,8 +767,10 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
           }
         }
 
+        // Fetch detailed song information.
         const info = await getInfo(song.id, song.title, song.artist);
         if (info) {
+          // Add the song to the queue at the calculated index.
           await TrackPlayer.add(info, insertAtIndex);
           log(
             `PlayNext: Added "${info.title}"${
@@ -632,11 +780,10 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
             }.`,
           );
 
-          // If we inserted at a specific index (not at the end), increment for the next song.
+          // Increment insert index for the next song if inserting sequentially.
           if (insertAtIndex !== undefined) {
             insertAtIndex++;
           }
-          // If insertAtIndex was undefined, the next song will also be added to the new end.
         }
       }
     } catch (error) {
@@ -645,15 +792,20 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({
     }
   };
 
+  /**
+   * Toggles the play/pause state of the current song.
+   */
   const togglePlayPause = async () => {
     try {
       const playbackState = await TrackPlayer.getPlaybackState();
       const currentState = playbackState.state;
 
+      // If currently playing or buffering, pause the player.
       if (currentState === State.Playing || currentState === State.Buffering) {
         await TrackPlayer.pause();
         setIsPlaying(false);
       } else {
+        // If paused or stopped, check if there are songs in the queue and play.
         const queue = await TrackPlayer.getQueue();
         if (queue.length > 0) {
           await TrackPlayer.play();

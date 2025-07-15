@@ -1,3 +1,11 @@
+/**
+ * This file defines the layout for the main tab navigation of the application.
+ * It configures the appearance of the tab bar, including icons, labels, and background,
+ * and specifies the screens accessible through each tab.
+ *
+ * @packageDocumentation
+ */
+
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Tabs } from "expo-router";
@@ -8,6 +16,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters/extend";
 
+/**
+ * `TabLayoutContent` component.
+ * Configures the tab navigation and renders the `FloatingPlayer`.
+ */
 function TabLayoutContent() {
   const { bottom } = useSafeAreaInsets();
 
@@ -21,7 +33,7 @@ function TabLayoutContent() {
             left: 0,
             right: 0,
             position: "absolute",
-            elevation: 0,
+            elevation: 0, // Remove shadow on Android.
           },
           tabBarLabelStyle: {
             fontSize: moderateScale(10),
@@ -29,13 +41,14 @@ function TabLayoutContent() {
           },
           tabBarActiveTintColor: Colors.tint,
           tabBarInactiveTintColor: "#afafaf",
-          headerShown: false,
+          headerShown: false, // Hide header for all tab screens.
           tabBarBackground: () => (
             <View
               style={{
                 ...StyleSheet.absoluteFillObject,
               }}
             >
+              {/* Gradient overlay for the tab bar background */}
               <LinearGradient
                 colors={["transparent", "black"]}
                 style={{
@@ -50,6 +63,7 @@ function TabLayoutContent() {
           ),
         }}
       >
+        {/* Home Tab */}
         <Tabs.Screen
           name="home"
           options={{
@@ -62,6 +76,7 @@ function TabLayoutContent() {
             ),
           }}
         />
+        {/* Favorites Tab */}
         <Tabs.Screen
           name="favorites"
           options={{
@@ -74,6 +89,7 @@ function TabLayoutContent() {
             ),
           }}
         />
+        {/* Playlists Tab */}
         <Tabs.Screen
           name="playlists"
           options={{
@@ -86,6 +102,7 @@ function TabLayoutContent() {
             ),
           }}
         />
+        {/* Downloads Tab */}
         <Tabs.Screen
           name="downloads"
           options={{
@@ -98,8 +115,10 @@ function TabLayoutContent() {
             ),
           }}
         />
+        {/* Index screen, hidden from tabs */}
         <Tabs.Screen name="index" options={{ href: null }} />
       </Tabs>
+      {/* Floating player component, positioned above the tab bar */}
       <FloatingPlayer
         style={{
           position: "absolute",
@@ -112,6 +131,10 @@ function TabLayoutContent() {
   );
 }
 
+/**
+ * `TabLayout` component.
+ * A wrapper component for `TabLayoutContent`.
+ */
 export default function TabLayout() {
   return <TabLayoutContent />;
 }

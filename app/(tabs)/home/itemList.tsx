@@ -1,3 +1,12 @@
+/**
+ * This file defines the `ItemList` component, a generic screen for displaying
+ * lists of various media types (songs, videos, albums, artists). It dynamically renders
+ * items based on the `type` parameter passed via navigation, and provides playback
+ * and navigation functionalities.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState, useEffect } from "react";
 import { defaultStyles } from "@/styles";
 import {
@@ -46,6 +55,11 @@ const ItemList = () => {
 
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
+  /**
+   * Renders a song search result item.
+   * @param item - The song item to render.
+   * @returns A View component representing a song result.
+   */
   const renderSongResult = ({ item }: { item: Song }) => (
     <View key={item.id} style={styles.searchResult}>
       <TouchableOpacity
@@ -100,6 +114,11 @@ const ItemList = () => {
     </View>
   );
 
+  /**
+   * Renders a video search result item.
+   * @param item - The video item to render.
+   * @returns A View component representing a video result.
+   */
   const renderVideoResult = ({ item }: { item: Song }) => (
     <View key={item.id} style={styles.searchResult}>
       <TouchableOpacity
@@ -154,6 +173,11 @@ const ItemList = () => {
     </View>
   );
 
+  /**
+   * Renders an album search result item.
+   * @param item - The album item to render.
+   * @returns A View component representing an album result.
+   */
   const renderAlbumResult = ({ item }: { item: Album }) => (
     <View key={item.id} style={styles.searchResult}>
       <TouchableOpacity
@@ -214,6 +238,11 @@ const ItemList = () => {
     </View>
   );
 
+  /**
+   * Renders an artist search result item.
+   * @param item - The artist item to render.
+   * @returns A View component representing an artist result.
+   */
   const renderArtistResult = ({ item }: { item: Artist }) => (
     <View key={item.id} style={styles.searchResult}>
       <TouchableOpacity

@@ -1,3 +1,12 @@
+/**
+ * This file defines the main music player screen of the application.
+ * It displays the currently active track's artwork, title, artist, playback controls,
+ * and progress. It also integrates features like favoriting, downloading, and navigating
+ * to the queue and lyrics screens.
+ *
+ * @packageDocumentation
+ */
+
 import { MovingText } from "@/components/MovingText";
 import {
   PlayerControls,
@@ -24,18 +33,26 @@ import {
   moderateScale,
 } from "react-native-size-matters/extend";
 
+/**
+ * `PlayerScreen` component.
+ * Displays the full-screen music player UI.
+ */
 const PlayerScreen = () => {
   const activeTrack = useActiveTrack();
   const router = useRouter();
 
+  // Extract dominant colors from the active track's artwork for the background gradient.
   const { imageColors } = useImageColors(
     activeTrack?.artwork ?? "https://placehold.co/50",
   );
 
+  // Get safe area insets to adjust UI elements for notches and system bars.
   const { top, bottom } = useSafeAreaInsets();
 
+  // Hook to manage track favoriting.
   const { isFavorite, toggleFavoriteFunc } = useTrackPlayerFavorite();
 
+  // Show a loading indicator if no active track is available.
   if (!activeTrack) {
     return (
       <View style={[defaultStyles.container, { justifyContent: "center" }]}>
@@ -45,7 +62,9 @@ const PlayerScreen = () => {
   }
 
   return (
+    // Enable vertical swipe gesture to dismiss the player.
     <VerticalSwipeGesture>
+      {/* Background gradient based on album artwork colors */}
       <LinearGradient
         style={{ flex: 1 }}
         colors={
@@ -55,9 +74,11 @@ const PlayerScreen = () => {
         }
       >
         <View style={styles.overlayContainer}>
+          {/* Dismiss player indicator */}
           <DismissPlayerSymbol />
 
           <View style={{ flex: 1, marginTop: top + verticalScale(50) }}>
+            {/* Album artwork */}
             <View style={styles.artworkImageContainer}>
               <FastImage
                 source={{
@@ -79,7 +100,7 @@ const PlayerScreen = () => {
                       alignItems: "center",
                     }}
                   >
-                    {/* Track title */}
+                    {/* Track title, with marquee effect for long titles */}
                     <View style={styles.trackTitleContainer}>
                       <MovingText
                         text={activeTrack.title ?? ""}
@@ -88,7 +109,7 @@ const PlayerScreen = () => {
                       />
                     </View>
 
-                    {/* Favorite button icon*/}
+                    {/* Favorite button */}
                     <FontAwesome
                       name={isFavorite ? "heart" : "heart-o"}
                       size={moderateScale(22)}
@@ -100,6 +121,7 @@ const PlayerScreen = () => {
                       hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                     />
 
+                    {/* Download song button */}
                     <DownloadSongButton style={{ paddingTop: 1 }} />
                   </View>
 
@@ -117,8 +139,10 @@ const PlayerScreen = () => {
                   )}
                 </View>
 
+                {/* Playback progress bar */}
                 <PlayerProgressBar style={{ marginTop: verticalScale(32) }} />
 
+                {/* Player controls (play/pause, skip, repeat) */}
                 <PlayerControls
                   style={{
                     marginTop: verticalScale(40),
@@ -127,6 +151,7 @@ const PlayerScreen = () => {
                 />
               </View>
             </View>
+            {/* Bottom navigation buttons (Queue, Lyrics) */}
             <View
               style={{ flexDirection: "row", justifyContent: "space-evenly" }}
             >
@@ -160,6 +185,12 @@ const PlayerScreen = () => {
   );
 };
 
+/**
+ * `DismissPlayerSymbol` component.
+ * Displays a small horizontal bar at the top of the player screen,
+ * indicating that the player can be dismissed by swiping down.
+ * @returns The rendered dismiss symbol component.
+ */
 const DismissPlayerSymbol = () => {
   const { top } = useSafeAreaInsets();
 
@@ -188,6 +219,7 @@ const DismissPlayerSymbol = () => {
   );
 };
 
+// Styles for the PlayerScreen component.
 const styles = ScaledSheet.create({
   overlayContainer: {
     ...defaultStyles.container,

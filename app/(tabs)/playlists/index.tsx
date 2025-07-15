@@ -1,3 +1,11 @@
+/**
+ * This file defines the `PlaylistScreen` component, which displays a list of
+ * all user-created playlists. It allows users to navigate into a playlist to view its songs,
+ * create new playlists, and access options to manage existing playlists.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import FastImage from "@d11/react-native-fast-image";
@@ -19,8 +27,13 @@ import {
   verticalScale,
 } from "react-native-size-matters/extend";
 
+// Randomly select a gradient background for the screen.
 const gradientIndex = Math.floor(Math.random() * 12);
 
+/**
+ * `PlaylistScreen` component.
+ * Displays a list of user-created playlists.
+ */
 export default function PlaylistScreen() {
   const { playlists, createNewPlaylist } = usePlaylists();
   const router = useRouter();
@@ -30,13 +43,19 @@ export default function PlaylistScreen() {
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // Determine if the floating player should be visible.
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
+  // Convert the playlists object into an array for rendering.
   const playlistArray = Object.entries(playlists).map(([name, tracks]) => ({
     name,
     thumbnail: tracks.length > 0 ? tracks[0].thumbnail : null,
   }));
 
+  /**
+   * Handles the creation of a new playlist.
+   * @param playlistName - The name of the new playlist.
+   */
   const handleCreatePlaylist = (playlistName: string) => {
     if (playlists[playlistName]) {
       console.warn("A playlist with this name already exists.");
@@ -46,6 +65,11 @@ export default function PlaylistScreen() {
     setModalVisible(false);
   };
 
+  /**
+   * Renders an individual playlist item.
+   * @param item - The playlist item to render.
+   * @returns A View component representing a playlist.
+   */
   const renderPlaylist = ({
     item,
   }: {
@@ -55,6 +79,7 @@ export default function PlaylistScreen() {
       <TouchableOpacity
         style={styles.playlistItemTouchableArea}
         onPress={() => {
+          // Navigate to the individual playlist screen.
           router.push({
             pathname: `/(tabs)/playlists/[playlistName]`,
             params: { playlistName: item.name },
@@ -67,15 +92,17 @@ export default function PlaylistScreen() {
         />
         <Text style={styles.playlistName}>{item.name}</Text>
       </TouchableOpacity>
+      {/* Options menu button for the playlist */}
       <TouchableOpacity
         activeOpacity={0.5}
         onPress={() => {
-          // Convert the song object to a JSON string
+          // Prepare playlist data for the menu modal.
           const playlistData = JSON.stringify({
             name: item.name,
             thumbnail: item.thumbnail,
           });
 
+          // Navigate to the menu modal.
           router.push({
             pathname: "/(modals)/menu",
             params: { playlistData: playlistData, type: "playlist" },
@@ -95,6 +122,7 @@ export default function PlaylistScreen() {
   return (
     <FullScreenGradientBackground index={gradientIndex}>
       <View style={defaultStyles.container}>
+        {/* Header with screen title */}
         <Text
           style={[
             styles.header,
@@ -105,6 +133,7 @@ export default function PlaylistScreen() {
           Playlists
         </Text>
 
+        {/* Divider that appears when scrolling */}
         {isScrolling && (
           <Divider
             style={{ backgroundColor: "rgba(255,255,255,0.3)", height: 0.3 }}
@@ -125,6 +154,7 @@ export default function PlaylistScreen() {
           }}
           scrollEventThrottle={16}
         >
+          {/* Message when no playlists are found */}
           {playlistArray.length === 0 ? (
             <View
               style={{
@@ -146,8 +176,10 @@ export default function PlaylistScreen() {
               </Text>
             </View>
           ) : (
+            // Render each playlist item.
             playlistArray.map((item) => renderPlaylist({ item }))
           )}
+          {/* Display total number of playlists */}
           {playlistArray.length !== 0 && (
             <Text
               style={{
@@ -162,6 +194,7 @@ export default function PlaylistScreen() {
           )}
         </ScrollView>
 
+        {/* Floating Action Button to create a new playlist */}
         <FAB
           style={{
             borderRadius: 20,
@@ -181,6 +214,7 @@ export default function PlaylistScreen() {
           onPress={() => setModalVisible(true)}
         />
 
+        {/* Modal for creating a new playlist */}
         <CreatePlaylistModal
           visible={modalVisible}
           onCreate={handleCreatePlaylist}
@@ -191,6 +225,7 @@ export default function PlaylistScreen() {
   );
 }
 
+// Styles for the PlaylistScreen component.
 const styles = ScaledSheet.create({
   header: {
     fontSize: "24@ms",

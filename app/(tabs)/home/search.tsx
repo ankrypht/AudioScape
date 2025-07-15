@@ -1,3 +1,12 @@
+/**
+ * This file defines the `SearchScreen` component, which provides a comprehensive
+ * search functionality for music content (songs, videos, albums, artists) from YouTube Music.
+ * It includes features like search suggestions, dynamic rendering of search results based on type,
+ * and navigation to detailed content pages.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   TouchableOpacity,
@@ -30,10 +39,18 @@ import {
   verticalScale,
 } from "react-native-size-matters/extend";
 
+/**
+ * @interface SearchSuggestions
+ * @description Defines the structure for a search suggestion item.
+ */
 interface SearchSuggestions {
   text: string;
 }
 
+/**
+ * `SearchScreen` component.
+ * Provides a search interface for music content.
+ */
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<SearchPageData>();
@@ -48,15 +65,20 @@ export default function SearchScreen() {
   const { playAudio } = useMusicPlayer();
   const searchBarRef = useRef<TextInput>(null);
 
+  /**
+   * Handles the main search operation based on the provided query.
+   * @param query - The search query string.
+   */
   const handleSearch = async (query: string) => {
     if (!query) return;
 
-    Keyboard.dismiss();
+    Keyboard.dismiss(); // Dismiss the keyboard when search is initiated.
 
     setIsSearching(false);
     setIsLoading(true);
     try {
       const yt = await innertube;
+      // Perform a comprehensive search and process the results.
       const searchResults = processSearchPageData(
         await yt.music.search(query, { type: "all" }),
       );
@@ -72,6 +94,9 @@ export default function SearchScreen() {
     setIsLoading(false);
   };
 
+  /**
+   * Fetches and updates search suggestions based on the current search query.
+   */
   const handleSearchSuggestions = useCallback(async () => {
     if (!searchQuery) return;
 
@@ -87,6 +112,7 @@ export default function SearchScreen() {
         searchSuggestions.length > 0 &&
         searchSuggestions[0].contents
       ) {
+        // Format the raw suggestions into a simpler array of objects.
         const formattedResults: SearchSuggestions[] =
           searchSuggestions[0].contents
             .filter(
@@ -110,6 +136,7 @@ export default function SearchScreen() {
     }
   }, [searchQuery]);
 
+  // Effect to fetch search suggestions whenever the search query changes.
   useEffect(() => {
     async function fetchResults() {
       await handleSearchSuggestions();
@@ -118,10 +145,18 @@ export default function SearchScreen() {
     fetchResults();
   }, [handleSearchSuggestions]);
 
+  /**
+   * Handles playing a selected song from the search results.
+   * @param song - The `Song` object to play.
+   */
   const handleSongSelect = (song: Song) => {
     playAudio(song);
   };
 
+  /**
+   * Handles selecting a search suggestion, performing a full search with the suggestion.
+   * @param suggestion - The selected `SearchSuggestions` item.
+   */
   const handleSearchSuggestionsSelect = async (
     suggestion: SearchSuggestions,
   ) => {
@@ -130,11 +165,17 @@ export default function SearchScreen() {
     await handleSearch(suggestion.text);
   };
 
+  /**
+   * Renders the top search result item.
+   * @param item - The `TopResult` item to render.
+   * @returns A View component representing the top result.
+   */
   const renderTopResult = (item: TopResult) => (
     <View key={item.id} style={styles.searchResult}>
       <TouchableOpacity
         style={styles.searchResultTouchableArea}
         onPress={() => {
+          // Navigate to song/video player or artist page based on item type.
           if (item.type === "song" || item.type === "video")
             handleSongSelect({
               id: item.id,
@@ -209,6 +250,11 @@ export default function SearchScreen() {
     </View>
   );
 
+  /**
+   * Renders a song search result item.
+   * @param item - The song item to render.
+   * @returns A View component representing a song result.
+   */
   const renderSongResult = ({ item }: { item: Song }) => (
     <View key={item.id} style={styles.searchResult}>
       <TouchableOpacity
@@ -239,7 +285,7 @@ export default function SearchScreen() {
       <TouchableOpacity
         activeOpacity={0.5}
         onPress={() => {
-          // Convert the song object to a JSON string
+          // Convert the song object to a JSON string.
           const songData = JSON.stringify({
             id: item.id,
             title: item.title,
@@ -263,6 +309,11 @@ export default function SearchScreen() {
     </View>
   );
 
+  /**
+   * Renders a video search result item.
+   * @param item - The video item to render.
+   * @returns A View component representing a video result.
+   */
   const renderVideoResult = ({ item }: { item: Song }) => (
     <View key={item.id} style={styles.searchResult}>
       <TouchableOpacity
@@ -293,7 +344,7 @@ export default function SearchScreen() {
       <TouchableOpacity
         activeOpacity={0.5}
         onPress={() => {
-          // Convert the song object to a JSON string
+          // Convert the song object to a JSON string.
           const songData = JSON.stringify({
             id: item.id,
             title: item.title,
@@ -317,6 +368,11 @@ export default function SearchScreen() {
     </View>
   );
 
+  /**
+   * Renders an album search result item.
+   * @param item - The album item to render.
+   * @returns A View component representing an album result.
+   */
   const renderAlbumResult = ({ item }: { item: Album }) => (
     <View key={item.id} style={styles.searchResult}>
       <TouchableOpacity
@@ -350,7 +406,7 @@ export default function SearchScreen() {
       <TouchableOpacity
         activeOpacity={0.5}
         onPress={() => {
-          // Convert the song object to a JSON string
+          // Convert the album object to a JSON string.
           const albumData = JSON.stringify({
             name: item.title,
             thumbnail: item.thumbnail,
@@ -377,6 +433,11 @@ export default function SearchScreen() {
     </View>
   );
 
+  /**
+   * Renders an artist search result item.
+   * @param item - The artist item to render.
+   * @returns A View component representing an artist result.
+   */
   const renderArtistResult = ({ item }: { item: Artist }) => (
     <View key={item.id} style={styles.searchResult}>
       <TouchableOpacity
@@ -404,6 +465,11 @@ export default function SearchScreen() {
     </View>
   );
 
+  /**
+   * Renders a search suggestion item.
+   * @param item - The search suggestion item to render.
+   * @returns A TouchableOpacity component representing a search suggestion.
+   */
   const renderSearchSuggestions = ({ item }: { item: SearchSuggestions }) => (
     <TouchableOpacity
       style={styles.searchResult}
@@ -419,6 +485,12 @@ export default function SearchScreen() {
     </TouchableOpacity>
   );
 
+  /**
+   * Renders a "Show All" button for a specific search result type.
+   * @param type The type of content (song, video, album, artist).
+   * @param title The title for the item list screen.
+   * @returns A TouchableOpacity component for the "Show All" button.
+   */
   const showAllButton = (
     type: "song" | "video" | "album" | "artist",
     title: string,
@@ -479,6 +551,7 @@ export default function SearchScreen() {
     );
   };
 
+  // Focus the search bar when the screen gains focus.
   useFocusEffect(
     React.useCallback(() => {
       if (searchBarRef.current) {
@@ -489,6 +562,7 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { paddingTop: top }]}>
+      {/* Search bar input component */}
       <Searchbar
         placeholder="Search for a song"
         value={searchQuery}
@@ -526,6 +600,7 @@ export default function SearchScreen() {
         ref={searchBarRef}
       />
 
+      {/* Conditional rendering based on search state (suggestions, loading, results) */}
       {isSearching ? (
         <FlatList
           data={searchSuggestions}
@@ -559,6 +634,7 @@ export default function SearchScreen() {
             }}
             keyboardShouldPersistTaps="handled"
           >
+            {/* Top Result section */}
             {searchResults.topResult && (
               <>
                 <Text style={styles.searchResultTypeText}>Top Result</Text>
@@ -566,6 +642,7 @@ export default function SearchScreen() {
               </>
             )}
 
+            {/* Songs section */}
             {searchResults?.songs && searchResults.songs.length > 0 && (
               <>
                 <Text style={styles.searchResultTypeText}>Songs</Text>
@@ -574,6 +651,7 @@ export default function SearchScreen() {
               </>
             )}
 
+            {/* Videos section */}
             {searchResults?.videos && searchResults.videos.length > 0 && (
               <>
                 <Text style={styles.searchResultTypeText}>Videos</Text>
@@ -584,6 +662,7 @@ export default function SearchScreen() {
               </>
             )}
 
+            {/* Albums section */}
             {searchResults?.albums && searchResults.albums.length > 0 && (
               <>
                 <Text style={styles.searchResultTypeText}>Albums</Text>
@@ -594,6 +673,7 @@ export default function SearchScreen() {
               </>
             )}
 
+            {/* Artists section */}
             {searchResults?.artists && searchResults.artists.length > 0 && (
               <>
                 <Text style={styles.searchResultTypeText}>Artists</Text>
@@ -610,6 +690,7 @@ export default function SearchScreen() {
   );
 }
 
+// Styles for the SearchScreen component.
 const styles = ScaledSheet.create({
   container: {
     flex: 1,

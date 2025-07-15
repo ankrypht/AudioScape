@@ -1,3 +1,11 @@
+/**
+ * This file defines the `TrendingSection` component, which displays a horizontally
+ * scrollable grid of trending songs. Each song is presented with its rank, artwork, title, and artist,
+ * and includes an option to open a menu for additional actions.
+ *
+ * @packageDocumentation
+ */
+
 import React from "react";
 import { ScrollView, TouchableOpacity, View, Text } from "react-native";
 import FastImage from "@d11/react-native-fast-image";
@@ -8,11 +16,19 @@ import { useActiveTrack } from "react-native-track-player";
 import { Colors } from "@/constants/Colors";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 
-interface TrendingSectionProps {
-  results: Song[];
-  onItemClick: (item: Song) => void;
+/**
+ * @interface TrendingSectionProps
+ */
+export interface TrendingSectionProps {
+  results: Song[]; // An array of Song objects to display as trending items.
+  onItemClick: (item: Song) => void; // Callback function when a trending item is clicked.
 }
 
+/**
+ * `TrendingSection` component.
+ * Renders a section of trending songs in a multi-row horizontal scroll view.
+ * @param {TrendingSectionProps} { results, onItemClick } Props for the component.
+ */
 export const TrendingSection: React.FC<TrendingSectionProps> = ({
   results,
   onItemClick,
@@ -20,9 +36,15 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
   const router = useRouter();
   const activeTrack = useActiveTrack();
 
+  /**
+   * Creates a row of trending song items, filtering results based on the starting index.
+   * This allows for a grid-like layout within a horizontal ScrollView.
+   * @param startIndex - The starting index to filter results for this row.
+   * @returns {JSX.Element[]} An array of JSX elements representing the song items in a row.
+   */
   const createRow = (startIndex: number) => {
     return results
-      .filter((_, index) => index % 4 === startIndex)
+      .filter((_, index) => index % 4 === startIndex) // Filter to create rows with specific items.
       .map((item, index) => (
         <View key={item.id} style={styles.itemContainer}>
           <TouchableOpacity
@@ -30,9 +52,11 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
             style={styles.itemTouchableArea}
             onPress={() => onItemClick(item)}
           >
+            {/* Display the rank of the song */}
             <View style={styles.rankContainer}>
               <Text style={styles.rankText}>{startIndex + 1 + index * 4}</Text>
             </View>
+            {/* Song artwork and playing indicator */}
             <View style={styles.imageContainer}>
               <FastImage
                 source={{ uri: item.thumbnail }}
@@ -46,6 +70,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
                 />
               )}
             </View>
+            {/* Song title and artist */}
             <View style={styles.textContainer}>
               <Text style={styles.title} numberOfLines={2}>
                 {item.title}
@@ -56,10 +81,11 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
             </View>
           </TouchableOpacity>
 
+          {/* Options menu button */}
           <TouchableOpacity
             activeOpacity={0.5}
             onPress={() => {
-              // Convert the song object to a JSON string
+              // Prepare song data for the menu modal.
               const songData = JSON.stringify({
                 id: item.id,
                 title: item.title,
@@ -67,6 +93,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
                 thumbnail: item.thumbnail,
               });
 
+              // Navigate to the menu modal with song details.
               router.push({
                 pathname: "/(modals)/menu",
                 params: { songData: songData, type: "song" },
@@ -91,6 +118,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.gridContainer}>
+          {/* Render four rows of trending items */}
           <View style={styles.row}>{createRow(0)}</View>
           <View style={styles.row}>{createRow(1)}</View>
           <View style={styles.row}>{createRow(2)}</View>
@@ -101,6 +129,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
   );
 };
 
+// Styles for the TrendingSection component.
 const styles = ScaledSheet.create({
   headerContainer: {
     flexDirection: "row",

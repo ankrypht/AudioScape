@@ -1,3 +1,12 @@
+/**
+ * This file defines the `ArtistPageScreen` component, which displays detailed
+ * information about a specific music artist. It fetches artist data from YouTube Music,
+ * including their top songs, albums, singles, and videos. Users can play individual
+ * songs or navigate to album/video detail pages from this screen.
+ *
+ * @packageDocumentation
+ */
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -69,6 +78,11 @@ export default function ArtistPageScreen() {
     playAudio(song);
   };
 
+  /**
+   * Renders a song item for the artist's page.
+   * @param item - The song item to render.
+   * @returns A View component representing the song item.
+   */
   const renderSong = ({ item }: { item: Song }) => (
     <View key={item.id} style={styles.song}>
       <TouchableOpacity
@@ -116,6 +130,12 @@ export default function ArtistPageScreen() {
     </View>
   );
 
+  /**
+   * Renders a large item (album or video) for an artist's page.
+   * @param item - The artist page item to render.
+   * @param type - The type of item ("album" or "video").
+   * @returns A TouchableOpacity component representing the large item.
+   */
   const renderLargeItem = (item: ArtistPageItem, type: "album" | "video") => (
     <TouchableOpacity
       key={item.id}

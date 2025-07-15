@@ -1,3 +1,11 @@
+/**
+ * This file defines the `PlayerProgressBar` component, which displays the current
+ * playback progress of a song using a seekable slider. It also shows the elapsed, remaining,
+ * and total time of the track.
+ *
+ * @packageDocumentation
+ */
+
 import { fontSize } from "@/constants/tokens";
 import { Colors } from "@/constants/Colors";
 import { formatSecondsToMinutes } from "@/helpers/miscellaneous";
@@ -12,9 +20,16 @@ import {
   ScaledSheet,
 } from "react-native-size-matters/extend";
 
+/**
+ * `PlayerProgressBar` component.
+ * Displays a seekable progress bar for the current track, along with time information.
+ * @param {ViewProps} { style } Props for the container View.
+ */
 export const PlayerProgressBar = ({ style }: ViewProps) => {
-  const { duration, position, buffered } = useProgress(250);
+  // Get current playback progress, duration, and buffered amount from TrackPlayer.
+  const { duration, position, buffered } = useProgress(250); // Update every 250ms.
 
+  // Shared values for the slider's internal state, used with `react-native-reanimated`.
   const isSliding = useSharedValue(false);
   const progress = useSharedValue(0);
   const slidingValue = useSharedValue(0);
@@ -22,10 +37,12 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
   const min = useSharedValue(0);
   const max = useSharedValue(1);
 
+  // Format time values for display.
   const trackElapsedTime = formatSecondsToMinutes(position);
   const trackRemainingTime = formatSecondsToMinutes(duration - position);
   const trackDuration = formatSecondsToMinutes(duration);
 
+  // Update progress and cache values only when the user is not actively sliding the bar.
   if (!isSliding.value) {
     progress.value = duration > 0 ? position / duration : 0;
     cache.value = duration > 0 ? buffered / duration : 0;
@@ -34,15 +51,16 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
   return (
     <View style={style}>
       <Slider
-        progress={progress}
-        minimumValue={min}
-        maximumValue={max}
-        cache={cache}
+        progress={progress} // Current playback progress (0-1).
+        minimumValue={min} // Minimum value of the slider (0).
+        maximumValue={max} // Maximum value of the slider (1).
+        cache={cache} // Buffered amount (0-1).
         containerStyle={{
           height: verticalScale(3.5),
           borderRadius: 16,
         }}
         thumbWidth={scale(13)}
+        // Custom bubble to display the time when sliding.
         renderBubble={() => (
           <View style={styles.bubbleContainer}>
             <Text style={styles.bubbleText}>
@@ -54,13 +72,16 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
           minimumTrackTintColor: Colors.minimumTrackTintColor,
           maximumTrackTintColor: Colors.maximumTrackTintColor,
         }}
+        // Callback when the user starts sliding the thumb.
         onSlidingStart={() => (isSliding.value = true)}
+        // Callback during sliding, updates the `slidingValue` and seeks the track.
         onValueChange={async (value) => {
           slidingValue.value = value;
           await TrackPlayer.seekTo(value * duration);
         }}
+        // Callback when the user releases the thumb after sliding.
         onSlidingComplete={async (value) => {
-          // if the user is not sliding, we should not update the position
+          // Only seek if the user was actually sliding.
           if (!isSliding.value) return;
 
           isSliding.value = false;
@@ -69,6 +90,7 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
         }}
       />
 
+      {/* Display elapsed, remaining, and total time */}
       <View style={styles.timeRow}>
         <Text style={styles.timeText}>{trackElapsedTime}</Text>
 
@@ -80,6 +102,7 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
   );
 };
 
+// Styles for the PlayerProgressBar component.
 const styles = ScaledSheet.create({
   timeRow: {
     flexDirection: "row",
