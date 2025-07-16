@@ -21,7 +21,6 @@ The root directory contains essential configuration files and the main source co
 - `📄 package.json`: Lists all project dependencies and defines useful scripts.
 - `📄 package-lock.json`: Ensures consistent dependency versions across all environments.
 - `📄 tsconfig.json`: Configures the TypeScript compiler.
-- `📄 typedoc.json`: Configuration for TypeDoc, the documentation generator.
 
 ### Core Files & Folders
 
@@ -29,7 +28,6 @@ The root directory contains essential configuration files and the main source co
 - `📁 assets/`: Holds all static assets like fonts and images.
 - `📁 components/`: Home to reusable React components used throughout the app.
 - `📁 constants/`: Stores constant values like colors, tokens, and static data.
-- `📁 docs/`: Contains the generated documentation for the project.
 - `📁 helpers/`: Contains helper functions for various tasks.
 - `📁 hooks/`: Includes custom React hooks for shared logic.
 - `📁 services/`: Manages interactions with external APIs (e.g., YouTube).
@@ -126,10 +124,6 @@ This directory contains reusable UI components.
 - `📄 images.ts`: A collection of image assets.
 - `📄 playbackService.ts`: Service for handling audio playback.
 - `📄 tokens.ts`: Contains constants for design tokens.
-
-### `docs`
-
-This directory contains the generated documentation from TypeDoc. It is automatically generated and should not be edited manually.
 
 ### `helpers`
 
