@@ -13,14 +13,16 @@ import { Colors } from "@/constants/Colors";
 import { unknownTrackImageUri } from "@/constants/images";
 import { FAB, Divider } from "react-native-paper";
 import LoaderKit from "react-native-loader-kit";
+import color from "color";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import { useActiveTrack } from "react-native-track-player";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { usePlaylists } from "@/store/library";
-import { MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
+import { useImageColors } from "@/hooks/useImageColors";
+import { Ionicons, Entypo } from "@expo/vector-icons";
 import FastImage from "@d11/react-native-fast-image";
-import { FullScreenGradientBackground } from "@/components/GradientBackground";
 import {
   ScaledSheet,
   moderateScale,
@@ -28,15 +30,14 @@ import {
   scale,
 } from "react-native-size-matters/extend";
 
-// Randomly select a gradient background for the screen.
-const gradientIndex = Math.floor(Math.random() * 12);
-
 /**
  * `PlaylistView` component.
  * Displays the songs within a specific playlist.
  */
 const PlaylistView = () => {
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
+  const [showHeaderTitle, setShowHeaderTitle] = useState<boolean>(false);
+  const [titleLayout, setTitleLayout] = useState({ y: 0, height: 0 });
   const { top, bottom } = useSafeAreaInsets();
   const router = useRouter();
   const lastActiveTrack = useLastActiveTrack();
@@ -51,6 +52,11 @@ const PlaylistView = () => {
   // Get the specific playlist data.
   const playlist = playlists[playlistName];
 
+  // Get playlist thumbnail colors.
+  const { imageColors } = useImageColors(
+    playlist[0]?.thumbnail ?? unknownTrackImageUri,
+  );
+
   // Determine if the floating player should be visible.
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
@@ -63,7 +69,14 @@ const PlaylistView = () => {
   };
 
   return (
-    <FullScreenGradientBackground index={gradientIndex}>
+    <LinearGradient
+      style={{ flex: 1 }}
+      colors={
+        imageColors
+          ? [color(imageColors.average).darken(0.2).hex(), "#000"]
+          : [Colors.background, "#000"]
+      }
+    >
       <View style={styles.container}>
         {/* Header with back button and playlist name */}
         <View
@@ -73,19 +86,27 @@ const PlaylistView = () => {
             { paddingTop: top },
           ]}
         >
-          <MaterialCommunityIcons
-            name="arrow-left"
+          <Ionicons
+            name="arrow-back"
             size={moderateScale(28)}
             color={Colors.text}
             style={{
-              position: "absolute",
-              left: 0,
-              paddingTop: top - 8,
               paddingLeft: 15,
+              paddingRight: 10,
+              marginTop: 2,
             }}
             onPress={() => router.back()}
           />
-          <Text style={styles.headerText}>{playlistName}</Text>
+
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.headerText,
+              !showHeaderTitle && { color: "transparent" },
+            ]}
+          >
+            {playlistName}
+          </Text>
         </View>
 
         {/* Divider that appears when scrolling */}
@@ -109,6 +130,9 @@ const PlaylistView = () => {
             const currentScrollPosition =
               Math.floor(e.nativeEvent.contentOffset.y) || 0;
             setIsScrolling(currentScrollPosition > 0);
+            setShowHeaderTitle(
+              currentScrollPosition > titleLayout.y + titleLayout.height,
+            );
           }}
           scrollEventThrottle={16}
         >
@@ -122,6 +146,30 @@ const PlaylistView = () => {
               style={styles.artworkImage}
             />
           </View>
+
+          <Text
+            onLayout={(event) => {
+              const layout = event.nativeEvent.layout;
+              setTitleLayout({ y: layout.y, height: layout.height });
+            }}
+            style={styles.titleText}
+          >
+            {playlistName}
+          </Text>
+
+          {/* Display total number of tracks in the playlist */}
+          {playlist.length !== 0 && (
+            <Text
+              style={{
+                color: Colors.text,
+                textAlign: "center",
+                fontSize: moderateScale(15),
+                marginBottom: 5,
+              }}
+            >
+              {playlist.length} {`Track${playlist.length > 1 ? "s" : ""}`}
+            </Text>
+          )}
 
           {/* List of songs in the playlist */}
           <View>
@@ -185,18 +233,6 @@ const PlaylistView = () => {
               </View>
             ))}
           </View>
-          {/* Display total number of tracks in the playlist */}
-          {playlist.length !== 0 && (
-            <Text
-              style={{
-                color: Colors.textMuted,
-                textAlign: "center",
-                fontSize: moderateScale(15),
-              }}
-            >
-              {playlist.length} {`Track${playlist.length > 1 ? "s" : ""}`}
-            </Text>
-          )}
         </ScrollView>
 
         {/* Floating Action Button to play the entire playlist */}
@@ -224,7 +260,7 @@ const PlaylistView = () => {
           />
         )}
       </View>
-    </FullScreenGradientBackground>
+    </LinearGradient>
   );
 };
 
@@ -237,16 +273,16 @@ const styles = ScaledSheet.create({
   },
   header: {
     flexDirection: "row",
+    justifyContent: "flex-start",
     alignItems: "center",
-    justifyContent: "center",
     paddingBottom: 10,
   },
   headerText: {
-    fontSize: "24@ms",
+    fontSize: "20@ms",
     fontWeight: "bold",
     color: Colors.text,
-    textAlign: "center",
-    marginHorizontal: scale(30) + 15,
+    textAlign: "left",
+    width: "82%",
   },
   headerScrolled: {
     backgroundColor: "rgba(0,0,0,0.3)",
@@ -261,13 +297,21 @@ const styles = ScaledSheet.create({
     alignSelf: "center",
     height: "240@ms",
     width: "240@ms",
-    marginBottom: 30,
+    marginBottom: 10,
   },
   artworkImage: {
     width: "240@ms",
     height: "240@ms",
     resizeMode: "cover",
     borderRadius: 12,
+  },
+  titleText: {
+    fontSize: "24@ms",
+    fontWeight: "bold",
+    color: Colors.text,
+    marginHorizontal: 15,
+    textAlign: "center",
+    marginBottom: 5,
   },
   songItem: {
     flexDirection: "row",
