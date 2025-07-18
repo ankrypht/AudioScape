@@ -58,7 +58,7 @@
     "text-encoding-polyfill": "^0.6.7",
     "ts-pattern": "^5.7.1",
     "web-streams-polyfill": "^3.3.3",
-    "youtubei.js": "github:ankrypht/YouTube.js"
+    "youtubei.js": "^15.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
