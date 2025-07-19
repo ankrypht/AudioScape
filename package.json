@@ -89,7 +89,6 @@
           "ts-pattern",
           "web-streams-polyfill",
           "youtubei.js",
-          "googlevideo",
           "lrclib-api"
         ]
       }
