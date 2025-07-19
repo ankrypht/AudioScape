@@ -239,7 +239,6 @@ const PlaylistView = () => {
         {playlist.length > 0 && (
           <FAB
             style={{
-              borderRadius: 50,
               position: "absolute",
               marginRight: 16,
               marginBottom:
@@ -248,7 +247,6 @@ const PlaylistView = () => {
               bottom: 0,
               backgroundColor: "white",
             }}
-            customSize={moderateScale(56)}
             theme={{ roundness: 7 }}
             icon="play"
             color="black"

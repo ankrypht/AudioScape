@@ -18,7 +18,7 @@ import {
 import FastImage from "@d11/react-native-fast-image";
 import LoaderKit from "react-native-loader-kit";
 import Entypo from "@expo/vector-icons/Entypo";
-import { Divider, FAB } from "react-native-paper";
+import { Divider, AnimatedFAB } from "react-native-paper";
 import { unknownTrackImageUri } from "@/constants/images";
 import { useRouter } from "expo-router";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
@@ -256,7 +256,7 @@ const DownloadsScreen = () => {
 
         {/* Floating Action Button to play all downloaded songs */}
         {formattedTracks.length > 0 && (
-          <FAB
+          <AnimatedFAB
             style={[
               styles.fab,
               {
@@ -266,7 +266,8 @@ const DownloadsScreen = () => {
               },
             ]}
             theme={{ roundness: 1 }}
-            customSize={moderateScale(56)}
+            extended={!isScrolling}
+            animateFrom={"right"}
             icon="play"
             label="Play All"
             color="black"
@@ -350,7 +351,6 @@ const styles = ScaledSheet.create({
     fontSize: "15@ms",
   },
   fab: {
-    borderRadius: 20,
     position: "absolute",
     marginRight: 16,
     right: 0,

@@ -13,7 +13,7 @@ import { Colors } from "@/constants/Colors";
 import { unknownTrackImageUri } from "@/constants/images";
 import { usePlaylists } from "@/store/library";
 import { useRouter } from "expo-router";
-import { FAB, Divider } from "react-native-paper";
+import { AnimatedFAB, Divider } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import { useActiveTrack } from "react-native-track-player";
@@ -195,9 +195,8 @@ export default function PlaylistScreen() {
         </ScrollView>
 
         {/* Floating Action Button to create a new playlist */}
-        <FAB
+        <AnimatedFAB
           style={{
-            borderRadius: 20,
             position: "absolute",
             marginRight: 16,
             marginBottom:
@@ -208,7 +207,8 @@ export default function PlaylistScreen() {
           }}
           theme={{ roundness: 1 }}
           icon="plus"
-          customSize={moderateScale(56)}
+          extended={!isScrolling}
+          animateFrom={"right"}
           label="Create Playlist"
           color="black"
           onPress={() => setModalVisible(true)}
