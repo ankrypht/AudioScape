@@ -119,11 +119,9 @@ export default function HomeScreen() {
           setQuickPicksResults(formattedResults);
         } else {
           setQuickPicksResults([]);
-          Alert.alert("No results", "No songs found in the home feed.");
         }
       } else {
         setQuickPicksResults([]);
-        Alert.alert("No results", "Unable to fetch home feed.");
       }
     } catch (error) {
       Alert.alert(
@@ -176,11 +174,9 @@ export default function HomeScreen() {
           setTrendingResults(formattedResults);
         } else {
           setTrendingResults([]);
-          Alert.alert("No results", "No songs found in the home feed.");
         }
       } else {
         setTrendingResults([]);
-        Alert.alert("No results", "Unable to fetch home feed.");
       }
     } catch (error) {
       Alert.alert(

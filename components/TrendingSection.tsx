@@ -111,6 +111,11 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
       ));
   };
 
+  // If there are no results, return null to avoid rendering the section.
+  if (results.length === 0) {
+    return null;
+  }
+
   return (
     <View>
       <View style={styles.headerContainer}>

@@ -87,6 +87,11 @@ export const QuickPicksSection: React.FC<QuickPicksSectionProps> = ({
   const topRowItems = results.slice(0, middleIndex);
   const bottomRowItems = results.slice(middleIndex);
 
+  // If there are no results, return null to avoid rendering the section.
+  if (results.length === 0) {
+    return null;
+  }
+
   return (
     <View>
       <Text style={styles.header}>Quick Picks</Text>
