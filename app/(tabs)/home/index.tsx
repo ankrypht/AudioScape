@@ -82,7 +82,7 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
   const [gradientIndex, setGradientIndex] = useState(
-    Math.floor(Math.random() * 12),
+    Math.floor(Math.random() * 11),
   );
   const { top, bottom } = useSafeAreaInsets();
   const { playAudio } = useMusicPlayer();
@@ -209,7 +209,7 @@ export default function HomeScreen() {
     const yt = await innertube;
     await getQuickPicks(yt);
     await getTrending(yt);
-    setGradientIndex(Math.floor(Math.random() * 12)); // Change background gradient on refresh.
+    setGradientIndex(Math.floor(Math.random() * 11)); // Change background gradient on refresh.
     setRefreshing(false);
   }, []);
 

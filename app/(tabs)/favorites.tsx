@@ -34,7 +34,7 @@ import {
 } from "react-native-size-matters/extend";
 
 // Randomly select a gradient background for the screen.
-const gradientIndex = Math.floor(Math.random() * 12);
+const gradientIndex = Math.floor(Math.random() * 11);
 
 /**
  * `FavoritesScreen` component.

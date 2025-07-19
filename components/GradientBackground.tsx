@@ -37,7 +37,6 @@ const backgroundImages: ImageSourcePropType[] = [
   require("@/assets/images/backgroundGradients/gradient-8.png"),
   require("@/assets/images/backgroundGradients/gradient-9.png"),
   require("@/assets/images/backgroundGradients/gradient-10.png"),
-  require("@/assets/images/backgroundGradients/gradient-11.png"),
 ];
 
 /**

@@ -39,7 +39,7 @@ import {
 } from "@/store/library";
 
 // Randomly select a gradient background for the screen.
-const gradientIndex = Math.floor(Math.random() * 12);
+const gradientIndex = Math.floor(Math.random() * 11);
 
 /**
  * `DownloadsScreen` component.
