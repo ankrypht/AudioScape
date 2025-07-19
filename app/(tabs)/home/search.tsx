@@ -567,7 +567,7 @@ export default function SearchScreen() {
         placeholder="Search for a song"
         value={searchQuery}
         onChangeText={setSearchQuery}
-        mode={"bar"}
+        mode={"view"}
         autoFocus
         icon={() => (
           <MaterialCommunityIcons
@@ -588,7 +588,7 @@ export default function SearchScreen() {
         style={styles.searchbar}
         inputStyle={{
           color: "white",
-          fontSize: moderateScale(16),
+          fontSize: moderateScale(15),
           alignSelf: "center",
         }}
         placeholderTextColor={Colors.textMuted}
@@ -698,9 +698,8 @@ const styles = ScaledSheet.create({
     alignItems: "center",
   },
   searchbar: {
-    width: "342@s",
     height: "56@ms",
-    backgroundColor: "#101010",
+    backgroundColor: "black",
   },
   searchResults: {
     width: "360@s",
