@@ -11,11 +11,7 @@ export default {
   icon: "./assets/images/icon.png",
   scheme: IS_DEV ? "audioscape-dev" : "audioscape",
   userInterfaceStyle: "automatic",
-  splash: {
-    image: "./assets/images/splash.png",
-    resizeMode: "contain",
-    backgroundColor: "#000",
-  },
+  newArchEnabled: false,
   android: {
     softwareKeyboardLayoutMode: "pan",
     permissions: [
@@ -33,6 +29,7 @@ export default {
       backgroundImage: "./assets/images/adaptive-icon-background.png",
     },
     backgroundColor: "#000",
+    edgeToEdgeEnabled: true,
   },
   plugins: [
     "expo-router",
@@ -44,13 +41,14 @@ export default {
         color: "#d17603",
       },
     ],
+    "react-native-edge-to-edge",
     [
-      "react-native-edge-to-edge",
+      "expo-splash-screen",
       {
-        android: {
-          parentTheme: "Default",
-          enforceNavigationBarContrast: false,
-        },
+        image: "./assets/images/splash.png",
+        imageWidth: 200,
+        resizeMode: "contain",
+        backgroundColor: "#000",
       },
     ],
   ],

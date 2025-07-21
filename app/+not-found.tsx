@@ -19,7 +19,7 @@ export default function NotFoundScreen() {
       {/* Set the title for the screen in the navigation header. */}
       <Stack.Screen options={{ title: "Oops!" }} />
       <View style={styles.container}>
-        <Text style={styles.titleText}>This screen doesn't exist.</Text>
+        <Text style={styles.titleText}>This screen does not exist.</Text>
         {/* Link to navigate back to the home screen. */}
         <Link href="/" style={styles.link}>
           <Text style={styles.linkText}>Go to home screen!</Text>

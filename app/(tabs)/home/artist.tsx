@@ -35,7 +35,7 @@ import {
   scale,
   ScaledSheet,
 } from "react-native-size-matters/extend";
-import { Artist as ArtistType } from "youtubei.js/dist/src/parser/ytmusic";
+import { YTMusic } from "youtubei.js";
 
 const HEADER_HEIGHT = 300;
 
@@ -43,7 +43,7 @@ export default function ArtistPageScreen() {
   const { top, bottom } = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [artist, setArtist] = useState<ArtistType>();
+  const [artist, setArtist] = useState<YTMusic.Artist>();
   const [artistData, setArtistData] = useState<ArtistPageData>();
   const [loading, setLoading] = useState(true);
   const { playAudio } = useMusicPlayer();

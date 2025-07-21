@@ -21,7 +21,7 @@ import LoaderKit from "react-native-loader-kit";
 import { QuickPicksSection } from "@/components/QuickPicksSection";
 import { TrendingSection } from "@/components/TrendingSection";
 import { innertube } from "@/services/youtube";
-import Innertube from "youtubei.js";
+import InnertubeClass from "youtubei.js";
 import { EvilIcons, Ionicons } from "@expo/vector-icons";
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -93,7 +93,7 @@ export default function HomeScreen() {
    * Fetches "Quick Picks" data from the YouTube Music home feed.
    * @param yt The Innertube instance.
    */
-  const getQuickPicks = async (yt: Innertube) => {
+  const getQuickPicks = async (yt: InnertubeClass) => {
     try {
       const homeFeed: FeedType = await yt.music.getHomeFeed();
 
@@ -137,7 +137,7 @@ export default function HomeScreen() {
    * Fetches "Trending" data from the YouTube Music explore feed.
    * @param yt The Innertube instance.
    */
-  const getTrending = async (yt: Innertube) => {
+  const getTrending = async (yt: InnertubeClass) => {
     try {
       const exploreFeed: FeedType = await yt.music.getExplore();
 

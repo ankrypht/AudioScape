@@ -12,7 +12,7 @@ The root directory contains essential configuration files and the main source co
 
 - `📄 .env-guideline-sizes`: A guideline for the sizes of environment variables.
 - `📄 .env.example`: An example file outlining the necessary environment variables.
-- `📄 .eslintrc.js`: Configuration for ESLint, ensuring consistent code style and quality.
+- `📄 eslint.config.js`: Configuration for ESLint, ensuring consistent code style and quality.
 - `📄 .gitignore`: Specifies files and folders that Git should ignore.
 - `📄 app.config.js`: Core configuration for the Expo app, including name, version, icon, and plugins.
 - `📄 babel.config.js`: Configuration for Babel, the JavaScript compiler.
@@ -160,4 +160,4 @@ This directory handles communication with external services and APIs.
 ### `types`
 
 - `📄 index.d.ts`: Contains global TypeScript type definitions.
-- `📄 searchItems.ts`: Defines types for search results.
+- `📄 searchItems.d.ts`: Defines types for search results.

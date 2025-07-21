@@ -6,8 +6,6 @@
  * @packageDocumentation
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 /**
  * Base interface for all searchable items, providing common properties.
  */
