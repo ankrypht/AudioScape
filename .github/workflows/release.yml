@@ -1,0 +1,92 @@
+# .github/workflows/release.yml
+
+name: Create EAS Build and Release
+
+# This workflow is triggered when a new tag is pushed that starts with 'v'
+# This is what release-please does when a release PR is merged.
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Set permissions for the GITHUB_TOKEN to allow creating releases
+permissions:
+  contents: write
+
+jobs:
+  # ===============================================================
+  # JOB 1: Build the Android APK using EAS
+  # ===============================================================
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Log in to Expo
+        run: eas login --token ${{ secrets.EXPO_TOKEN }}
+
+      - name: Make build script executable
+        run: chmod +x .github/scripts/build_and_download.sh
+
+      - name: Get version from tag
+        id: get_version
+        # github.ref_name will be the tag (e.g., v1.9.0)
+        run: echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Run EAS Build and Download APK
+        # This script will now create a file like 'audioscapev1.9.0.apk' in the 'builds' folder
+        run: .github/scripts/build_and_download.sh
+
+      - name: Upload APK as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: builds/audioscape${{ env.APP_VERSION }}.apk
+
+  # ===============================================================
+  # JOB 2: Wait for Approval and Create GitHub Release
+  # ===============================================================
+  create-release:
+    name: Approve and Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build # This job will only run if the 'build' job succeeds
+
+    # This is the magic part: Define an environment for approval
+    # You must configure this environment in your GitHub repo settings
+    environment:
+      name: Production Release
+      url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # This action uses the GITHUB_TOKEN secret automatically
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          # This will automatically generate release notes from your commits
+          generate_release_notes: true
+          files: audioscape${{ env.APP_VERSION }}.apk
