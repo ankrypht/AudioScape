@@ -26,16 +26,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 22.x
 
       - name: Install dependencies
         run: npm install
 
       - name: Install EAS CLI
         run: npm install -g eas-cli
-
-      - name: Log in to Expo
-        run: eas login --token ${{ secrets.EXPO_TOKEN }}
 
       - name: Make build script executable
         run: chmod +x .github/scripts/build_and_download.sh
