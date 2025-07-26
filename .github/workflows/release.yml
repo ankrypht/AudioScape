@@ -47,6 +47,9 @@ jobs:
             echo "APP_VERSION=0.0.0-test" >> $GITHUB_ENV
           fi
 
+      - name: Set environment variable for EAS
+        run: echo "EXPO_TOKEN=${{ secrets.EXPO_TOKEN }}" >> $GITHUB_ENV
+
       - name: Run EAS Build and Download APK
         run: .github/scripts/build_and_download.sh
 
