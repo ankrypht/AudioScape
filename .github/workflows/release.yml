@@ -38,7 +38,7 @@ jobs:
         run: eas login --token ${{ secrets.EXPO_TOKEN }}
 
       - name: Make build script executable
-        run: chmod +x ./build_and_download.sh
+        run: chmod +x .github/scripts/build_and_download.sh
 
       - name: Get version
         id: get_version
@@ -51,7 +51,7 @@ jobs:
           fi
 
       - name: Run EAS Build and Download APK
-        run: ./build_and_download.sh
+        run: .github/scripts/build_and_download.sh
 
       - name: Upload APK as an artifact
         uses: actions/upload-artifact@v4
