@@ -15,6 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: expo
+          
+      - name: Convert to Draft
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          gh release edit ${{ steps.release.outputs.tag_name }} --draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
