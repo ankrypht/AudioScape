@@ -19,7 +19,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: expo
-          
+
       - name: Convert to Draft
         if: ${{ steps.release.outputs.release_created }}
         run: |

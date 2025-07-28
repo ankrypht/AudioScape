@@ -1,23 +1,22 @@
 /**
  * This file manages the downloading and local storage of songs and their artwork.
- * It handles file system operations, interacts with the device's MediaLibrary, sends download
+ * It handles file system operations, sends download
  * progress notifications, and updates the Redux store to reflect the state of downloaded tracks.
  *
  * @packageDocumentation
  */
 
-import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
-import * as Notifications from "expo-notifications";
-import { store } from "@/store/library";
-import { ToastAndroid } from "react-native";
 import {
   addDownloadedTrack,
+  DownloadedSongMetadata,
   removeDownloadedTrack,
-  setSongDownloading,
   removeSongDownloading,
+  setSongDownloading,
+  store,
 } from "@/store/library";
-import { DownloadedSongMetadata } from "@/store/library";
+import * as FileSystem from "expo-file-system";
+import * as Notifications from "expo-notifications";
+import { ToastAndroid } from "react-native";
 
 /**
  * Defines the structure for a song object that is available for download.
@@ -32,27 +31,9 @@ export interface RemoteSong {
   mimeType?: string; // e.g., "audio/mp4", "audio/mpeg"
 }
 
-// Folder name within the app's document directory to store artwork.
+// Folder names within the app's document directory.
 const ARTWORK_FOLDER = "Artworks";
-
-/**
- * Sanitizes a string to be used as a safe filename.
- * @param name - The string to sanitize.
- * @returns A safe filename string.
- */
-const makeSafeFilename = (name: string): string => {
-  return (
-    name
-      // Replace characters that are illegal in Android filenames.
-      .replace(/[/\\?%*:|"<>]/g, "_")
-      // Replace multiple spaces with a single underscore.
-      .replace(/\s+/g, "_")
-      // Trim leading/trailing underscores.
-      .replace(/^_+|_+$/g, "")
-      // Limit the length to prevent filesystem errors.
-      .substring(0, 200)
-  );
-};
+const SONGS_FOLDER = "Songs";
 
 /**
  * Attempts to determine a file extension from a URL or an explicit MIME type.
@@ -160,22 +141,7 @@ export async function requestAppNotificationPermissions(): Promise<boolean> {
 }
 
 /**
- * Requests media library (storage) permissions from the user.
- * @returns A promise that resolves to true if permissions are granted, false otherwise.
- */
-export const requestDownloadPermissions = async (): Promise<boolean> => {
-  console.log("Requesting media library permissions...");
-  const mediaLibraryPermissions = await MediaLibrary.requestPermissionsAsync();
-  if (mediaLibraryPermissions.status !== "granted") {
-    console.warn("Media library permission denied.");
-    return false;
-  }
-  console.log("Media library permission granted.");
-  return true;
-};
-
-/**
- * Downloads a song and its artwork, saves them to the local file system and MediaLibrary,
+ * Downloads a song and its artwork, saves them to the local file system,
  * and updates the Redux store with the song's metadata.
  * @param song The RemoteSong object to download.
  * @returns A promise that resolves to the metadata of the downloaded song, or null if the download fails.
@@ -183,13 +149,6 @@ export const requestDownloadPermissions = async (): Promise<boolean> => {
 export const downloadAndSaveSong = async (
   song: RemoteSong,
 ): Promise<DownloadedSongMetadata | null> => {
-  // Ensure necessary permissions are granted before proceeding.
-  const hasStoragePermissions = await requestDownloadPermissions();
-  if (!hasStoragePermissions) {
-    alert("Storage permissions are required to download songs.");
-    return null;
-  }
-
   const hasNotificationPermissions = await requestAppNotificationPermissions();
 
   const {
@@ -213,8 +172,6 @@ export const downloadAndSaveSong = async (
 
   const notificationId = `download_song_${id}`;
 
-  // Prepare safe filenames and paths for the track and artwork.
-  const safeTitle = makeSafeFilename(title);
   const trackFileExtension = getFileExtensionFromUrlOrMime(
     remoteTrackUrl,
     explicitMimeType,
@@ -224,8 +181,8 @@ export const downloadAndSaveSong = async (
     remoteArtworkUrl ? undefined : "image/jpeg",
   );
 
-  const trackFileName = `${safeTitle}_${id}.${trackFileExtension}`;
-  const artworkFileNameInDocs = `artwork_${safeTitle}_${id}.${artworkFileExtension}`;
+  const trackFileName = `${id}.${trackFileExtension}`;
+  const artworkFileNameInDocs = `artwork_${id}.${artworkFileExtension}`;
 
   const tempTrackUriInCache = (FileSystem.cacheDirectory || "") + trackFileName;
   let tempArtworkUriInCache: string | undefined = remoteArtworkUrl
@@ -235,6 +192,7 @@ export const downloadAndSaveSong = async (
   const finalArtworkUriInDocs = remoteArtworkUrl
     ? `${FileSystem.documentDirectory}${ARTWORK_FOLDER}/${artworkFileNameInDocs}`
     : undefined;
+  const finalTrackUriInDocs = `${FileSystem.documentDirectory}${SONGS_FOLDER}/${trackFileName}`;
 
   // Set up notification handler and schedule initial notification.
   if (hasNotificationPermissions) {
@@ -383,20 +341,22 @@ export const downloadAndSaveSong = async (
       }
     }
 
-    // Create an asset in the device's MediaLibrary.
-    const trackAsset = await MediaLibrary.createAssetAsync(
-      trackDownloadResult.uri,
-    );
-    console.log(
-      "Track asset created in MediaLibrary:",
-      trackAsset.uri,
-      "ID:",
-      trackAsset.id,
-    );
+    // Ensure the songs directory exists.
+    const songsDir = `${FileSystem.documentDirectory}${SONGS_FOLDER}`;
+    const songsDirInfo = await FileSystem.getInfoAsync(songsDir);
+    if (!songsDirInfo.exists) {
+      console.log(`Creating songs directory: ${songsDir}`);
+      await FileSystem.makeDirectoryAsync(songsDir, {
+        intermediates: true,
+      });
+    }
 
-    // Clean up the cached track file.
-    console.log(`Deleting cached track file: ${trackDownloadResult.uri}`);
-    await FileSystem.deleteAsync(trackDownloadResult.uri, { idempotent: true });
+    // Move track from cache to permanent storage.
+    await FileSystem.moveAsync({
+      from: trackDownloadResult.uri,
+      to: finalTrackUriInDocs,
+    });
+    console.log("Track saved to document directory:", finalTrackUriInDocs);
 
     // Prepare the metadata for the downloaded song.
     const metadata: DownloadedSongMetadata = {
@@ -404,8 +364,7 @@ export const downloadAndSaveSong = async (
       title,
       artist,
       duration,
-      localTrackUri: trackAsset.uri,
-      mediaLibraryAssetId: trackAsset.id,
+      localTrackUri: finalTrackUriInDocs,
       localArtworkUri: storedArtworkPath,
       downloadDate: new Date().toISOString(),
     };
@@ -494,7 +453,7 @@ export const getDownloadedSongMetadataById = (
 };
 
 /**
- * Deletes a downloaded song from the file system, MediaLibrary, and Redux store.
+ * Deletes a downloaded song from the file system and Redux store.
  * @param songId The ID of the song to remove.
  * @returns A promise that resolves to true if the deletion was successful, false otherwise.
  */
@@ -502,19 +461,23 @@ export const removeDownloadedSong = async (
   songId: string,
 ): Promise<boolean> => {
   try {
-    // Check for MediaLibrary permissions before attempting to delete.
-    const mediaLibraryPermissions = await MediaLibrary.getPermissionsAsync();
-    if (mediaLibraryPermissions.status !== "granted") {
-      const requestedPermissions = await MediaLibrary.requestPermissionsAsync();
-      if (requestedPermissions.status !== "granted") {
-        console.warn("Cannot delete from MediaLibrary without permissions.");
-      }
-    }
-
     const songToRemove = getDownloadedSongMetadataById(songId);
     if (!songToRemove) {
       console.log("Song not found in metadata, cannot remove:", songId);
       return true; // Already removed, so consider it a success.
+    }
+
+    // Delete the local track file.
+    if (songToRemove.localTrackUri) {
+      console.log("Deleting local track:", songToRemove.localTrackUri);
+      await FileSystem.deleteAsync(songToRemove.localTrackUri, {
+        idempotent: true,
+      }).catch((e) => {
+        console.warn(
+          `Failed to delete local track ${songToRemove.localTrackUri}:`,
+          e,
+        );
+      });
     }
 
     // Delete the local artwork file.
@@ -528,44 +491,6 @@ export const removeDownloadedSong = async (
           e,
         );
       });
-    }
-
-    // Delete the track from the MediaLibrary.
-    const assetsToDeleteFromMediaLibrary: string[] = [];
-    if (songToRemove.mediaLibraryAssetId) {
-      assetsToDeleteFromMediaLibrary.push(songToRemove.mediaLibraryAssetId);
-    }
-
-    if (
-      assetsToDeleteFromMediaLibrary.length > 0 &&
-      mediaLibraryPermissions.status === "granted"
-    ) {
-      console.log(
-        "Deleting assets from MediaLibrary:",
-        assetsToDeleteFromMediaLibrary,
-      );
-      try {
-        const deletionResult = await MediaLibrary.deleteAssetsAsync(
-          assetsToDeleteFromMediaLibrary,
-        );
-        if (deletionResult) {
-          console.log(
-            "MediaLibrary.deleteAssetsAsync call potentially successful for song:",
-            songId,
-          );
-        } else {
-          console.warn(
-            "MediaLibrary.deleteAssetsAsync call reported failure for song:",
-            songId,
-          );
-        }
-      } catch (mediaError) {
-        console.error("Error deleting asset from MediaLibrary:", mediaError);
-      }
-    } else if (assetsToDeleteFromMediaLibrary.length > 0) {
-      console.warn(
-        "Skipping MediaLibrary asset deletion due to missing permissions.",
-      );
     }
 
     // Remove the track from the Redux store.

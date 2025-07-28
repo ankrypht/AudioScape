@@ -6,9 +6,9 @@
  * @packageDocumentation
  */
 
-import { createSlice, configureStore, PayloadAction } from "@reduxjs/toolkit";
-import { useDispatch, useSelector } from "react-redux";
+import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import * as FileSystem from "expo-file-system";
+import { useDispatch, useSelector } from "react-redux";
 
 /**
  * Defines the structure of the entire library state managed by Redux.
@@ -28,8 +28,7 @@ export interface DownloadedSongMetadata {
   title: string;
   artist: string;
   duration?: number; // Duration in seconds
-  localTrackUri: string; // Local content:// URI for playback (from MediaLibrary)
-  mediaLibraryAssetId: string; // MediaLibrary asset ID for the song file
+  localTrackUri: string; // Local content:// URI for playback
   localArtworkUri?: string; // Optional: Local content:// URI for downloaded thumbnail
   downloadDate: string; // ISO date string
 }
