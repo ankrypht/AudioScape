@@ -8,30 +8,31 @@
  */
 
 import { MovingText } from "@/components/MovingText";
+import VerticalSwipeGesture from "@/components/navigation/VerticalGesture";
 import {
-  PlayerControls,
   DownloadSongButton,
+  PlayerControls,
 } from "@/components/PlayerControls";
 import { PlayerProgressBar } from "@/components/PlayerProgressbar";
-import { screenPadding } from "@/constants/tokens";
 import { Colors } from "@/constants/Colors";
+import { screenPadding } from "@/constants/tokens";
+import { triggerHaptic } from "@/helpers/haptics";
 import { useImageColors } from "@/hooks/useImageColors";
 import { useTrackPlayerFavorite } from "@/hooks/useTrackPlayerFavorite";
 import { defaultStyles } from "@/styles";
-import { LinearGradient } from "expo-linear-gradient";
-import { ActivityIndicator, Text, View, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-import { FontAwesome } from "@expo/vector-icons";
 import FastImage from "@d11/react-native-fast-image";
+import { FontAwesome } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useActiveTrack } from "react-native-track-player";
-import VerticalSwipeGesture from "@/components/navigation/VerticalGesture";
 import {
+  moderateScale,
+  scale,
   ScaledSheet,
   verticalScale,
-  scale,
-  moderateScale,
 } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 /**
  * `PlayerScreen` component.
@@ -116,6 +117,7 @@ const PlayerScreen = () => {
                       color={isFavorite ? "#ff0000" : Colors.icon}
                       style={{ marginRight: 13, marginLeft: 8 }}
                       onPress={() => {
+                        triggerHaptic();
                         toggleFavoriteFunc();
                       }}
                       hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
@@ -153,27 +155,27 @@ const PlayerScreen = () => {
             </View>
             {/* Bottom navigation buttons (Queue, Lyrics) */}
             <View
-              style={{ flexDirection: "row", justifyContent: "space-evenly" }}
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-evenly",
+                bottom: verticalScale(20) + bottom,
+              }}
             >
               <TouchableOpacity
-                activeOpacity={0.5}
-                hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                style={[
-                  styles.bottomButton,
-                  { bottom: verticalScale(20) + bottom },
-                ]}
-                onPress={() => router.push({ pathname: "/(modals)/queue" })}
+                style={styles.bottomButton}
+                onPress={() => {
+                  triggerHaptic();
+                  router.push({ pathname: "/(modals)/queue" });
+                }}
               >
                 <Text style={styles.bottomButtonText}>QUEUE</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                activeOpacity={0.5}
-                hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                style={[
-                  styles.bottomButton,
-                  { bottom: verticalScale(20) + bottom },
-                ]}
-                onPress={() => router.push({ pathname: "/(modals)/lyrics" })}
+                style={styles.bottomButton}
+                onPress={() => {
+                  triggerHaptic();
+                  router.push({ pathname: "/(modals)/lyrics" });
+                }}
               >
                 <Text style={styles.bottomButtonText}> LYRICS</Text>
               </TouchableOpacity>

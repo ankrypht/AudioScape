@@ -5,16 +5,18 @@
  * @packageDocumentation
  */
 
+import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
+import * as Haptics from "expo-haptics";
 import React, { useState } from "react";
 import {
   Modal,
-  View,
   Text,
   TextInput,
-  TouchableOpacity,
   ToastAndroid,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Colors } from "@/constants/Colors";
 import { ScaledSheet } from "react-native-size-matters/extend";
 
 /**
@@ -49,6 +51,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({
    */
   const handleCreate = () => {
     if (!playlistName.trim()) {
+      triggerHaptic(Haptics.AndroidHaptics.Reject);
       ToastAndroid.show(
         "Please enter a valid playlist name.",
         ToastAndroid.LONG,

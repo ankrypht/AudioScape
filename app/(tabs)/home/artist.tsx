@@ -7,33 +7,35 @@
  * @packageDocumentation
  */
 
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  ImageBackground,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import FastImage from "@d11/react-native-fast-image";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons, Entypo } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useMusicPlayer } from "@/components/MusicPlayerContext";
+import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
 import {
   innertube,
   processArtistPageData,
   processItems,
 } from "@/services/youtube";
-import { Colors } from "@/constants/Colors";
-import { useMusicPlayer } from "@/components/MusicPlayerContext";
+import FastImage from "@d11/react-native-fast-image";
+import { Entypo, Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   moderateScale,
-  verticalScale,
   scale,
   ScaledSheet,
+  verticalScale,
 } from "react-native-size-matters/extend";
 import { YTMusic } from "youtubei.js";
 
@@ -75,6 +77,7 @@ export default function ArtistPageScreen() {
   }, [artistId]);
 
   const handleSongSelect = (song: Song) => {
+    triggerHaptic();
     playAudio(song);
   };
 
@@ -104,8 +107,8 @@ export default function ArtistPageScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        activeOpacity={0.5}
         onPress={() => {
+          triggerHaptic();
           // Convert the song object to a JSON string
           const songData = JSON.stringify({
             id: item.id,
@@ -144,6 +147,7 @@ export default function ArtistPageScreen() {
         type === "video" && { width: scale(160), height: scale(135) },
       ]}
       onPress={() => {
+        triggerHaptic();
         if (type === "video")
           handleSongSelect({
             id: item.id,
@@ -171,6 +175,9 @@ export default function ArtistPageScreen() {
             artist: item.subtitle.slice(0, item.subtitle.indexOf(" • ")),
             thumbnail: item.thumbnail,
           });
+
+          // Trigger haptic feedback for long press.
+          triggerHaptic(Haptics.AndroidHaptics.Long_Press);
 
           router.push({
             pathname: "/(modals)/menu",
@@ -232,7 +239,12 @@ export default function ArtistPageScreen() {
 
         {/* --- TOP NAVIGATION ICONS --- */}
         <View style={[styles.topNav, { top: top }]}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity
+            onPress={() => {
+              triggerHaptic();
+              router.back();
+            }}
+          >
             <Ionicons
               name="arrow-back"
               size={moderateScale(26)}
@@ -258,6 +270,7 @@ export default function ArtistPageScreen() {
           <TouchableOpacity
             style={styles.button}
             onPress={async () => {
+              triggerHaptic();
               if (!artist) {
                 return;
               }

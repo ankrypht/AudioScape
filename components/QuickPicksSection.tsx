@@ -6,14 +6,16 @@
  * @packageDocumentation
  */
 
-import React from "react";
-import { ScrollView, TouchableOpacity, View, Text } from "react-native";
-import FastImage from "@d11/react-native-fast-image";
-import LoaderKit from "react-native-loader-kit";
-import { useActiveTrack } from "react-native-track-player";
-import { useRouter } from "expo-router";
 import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
+import FastImage from "@d11/react-native-fast-image";
+import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
+import React from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import LoaderKit from "react-native-loader-kit";
 import { ScaledSheet } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 /**
  * @interface QuickPicksSectionProps
@@ -45,7 +47,10 @@ export const QuickPicksSection: React.FC<QuickPicksSectionProps> = ({
     <TouchableOpacity
       key={item.id}
       style={styles.itemContainer}
-      onPress={() => onItemClick(item)}
+      onPress={() => {
+        triggerHaptic();
+        onItemClick(item);
+      }}
       onLongPress={() => {
         // Prepare song data for the menu modal.
         const songData = JSON.stringify({
@@ -54,6 +59,9 @@ export const QuickPicksSection: React.FC<QuickPicksSectionProps> = ({
           artist: item.artist,
           thumbnail: item.thumbnail,
         });
+
+        // Trigger haptic feedback for long press.
+        triggerHaptic(Haptics.AndroidHaptics.Long_Press);
 
         // Navigate to the menu modal with song details.
         router.push({

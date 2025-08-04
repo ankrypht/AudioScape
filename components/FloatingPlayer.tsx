@@ -6,20 +6,21 @@
  * @packageDocumentation
  */
 
+import { MovingText } from "@/components/MovingText";
 import {
   PlayPauseButton,
   SkipToNextButton,
   SkipToPreviousButton,
 } from "@/components/PlayerControls";
+import { triggerHaptic } from "@/helpers/haptics";
+import { useImageColors } from "@/hooks/useImageColors";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
-import { useRouter } from "expo-router";
-import { View, ViewProps, TouchableOpacity } from "react-native";
 import FastImage from "@d11/react-native-fast-image";
 import color from "color";
-import { useActiveTrack } from "react-native-track-player";
-import { useImageColors } from "@/hooks/useImageColors";
-import { MovingText } from "@/components/MovingText";
+import { useRouter } from "expo-router";
+import { TouchableOpacity, View, ViewProps } from "react-native";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 /**
  * `FloatingPlayer` component displays a compact music player at the bottom of the screen.
@@ -53,6 +54,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
    * Handles the press event on the floating player, navigating to the full player screen.
    */
   const handlePress = () => {
+    triggerHaptic();
     router.navigate("/player");
   };
 
@@ -61,11 +63,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
 
   return (
     <View style={[styles.container, { backgroundColor: darkerColor }, style]}>
-      <TouchableOpacity
-        onPress={handlePress}
-        activeOpacity={0.5}
-        style={styles.touchableArea}
-      >
+      <TouchableOpacity onPress={handlePress} style={styles.touchableArea}>
         {/* Track artwork */}
         <FastImage
           source={{
@@ -91,10 +89,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
       </TouchableOpacity>
 
       {/* Playback controls */}
-      <TouchableOpacity
-        activeOpacity={0.5}
-        style={styles.trackControlsContainer}
-      >
+      <TouchableOpacity style={styles.trackControlsContainer}>
         <SkipToPreviousButton iconSize={moderateScale(25)} />
         <PlayPauseButton iconSize={moderateScale(25)} />
         <SkipToNextButton iconSize={moderateScale(25)} />

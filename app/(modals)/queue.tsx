@@ -6,24 +6,25 @@
  * @packageDocumentation
  */
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Text, TouchableOpacity, View, FlatList } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import TrackPlayer, {
-  Track,
-  useTrackPlayerEvents,
-  Event,
-  useActiveTrack,
-} from "react-native-track-player";
-import { useRouter } from "expo-router";
-import LoaderKit from "react-native-loader-kit";
+import VerticalDismiss from "@/components/navigation/VerticalArrowDismiss";
 import { Colors } from "@/constants/Colors";
 import { unknownTrackImageUri } from "@/constants/images";
+import { triggerHaptic } from "@/helpers/haptics";
 import FastImage from "@d11/react-native-fast-image";
-import { Divider } from "react-native-paper";
-import VerticalDismiss from "@/components/navigation/VerticalArrowDismiss";
 import { Entypo } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import LoaderKit from "react-native-loader-kit";
+import { Divider } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
+import TrackPlayer, {
+  Event,
+  Track,
+  useActiveTrack,
+  useTrackPlayerEvents,
+} from "react-native-track-player";
 
 /**
  * `QueueModal` component.
@@ -76,6 +77,7 @@ export default function QueueModal() {
    * @param song - The selected song from the queue.
    */
   const handleSongSelect = async (song: Track) => {
+    triggerHaptic();
     await TrackPlayer.skip(queue.indexOf(song));
   };
 
@@ -126,8 +128,8 @@ export default function QueueModal() {
 
         {/* Options menu button for the song */}
         <TouchableOpacity
-          activeOpacity={0.5}
           onPress={() => {
+            triggerHaptic();
             // Prepare song data for the menu modal.
             const songData = JSON.stringify({
               id: item.id,

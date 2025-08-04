@@ -6,16 +6,18 @@
  * @packageDocumentation
  */
 
-import React, { ReactNode } from "react";
-import { StyleSheet, Dimensions } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  runOnJS,
-  Easing,
-} from "react-native-reanimated";
+import { triggerHaptic } from "@/helpers/haptics";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
+import React, { ReactNode } from "react";
+import { Dimensions, StyleSheet } from "react-native";
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 // Get the full height of the window for dismissal animation.
 const { height } = Dimensions.get("window");
@@ -49,6 +51,7 @@ const VerticalDismiss: React.FC<VerticalDismissProps> = ({ children }) => {
    * Moves the component off-screen downwards and then navigates back.
    */
   const handleDismiss = () => {
+    triggerHaptic(Haptics.AndroidHaptics.Gesture_Start); // Trigger haptic feedback on dismiss.
     translateY.value = withTiming(
       height + 100, // Move 100 units beyond the screen height.
       {

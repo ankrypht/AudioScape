@@ -6,12 +6,13 @@
  * @packageDocumentation
  */
 
+import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
+import { usePlaylists } from "@/store/library";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import * as React from "react";
 import { ToastAndroid } from "react-native";
 import { Button, Dialog } from "react-native-paper";
-import { Colors } from "@/constants/Colors";
-import { usePlaylists } from "@/store/library";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { moderateScale } from "react-native-size-matters/extend";
 
 /**
@@ -33,6 +34,7 @@ const DeletePlaylistDialog = () => {
    */
   async function deletePlaylist(): Promise<void> {
     if (playlistName) {
+      triggerHaptic();
       await deleteExistingPlaylist(playlistName);
       ToastAndroid.show("Playlist deleted", ToastAndroid.SHORT);
     }
@@ -55,7 +57,10 @@ const DeletePlaylistDialog = () => {
         <Button
           textColor={Colors.text}
           labelStyle={{ fontSize: moderateScale(13) }}
-          onPress={() => router.back()}
+          onPress={() => {
+            triggerHaptic();
+            router.back();
+          }}
         >
           Cancel
         </Button>

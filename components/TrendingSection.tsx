@@ -6,15 +6,16 @@
  * @packageDocumentation
  */
 
-import React from "react";
-import { ScrollView, TouchableOpacity, View, Text } from "react-native";
+import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
 import FastImage from "@d11/react-native-fast-image";
-import LoaderKit from "react-native-loader-kit";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useRouter } from "expo-router";
-import { useActiveTrack } from "react-native-track-player";
-import { Colors } from "@/constants/Colors";
+import React from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import LoaderKit from "react-native-loader-kit";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 /**
  * @interface TrendingSectionProps
@@ -50,7 +51,10 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
           <TouchableOpacity
             key={item.id}
             style={styles.itemTouchableArea}
-            onPress={() => onItemClick(item)}
+            onPress={() => {
+              triggerHaptic();
+              onItemClick(item);
+            }}
           >
             {/* Display the rank of the song */}
             <View style={styles.rankContainer}>
@@ -83,8 +87,8 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
 
           {/* Options menu button */}
           <TouchableOpacity
-            activeOpacity={0.5}
             onPress={() => {
+              triggerHaptic();
               // Prepare song data for the menu modal.
               const songData = JSON.stringify({
                 id: item.id,

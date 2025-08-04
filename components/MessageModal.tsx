@@ -6,12 +6,13 @@
  * @packageDocumentation
  */
 
-import React, { useState, useEffect } from "react";
-import { Modal, View, Text, TouchableOpacity, Linking } from "react-native";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { initializeApp } from "firebase/app";
-import { storage } from "@/storage";
 import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
+import { storage } from "@/storage";
+import { initializeApp } from "firebase/app";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { Linking, Modal, Text, TouchableOpacity, View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters/extend";
 
 // Firebase configuration for initializing the app.
@@ -70,6 +71,7 @@ export const MessageModal = () => {
    * @param url - The URL string to open.
    */
   const handleLinkPress = (url: string) => {
+    triggerHaptic();
     Linking.openURL(url).catch((err) =>
       console.error("Failed to open URL:", err),
     );
@@ -110,7 +112,10 @@ export const MessageModal = () => {
 
           <TouchableOpacity
             style={styles.modalButton}
-            onPress={() => setIsModalVisible(false)}
+            onPress={() => {
+              triggerHaptic();
+              setIsModalVisible(false);
+            }}
           >
             <Text style={styles.modalButtonText}>Dismiss</Text>
           </TouchableOpacity>

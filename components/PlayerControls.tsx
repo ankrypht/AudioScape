@@ -6,26 +6,27 @@
  * @packageDocumentation
  */
 
-import React, { useCallback, ComponentProps } from "react";
 import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
+import { useTrackPlayerRepeatMode } from "@/hooks/useTrackPlayerRepeatMode";
+import { downloadAndSaveSong } from "@/services/download";
+import { useIsSongDownloaded } from "@/store/library";
 import {
+  Entypo,
   FontAwesome6,
   MaterialCommunityIcons,
   MaterialIcons,
-  Entypo,
 } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { ComponentProps, useCallback } from "react";
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
+import { moderateScale } from "react-native-size-matters/extend";
 import TrackPlayer, {
-  useIsPlaying,
   RepeatMode,
   useActiveTrack,
+  useIsPlaying,
 } from "react-native-track-player";
-import { useRouter } from "expo-router";
-import { downloadAndSaveSong } from "@/services/download";
-import { useTrackPlayerRepeatMode } from "@/hooks/useTrackPlayerRepeatMode";
 import { match } from "ts-pattern";
-import { useIsSongDownloaded } from "@/store/library";
-import { moderateScale } from "react-native-size-matters/extend";
 
 /**
  * Props for the `PlayerControls` component.
@@ -97,8 +98,14 @@ export const PlayPauseButton = ({
   return (
     <View style={[{ height: iconSize }, style]}>
       <TouchableOpacity
-        activeOpacity={0.5}
-        onPress={playing ? TrackPlayer.pause : TrackPlayer.play}
+        onPress={() => {
+          triggerHaptic();
+          if (playing) {
+            TrackPlayer.pause();
+          } else {
+            TrackPlayer.play();
+          }
+        }}
       >
         <FontAwesome6
           name={playing ? "pause" : "play"}
@@ -119,8 +126,10 @@ export const SkipToNextButton = ({
 }: PlayerButtonProps) => {
   return (
     <TouchableOpacity
-      activeOpacity={0.5}
-      onPress={() => TrackPlayer.skipToNext()}
+      onPress={() => {
+        triggerHaptic();
+        TrackPlayer.skipToNext();
+      }}
     >
       <Entypo name="controller-next" size={iconSize} color={Colors.text} />
     </TouchableOpacity>
@@ -136,8 +145,10 @@ export const SkipToPreviousButton = ({
 }: PlayerButtonProps) => {
   return (
     <TouchableOpacity
-      activeOpacity={0.5}
-      onPress={() => TrackPlayer.skipToPrevious()}
+      onPress={() => {
+        triggerHaptic();
+        TrackPlayer.skipToPrevious();
+      }}
     >
       <Entypo
         name="controller-jump-to-start"
@@ -159,8 +170,10 @@ export const AddToPlaylistButton = ({ iconSize = moderateScale(30) }) => {
   return (
     <View>
       <TouchableOpacity
-        activeOpacity={0.5}
-        onPress={() => router.push({ pathname: "/(modals)/addToPlaylist" })}
+        onPress={() => {
+          triggerHaptic();
+          router.push({ pathname: "/(modals)/addToPlaylist" });
+        }}
       >
         <MaterialIcons
           name="playlist-add"
@@ -189,7 +202,7 @@ export const DownloadSongButton = ({
    */
   const handleDownload = useCallback(async () => {
     if (!activeTrack || downloaded) return; // Do nothing if no active track or already downloaded.
-
+    triggerHaptic();
     await downloadAndSaveSong({
       id: activeTrack.id,
       title: activeTrack.title || "Unknown Title",
@@ -204,7 +217,7 @@ export const DownloadSongButton = ({
 
   return (
     <View style={[{ height: iconSize }, style]}>
-      <TouchableOpacity activeOpacity={0.5} onPress={handleDownload}>
+      <TouchableOpacity onPress={handleDownload}>
         <MaterialIcons
           name={downloaded ? "download-done" : "download"}
           size={iconSize}
@@ -247,6 +260,7 @@ export const RepeatToggle = ({ ...iconProps }: RepeatIconProps) => {
    * Cycles through the repeat modes and updates the player.
    */
   const toggleRepeatMode = () => {
+    triggerHaptic();
     if (repeatMode == null) return;
 
     // Determine the next repeat mode in the defined order.

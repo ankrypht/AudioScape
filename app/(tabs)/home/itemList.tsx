@@ -7,30 +7,31 @@
  * @packageDocumentation
  */
 
-import React, { useState, useEffect } from "react";
-import { defaultStyles } from "@/styles";
-import {
-  TouchableOpacity,
-  ActivityIndicator,
-  View,
-  Text,
-  ScrollView,
-} from "react-native";
-import FastImage from "@d11/react-native-fast-image";
-import LoaderKit from "react-native-loader-kit";
-import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
-import { FAB, Divider } from "react-native-paper";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
-import { useActiveTrack } from "react-native-track-player";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
+import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
+import { defaultStyles } from "@/styles";
+import FastImage from "@d11/react-native-fast-image";
+import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import LoaderKit from "react-native-loader-kit";
+import { Divider, FAB } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ScaledSheet,
   moderateScale,
   verticalScale,
 } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 const ItemList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -88,8 +89,8 @@ const ItemList = () => {
       </TouchableOpacity>
 
       <TouchableOpacity
-        activeOpacity={0.5}
         onPress={() => {
+          triggerHaptic();
           // Convert the song object to a JSON string
           const songData = JSON.stringify({
             id: item.id,
@@ -147,8 +148,8 @@ const ItemList = () => {
       </TouchableOpacity>
 
       <TouchableOpacity
-        activeOpacity={0.5}
         onPress={() => {
+          triggerHaptic();
           // Convert the song object to a JSON string
           const songData = JSON.stringify({
             id: item.id,
@@ -183,6 +184,7 @@ const ItemList = () => {
       <TouchableOpacity
         style={styles.searchResultTouchableArea}
         onPress={() => {
+          triggerHaptic();
           router.push({
             pathname: "/(tabs)/home/album",
             params: {
@@ -209,8 +211,8 @@ const ItemList = () => {
       </TouchableOpacity>
 
       <TouchableOpacity
-        activeOpacity={0.5}
         onPress={() => {
+          triggerHaptic();
           // Convert the song object to a JSON string
           const albumData = JSON.stringify({
             name: item.title,
@@ -248,6 +250,7 @@ const ItemList = () => {
       <TouchableOpacity
         style={styles.searchResultTouchableArea}
         onPress={() => {
+          triggerHaptic();
           router.push({
             pathname: "/(tabs)/home/artist",
             params: { id: item.id, subtitle: item.subtitle },
@@ -297,6 +300,7 @@ const ItemList = () => {
   }, [data, type]);
 
   const handleSongSelect = (song: Song) => {
+    triggerHaptic();
     playAudio(song, formattedTracks);
   };
 
@@ -322,7 +326,10 @@ const ItemList = () => {
           name="arrow-left"
           size={moderateScale(25)}
           color={Colors.text}
-          onPress={() => router.back()}
+          onPress={() => {
+            triggerHaptic();
+            router.back();
+          }}
         />
         <Text style={styles.headerText}>{title}</Text>
       </View>
@@ -400,6 +407,7 @@ const ItemList = () => {
           icon="play"
           color="black"
           onPress={async () => {
+            triggerHaptic();
             if (formattedTracks.length === 0) return;
             await playPlaylist(formattedTracks);
             await router.navigate("/player");

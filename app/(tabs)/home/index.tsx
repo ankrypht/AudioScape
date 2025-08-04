@@ -7,35 +7,36 @@
  * @packageDocumentation
  */
 
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  Alert,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
-import FastImage from "@d11/react-native-fast-image";
-import LoaderKit from "react-native-loader-kit";
+import { FullScreenGradientBackground } from "@/components/GradientBackground";
+import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { QuickPicksSection } from "@/components/QuickPicksSection";
 import { TrendingSection } from "@/components/TrendingSection";
-import { innertube } from "@/services/youtube";
-import InnertubeClass from "youtubei.js";
-import { EvilIcons, Ionicons } from "@expo/vector-icons";
-import { useMusicPlayer } from "@/components/MusicPlayerContext";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { Divider } from "react-native-paper";
-import { FullScreenGradientBackground } from "@/components/GradientBackground";
-import { transparentIconUri } from "@/constants/images";
 import { Colors } from "@/constants/Colors";
+import { transparentIconUri } from "@/constants/images";
+import { triggerHaptic } from "@/helpers/haptics";
+import { innertube } from "@/services/youtube";
+import FastImage from "@d11/react-native-fast-image";
+import { EvilIcons, Ionicons } from "@expo/vector-icons";
+import { useNetInfo } from "@react-native-community/netinfo";
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Alert,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import LoaderKit from "react-native-loader-kit";
+import { Divider } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ScaledSheet,
   moderateScale,
   verticalScale,
 } from "react-native-size-matters/extend";
-import { useNetInfo } from "@react-native-community/netinfo";
+import InnertubeClass from "youtubei.js";
 
 /**
  * @interface FeedType
@@ -255,6 +256,7 @@ export default function HomeScreen() {
             color={"white"}
             size={moderateScale(35)}
             onPress={() => {
+              triggerHaptic();
               router.navigate("/(tabs)/home/search");
             }}
           />
@@ -283,7 +285,10 @@ export default function HomeScreen() {
                 borderRadius: 100,
                 marginBottom: 10,
               }}
-              onPress={() => router.navigate("/(tabs)/downloads")}
+              onPress={() => {
+                triggerHaptic();
+                router.navigate("/(tabs)/downloads");
+              }}
             >
               <Text
                 style={{

@@ -6,37 +6,38 @@
  * @packageDocumentation
  */
 
-import React, { useState, useMemo } from "react";
-import { defaultStyles } from "@/styles";
-import {
-  TouchableOpacity,
-  ActivityIndicator,
-  View,
-  Text,
-  ScrollView,
-} from "react-native";
-import FastImage from "@d11/react-native-fast-image";
-import LoaderKit from "react-native-loader-kit";
-import Entypo from "@expo/vector-icons/Entypo";
-import { Divider, AnimatedFAB } from "react-native-paper";
-import { unknownTrackImageUri } from "@/constants/images";
-import { useRouter } from "expo-router";
-import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
-import { useActiveTrack } from "react-native-track-player";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { FullScreenGradientBackground } from "@/components/GradientBackground";
+import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { Colors } from "@/constants/Colors";
+import { unknownTrackImageUri } from "@/constants/images";
+import { triggerHaptic } from "@/helpers/haptics";
+import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
+import {
+  DownloadedSongMetadata,
+  useActiveDownloads,
+  useDownloadedTracks,
+} from "@/store/library";
+import { defaultStyles } from "@/styles";
+import FastImage from "@d11/react-native-fast-image";
+import Entypo from "@expo/vector-icons/Entypo";
+import { useRouter } from "expo-router";
+import React, { useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import LoaderKit from "react-native-loader-kit";
+import { AnimatedFAB, Divider } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ScaledSheet,
   moderateScale,
   verticalScale,
 } from "react-native-size-matters/extend";
-import {
-  useDownloadedTracks,
-  DownloadedSongMetadata,
-  useActiveDownloads,
-} from "@/store/library";
+import { useActiveTrack } from "react-native-track-player";
 
 // Randomly select a gradient background for the screen.
 const gradientIndex = Math.floor(Math.random() * 11);
@@ -74,6 +75,7 @@ const DownloadsScreen = () => {
    * @param song - The `DownloadedSongMetadata` of the song to play.
    */
   const handleSongSelect = (song: DownloadedSongMetadata) => {
+    triggerHaptic();
     playDownloadedSong(song, formattedTracks);
   };
 
@@ -81,6 +83,7 @@ const DownloadsScreen = () => {
    * Handles playing all downloaded songs.
    */
   const handlePlayAllDownloads = async () => {
+    triggerHaptic();
     if (formattedTracks.length === 0) return;
     await playAllDownloadedSongs(formattedTracks);
     await router.navigate("/player");
@@ -91,6 +94,7 @@ const DownloadsScreen = () => {
    * @param song - The `DownloadedSongMetadata` of the song to open the menu for.
    */
   const handleOpenMenu = (song: DownloadedSongMetadata) => {
+    triggerHaptic();
     // Find the original metadata to ensure all necessary fields are passed.
     const originalMetadata = downloadedTracksMeta.find((m) => m.id === song.id);
     if (!originalMetadata) return;
@@ -229,7 +233,6 @@ const DownloadsScreen = () => {
 
                     {/* Options menu button for downloaded song */}
                     <TouchableOpacity
-                      activeOpacity={0.5}
                       onPress={() => handleOpenMenu(item)}
                       hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                     >

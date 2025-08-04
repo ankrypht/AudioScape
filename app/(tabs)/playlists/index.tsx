@@ -6,26 +6,34 @@
  * @packageDocumentation
  */
 
-import React, { useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import FastImage from "@d11/react-native-fast-image";
+import CreatePlaylistModal from "@/app/(modals)/createPlaylist";
+import { FullScreenGradientBackground } from "@/components/GradientBackground";
 import { Colors } from "@/constants/Colors";
 import { unknownTrackImageUri } from "@/constants/images";
+import { triggerHaptic } from "@/helpers/haptics";
+import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import { usePlaylists } from "@/store/library";
+import { defaultStyles } from "@/styles";
+import FastImage from "@d11/react-native-fast-image";
+import { Entypo } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  ScrollView,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { AnimatedFAB, Divider } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
-import { useActiveTrack } from "react-native-track-player";
-import { Entypo } from "@expo/vector-icons";
-import { FullScreenGradientBackground } from "@/components/GradientBackground";
-import CreatePlaylistModal from "@/app/(modals)/createPlaylist";
-import { defaultStyles } from "@/styles";
 import {
   ScaledSheet,
   moderateScale,
   verticalScale,
 } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 // Randomly select a gradient background for the screen.
 const gradientIndex = Math.floor(Math.random() * 11);
@@ -58,9 +66,14 @@ export default function PlaylistScreen() {
    */
   const handleCreatePlaylist = (playlistName: string) => {
     if (playlists[playlistName]) {
-      console.warn("A playlist with this name already exists.");
+      triggerHaptic(Haptics.AndroidHaptics.Reject);
+      ToastAndroid.show(
+        "A playlist with this name already exists.",
+        ToastAndroid.SHORT,
+      );
       return;
     }
+    triggerHaptic();
     createNewPlaylist(playlistName);
     setModalVisible(false);
   };
@@ -79,6 +92,7 @@ export default function PlaylistScreen() {
       <TouchableOpacity
         style={styles.playlistItemTouchableArea}
         onPress={() => {
+          triggerHaptic();
           // Navigate to the individual playlist screen.
           router.push({
             pathname: `/(tabs)/playlists/[playlistName]`,
@@ -94,8 +108,8 @@ export default function PlaylistScreen() {
       </TouchableOpacity>
       {/* Options menu button for the playlist */}
       <TouchableOpacity
-        activeOpacity={0.5}
         onPress={() => {
+          triggerHaptic();
           // Prepare playlist data for the menu modal.
           const playlistData = JSON.stringify({
             name: item.name,
@@ -211,14 +225,20 @@ export default function PlaylistScreen() {
           animateFrom={"right"}
           label="Create Playlist"
           color="black"
-          onPress={() => setModalVisible(true)}
+          onPress={() => {
+            triggerHaptic();
+            setModalVisible(true);
+          }}
         />
 
         {/* Modal for creating a new playlist */}
         <CreatePlaylistModal
           visible={modalVisible}
           onCreate={handleCreatePlaylist}
-          onCancel={() => setModalVisible(false)}
+          onCancel={() => {
+            triggerHaptic();
+            setModalVisible(false);
+          }}
         />
       </View>
     </FullScreenGradientBackground>

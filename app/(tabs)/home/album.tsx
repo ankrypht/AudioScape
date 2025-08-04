@@ -7,34 +7,35 @@
  * @packageDocumentation
  */
 
-import React, { useState, useEffect } from "react";
-import {
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { Colors } from "@/constants/Colors";
 import { unknownTrackImageUri } from "@/constants/images";
-import { FAB, Divider } from "react-native-paper";
-import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
-import { useActiveTrack } from "react-native-track-player";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMusicPlayer } from "@/components/MusicPlayerContext";
-import { Ionicons, Entypo } from "@expo/vector-icons";
-import FastImage from "@d11/react-native-fast-image";
-import { LinearGradient } from "expo-linear-gradient";
-import color from "color";
-import { innertube, processAlbumPageData } from "@/services/youtube";
+import { triggerHaptic } from "@/helpers/haptics";
 import { useImageColors } from "@/hooks/useImageColors";
+import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
+import { innertube, processAlbumPageData } from "@/services/youtube";
+import FastImage from "@d11/react-native-fast-image";
+import { Entypo, Ionicons } from "@expo/vector-icons";
+import color from "color";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Divider, FAB } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ScaledSheet,
   moderateScale,
-  verticalScale,
   scale,
+  verticalScale,
 } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 export default function AlbumPageScreen() {
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
@@ -129,7 +130,10 @@ export default function AlbumPageScreen() {
               paddingRight: 10,
               marginTop: 2,
             }}
-            onPress={() => router.back()}
+            onPress={() => {
+              triggerHaptic();
+              router.back();
+            }}
           />
 
           <Text
@@ -217,6 +221,7 @@ export default function AlbumPageScreen() {
                 <TouchableOpacity
                   style={styles.songItemTouchableArea}
                   onPress={() => {
+                    triggerHaptic();
                     handleSongSelect(
                       {
                         id: item.id,
@@ -241,8 +246,8 @@ export default function AlbumPageScreen() {
                   </View>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  activeOpacity={0.5}
                   onPress={() => {
+                    triggerHaptic();
                     // Convert the song object to a JSON string
                     const songData = JSON.stringify({
                       id: item.id,
@@ -284,6 +289,7 @@ export default function AlbumPageScreen() {
             icon="play"
             color="black"
             onPress={async () => {
+              triggerHaptic();
               if (albumData?.songs.length === 0) return;
               await playPlaylist(playableSongList);
               await router.navigate("/player");

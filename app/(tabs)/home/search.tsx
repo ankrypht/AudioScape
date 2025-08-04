@@ -7,37 +7,38 @@
  * @packageDocumentation
  */
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import {
-  TouchableOpacity,
-  FlatList,
-  Alert,
-  SafeAreaView,
-  ScrollView,
-  Keyboard,
-  TextInput,
-  Text,
-  View,
-} from "react-native";
-import FastImage from "@d11/react-native-fast-image";
-import { Searchbar } from "react-native-paper";
-import LoaderKit from "react-native-loader-kit";
-import { useActiveTrack } from "react-native-track-player";
-import { useRouter, useFocusEffect } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
-import { EvilIcons, Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
 import {
   innertube,
   processItems,
   processSearchPageData,
 } from "@/services/youtube";
-import { Colors } from "@/constants/Colors";
+import FastImage from "@d11/react-native-fast-image";
+import { Entypo, EvilIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Keyboard,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import LoaderKit from "react-native-loader-kit";
+import { Searchbar } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ScaledSheet,
   moderateScale,
   verticalScale,
 } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 /**
  * @interface SearchSuggestions
@@ -150,6 +151,7 @@ export default function SearchScreen() {
    * @param song - The `Song` object to play.
    */
   const handleSongSelect = (song: Song) => {
+    triggerHaptic();
     playAudio(song);
   };
 
@@ -160,6 +162,7 @@ export default function SearchScreen() {
   const handleSearchSuggestionsSelect = async (
     suggestion: SearchSuggestions,
   ) => {
+    triggerHaptic();
     Keyboard.dismiss();
     await setSearchQuery(suggestion.text);
     await handleSearch(suggestion.text);
@@ -175,6 +178,7 @@ export default function SearchScreen() {
       <TouchableOpacity
         style={styles.searchResultTouchableArea}
         onPress={() => {
+          triggerHaptic();
           // Navigate to song/video player or artist page based on item type.
           if (item.type === "song" || item.type === "video")
             handleSongSelect({
@@ -222,8 +226,8 @@ export default function SearchScreen() {
 
       {(item.type === "song" || item.type === "video") && (
         <TouchableOpacity
-          activeOpacity={0.5}
           onPress={() => {
+            triggerHaptic();
             if (item.type === "song" || item.type === "video") {
               const songData = JSON.stringify({
                 id: item.id,
@@ -283,8 +287,8 @@ export default function SearchScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        activeOpacity={0.5}
         onPress={() => {
+          triggerHaptic();
           // Convert the song object to a JSON string.
           const songData = JSON.stringify({
             id: item.id,
@@ -342,8 +346,8 @@ export default function SearchScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        activeOpacity={0.5}
         onPress={() => {
+          triggerHaptic();
           // Convert the song object to a JSON string.
           const songData = JSON.stringify({
             id: item.id,
@@ -378,6 +382,7 @@ export default function SearchScreen() {
       <TouchableOpacity
         style={styles.searchResultTouchableArea}
         onPress={() => {
+          triggerHaptic();
           router.push({
             pathname: "/(tabs)/home/album",
             params: {
@@ -404,8 +409,8 @@ export default function SearchScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        activeOpacity={0.5}
         onPress={() => {
+          triggerHaptic();
           // Convert the album object to a JSON string.
           const albumData = JSON.stringify({
             name: item.title,
@@ -443,6 +448,7 @@ export default function SearchScreen() {
       <TouchableOpacity
         style={styles.searchResultTouchableArea}
         onPress={() => {
+          triggerHaptic();
           router.push({
             pathname: "/(tabs)/home/artist",
             params: { id: item.id, subtitle: item.subtitle },
@@ -499,6 +505,7 @@ export default function SearchScreen() {
       <TouchableOpacity
         style={styles.button}
         onPress={async () => {
+          triggerHaptic();
           setIsLoading(true);
           const yt = await innertube;
           const allResult = await yt.music.search(searchQuery, {
@@ -578,10 +585,12 @@ export default function SearchScreen() {
         )}
         iconColor="white"
         onIconPress={() => {
+          triggerHaptic();
           Keyboard.dismiss();
           router.back();
         }}
         onClearIconPress={() => {
+          triggerHaptic();
           Keyboard.dismiss();
         }}
         onSubmitEditing={() => handleSearch(searchQuery)}

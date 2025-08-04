@@ -6,10 +6,11 @@
  * @packageDocumentation
  */
 
-import React, { useState, useEffect } from "react";
-import { Modal, View, Text, TouchableOpacity, Linking } from "react-native";
-import * as Application from "expo-application";
 import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
+import * as Application from "expo-application";
+import React, { useEffect, useState } from "react";
+import { Linking, Modal, Text, TouchableOpacity, View } from "react-native";
 import { ScaledSheet } from "react-native-size-matters/extend";
 
 /**
@@ -98,6 +99,7 @@ export const UpdateModal = () => {
    * @param url The URL string to open.
    */
   const handleLinkPress = (url: string) => {
+    triggerHaptic();
     Linking.openURL(url).catch((err) =>
       console.error("Failed to open URL:", err),
     );
@@ -138,7 +140,10 @@ export const UpdateModal = () => {
 
           <TouchableOpacity
             style={styles.modalButton}
-            onPress={() => setIsModalVisible(false)}
+            onPress={() => {
+              triggerHaptic();
+              setIsModalVisible(false);
+            }}
           >
             <Text style={styles.modalButtonText}>Dismiss</Text>
           </TouchableOpacity>

@@ -6,32 +6,33 @@
  * @packageDocumentation
  */
 
-import React, { useState, useEffect } from "react";
+import { FullScreenGradientBackground } from "@/components/GradientBackground";
+import { useMusicPlayer } from "@/components/MusicPlayerContext";
+import { Colors } from "@/constants/Colors";
+import { triggerHaptic } from "@/helpers/haptics";
+import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import { useFavorites } from "@/store/library";
 import { defaultStyles } from "@/styles";
-import {
-  TouchableOpacity,
-  ActivityIndicator,
-  View,
-  Text,
-  ScrollView,
-} from "react-native";
 import FastImage from "@d11/react-native-fast-image";
-import LoaderKit from "react-native-loader-kit";
 import Entypo from "@expo/vector-icons/Entypo";
-import { FAB, Divider } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
-import { useActiveTrack } from "react-native-track-player";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import LoaderKit from "react-native-loader-kit";
+import { Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMusicPlayer } from "@/components/MusicPlayerContext";
-import { FullScreenGradientBackground } from "@/components/GradientBackground";
-import { Colors } from "@/constants/Colors";
 import {
   ScaledSheet,
   moderateScale,
   verticalScale,
 } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 // Randomly select a gradient background for the screen.
 const gradientIndex = Math.floor(Math.random() * 11);
@@ -78,6 +79,7 @@ const FavoritesScreen = () => {
    * @param song - The `Song` object to play.
    */
   const handleSongSelect = (song: Song) => {
+    triggerHaptic();
     playAudio(song, formattedTracks);
   };
 
@@ -172,8 +174,8 @@ const FavoritesScreen = () => {
 
                   {/* Options menu button for the song */}
                   <TouchableOpacity
-                    activeOpacity={0.5}
                     onPress={() => {
+                      triggerHaptic();
                       // Prepare song data for the menu modal.
                       const songData = JSON.stringify({
                         id: item.id,
@@ -231,6 +233,7 @@ const FavoritesScreen = () => {
             icon="play"
             color="black"
             onPress={async () => {
+              triggerHaptic();
               if (formattedTracks.length === 0) return;
               await playPlaylist(formattedTracks);
               await router.navigate("/player");

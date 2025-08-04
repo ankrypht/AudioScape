@@ -6,29 +6,30 @@
  * @packageDocumentation
  */
 
-import React, { useState } from "react";
-import { Text, View, ScrollView, TouchableOpacity } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { Colors } from "@/constants/Colors";
 import { unknownTrackImageUri } from "@/constants/images";
-import { FAB, Divider } from "react-native-paper";
-import LoaderKit from "react-native-loader-kit";
+import { triggerHaptic } from "@/helpers/haptics";
+import { useImageColors } from "@/hooks/useImageColors";
+import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
+import { usePlaylists } from "@/store/library";
+import FastImage from "@d11/react-native-fast-image";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 import color from "color";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
-import { useActiveTrack } from "react-native-track-player";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import LoaderKit from "react-native-loader-kit";
+import { Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMusicPlayer } from "@/components/MusicPlayerContext";
-import { usePlaylists } from "@/store/library";
-import { useImageColors } from "@/hooks/useImageColors";
-import { Ionicons, Entypo } from "@expo/vector-icons";
-import FastImage from "@d11/react-native-fast-image";
 import {
   ScaledSheet,
   moderateScale,
-  verticalScale,
   scale,
+  verticalScale,
 } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 /**
  * `PlaylistView` component.
@@ -65,6 +66,7 @@ const PlaylistView = () => {
    * @param song - The `Song` object to play.
    */
   const handleSongSelect = (song: Song) => {
+    triggerHaptic();
     playAudio(song, playlist);
   };
 
@@ -95,7 +97,10 @@ const PlaylistView = () => {
               paddingRight: 10,
               marginTop: 2,
             }}
-            onPress={() => router.back()}
+            onPress={() => {
+              triggerHaptic();
+              router.back();
+            }}
           />
 
           <Text
@@ -202,8 +207,8 @@ const PlaylistView = () => {
                 </TouchableOpacity>
                 {/* Options menu button for the song */}
                 <TouchableOpacity
-                  activeOpacity={0.5}
                   onPress={() => {
+                    triggerHaptic();
                     // Prepare song data for the menu modal.
                     const songData = JSON.stringify({
                       id: item.id,
@@ -251,6 +256,7 @@ const PlaylistView = () => {
             icon="play"
             color="black"
             onPress={async () => {
+              triggerHaptic();
               if (playlist.length === 0) return;
               await playPlaylist(playlist);
               await router.navigate("/player");

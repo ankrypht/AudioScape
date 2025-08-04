@@ -6,24 +6,29 @@ Welcome to the AudioScape project! This document provides a clear and comprehens
 
 ## 🌳 Root Directory
 
-The root directory contains essential configuration files and the main source code folders.
+The root directory contains essential configuration files, documentation, and the main source code folders.
 
-### Configuration Files
+### Configuration Files & Folders
 
 - `📄 .env-guideline-sizes`: A guideline for the sizes of environment variables.
 - `📄 .env.example`: An example file outlining the necessary environment variables.
-- `📄 eslint.config.js`: Configuration for ESLint, ensuring consistent code style and quality.
 - `📄 .gitignore`: Specifies files and folders that Git should ignore.
 - `📄 app.config.js`: Core configuration for the Expo app, including name, version, icon, and plugins.
 - `📄 babel.config.js`: Configuration for Babel, the JavaScript compiler.
 - `📄 eas.json`: Configuration for Expo Application Services (EAS) for building and deploying the app.
+- `📄 eslint.config.js`: Configuration for ESLint, ensuring consistent code style and quality.
 - `📄 metro.config.js`: Configuration for Metro, the React Native bundler.
 - `📄 package.json`: Lists all project dependencies and defines useful scripts.
 - `📄 package-lock.json`: Ensures consistent dependency versions across all environments.
 - `📄 tsconfig.json`: Configures the TypeScript compiler.
 
-### Core Files & Folders
+### Core Project Structure
 
+- `📁 .github/`: Holds GitHub-specific files, like workflow definitions.
+  - `📁 workflows/`: Contains CI/CD workflow configurations.
+    - `📄 release-please.yml`: A workflow for automating releases.
+- `📁 .vscode/`: Contains Visual Studio Code editor settings.
+  - `📄 settings.json`: Workspace-specific settings for VS Code.
 - `📁 app/`: Contains all the screens, navigation logic, and layouts.
 - `📁 assets/`: Holds all static assets like fonts and images.
 - `📁 components/`: Home to reusable React components used throughout the app.
@@ -127,6 +132,7 @@ This directory contains reusable UI components.
 
 ### `helpers`
 
+- `📄 haptics.ts`: Provides functions for triggering haptic feedback.
 - `📄 miscellaneous.ts`: A collection of miscellaneous helper functions.
 
 ### `hooks`

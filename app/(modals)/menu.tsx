@@ -6,37 +6,38 @@
  * @packageDocumentation
  */
 
-import React, { useEffect, useState } from "react";
-import { Text, View, TouchableOpacity, ToastAndroid } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMusicPlayer } from "@/components/MusicPlayerContext";
+import VerticalSwipeGesture from "@/components/navigation/VerticalGesture";
 import { Colors } from "@/constants/Colors";
-import { Divider } from "react-native-paper";
+import { unknownTrackImageUri } from "@/constants/images";
+import { triggerHaptic } from "@/helpers/haptics";
 import { useTrackPlayerFavorite } from "@/hooks/useTrackPlayerFavorite";
 import {
-  FontAwesome,
-  MaterialIcons,
-  Feather,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
-import { unknownTrackImageUri } from "@/constants/images";
-import FastImage from "@d11/react-native-fast-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { usePlaylists } from "@/store/library";
-import { useMusicPlayer } from "@/components/MusicPlayerContext";
-import { getInfo, innertube, processAlbumPageData } from "@/services/youtube";
-import VerticalSwipeGesture from "@/components/navigation/VerticalGesture";
-import {
-  removeDownloadedSong,
   downloadAndSaveSong,
   isSongDownloaded,
+  removeDownloadedSong,
 } from "@/services/download";
-import TrackPlayer from "react-native-track-player";
+import { getInfo, innertube, processAlbumPageData } from "@/services/youtube";
+import { usePlaylists } from "@/store/library";
+import FastImage from "@d11/react-native-fast-image";
+import {
+  Feather,
+  FontAwesome,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Text, ToastAndroid, TouchableOpacity, View } from "react-native";
+import { Divider } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ScaledSheet,
   moderateScale,
   scale,
   verticalScale,
 } from "react-native-size-matters/extend";
+import TrackPlayer from "react-native-track-player";
 
 /**
  * `MenuModal` component.
@@ -109,6 +110,7 @@ export default function MenuModal() {
         size={moderateScale(22)}
         color={isFavorite ? "#ff0000" : Colors.icon}
         onPress={() => {
+          triggerHaptic();
           toggleFavoriteFunc(song);
           setIsFavorite((prev) => !prev);
         }}
@@ -151,6 +153,7 @@ export default function MenuModal() {
         <Feather name="radio" size={moderateScale(24)} color={Colors.text} />
       ),
       onPress: async () => {
+        triggerHaptic();
         if (selectedSong) await playAudio(selectedSong);
         router.back();
       },
@@ -166,6 +169,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         await router.push({
           pathname: "/(modals)/addToPlaylist",
           params: selectedSong
@@ -185,6 +189,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         await playNext(selectedSong ? [selectedSong] : null);
         ToastAndroid.show("Song will play next", ToastAndroid.SHORT);
         router.back();
@@ -201,6 +206,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         if (selectedSong) {
           const queue = await TrackPlayer.getQueue();
           await TrackPlayer.remove(
@@ -222,6 +228,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         if (selectedSong) {
           await removeTrackFromPlaylist(selectedSong.id, playlistName);
           ToastAndroid.show("Song removed from playlist", ToastAndroid.SHORT);
@@ -240,6 +247,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         if (selectedPlaylist) {
           const playlistSongs = playlists[selectedPlaylist.name];
           if (playlistSongs.length === 0) return;
@@ -259,6 +267,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         if (selectedPlaylist) {
           const playlistSongs = playlists[selectedPlaylist.name];
           if (playlistSongs.length === 0) return;
@@ -279,6 +288,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         if (selectedPlaylist) {
           router.push({
             pathname: "/(modals)/deletePlaylist",
@@ -298,6 +308,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         if (selectedSong) {
           await removeDownloadedSong(selectedSong.id);
           ToastAndroid.show("Song removed from downloads", ToastAndroid.SHORT);
@@ -316,6 +327,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         if (selectedSong) {
           const isDownloaded = isSongDownloaded(selectedSong.id);
           if (isDownloaded) {
@@ -349,6 +361,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         if (selectedAlbum) {
           const yt = await innertube;
           const album = await yt.music.getAlbum(selectedAlbum.id);
@@ -376,6 +389,7 @@ export default function MenuModal() {
         />
       ),
       onPress: async () => {
+        triggerHaptic();
         if (selectedAlbum) {
           const yt = await innertube;
           const album = await yt.music.getAlbum(selectedAlbum.id);

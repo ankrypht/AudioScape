@@ -6,26 +6,28 @@
  * @packageDocumentation
  */
 
-import React, { useState, useMemo } from "react";
+import CreatePlaylistModal from "@/app/(modals)/createPlaylist";
+import VerticalDismiss from "@/components/navigation/VerticalArrowDismiss";
+import { Colors } from "@/constants/Colors";
+import { unknownTrackImageUri } from "@/constants/images";
+import { triggerHaptic } from "@/helpers/haptics";
+import { usePlaylists } from "@/store/library";
+import FastImage from "@d11/react-native-fast-image";
+import { Entypo } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { useLocalSearchParams } from "expo-router";
+import React, { useMemo, useState } from "react";
 import {
+  FlatList,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
-  FlatList,
-  ToastAndroid,
 } from "react-native";
-import FastImage from "@d11/react-native-fast-image";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useActiveTrack } from "react-native-track-player";
-import { useLocalSearchParams } from "expo-router";
-import { usePlaylists } from "@/store/library";
-import { Colors } from "@/constants/Colors";
 import { Divider } from "react-native-paper";
-import { unknownTrackImageUri } from "@/constants/images";
-import VerticalDismiss from "@/components/navigation/VerticalArrowDismiss";
-import CreatePlaylistModal from "@/app/(modals)/createPlaylist";
-import { Entypo } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
+import { useActiveTrack } from "react-native-track-player";
 
 /**
  * `AddToPlaylistModal` component.
@@ -54,9 +56,14 @@ export default function AddToPlaylistModal() {
    */
   const handleCreatePlaylist = (playlistName: string) => {
     if (playlists[playlistName]) {
-      console.warn("A playlist with this name already exists.");
+      triggerHaptic(Haptics.AndroidHaptics.Reject);
+      ToastAndroid.show(
+        "A playlist with this name already exists.",
+        ToastAndroid.SHORT,
+      );
       return;
     }
+    triggerHaptic();
     createNewPlaylist(playlistName);
     setModalVisible(false);
   };
@@ -91,6 +98,7 @@ export default function AddToPlaylistModal() {
       <TouchableOpacity
         style={styles.playlistItem}
         onPress={() => {
+          triggerHaptic();
           ToastAndroid.show(`Added song to ${item.name}`, ToastAndroid.SHORT);
           if (track) addTrackToPlaylist(track, item.name);
           handleDismiss(); // Dismiss the modal after adding.
@@ -127,7 +135,10 @@ export default function AddToPlaylistModal() {
               {/* Button to create a new playlist */}
               <TouchableOpacity
                 style={styles.createButton}
-                onPress={() => setModalVisible(true)}
+                onPress={() => {
+                  triggerHaptic();
+                  setModalVisible(true);
+                }}
               >
                 <Text style={styles.createButtonText}>+ New Playlist</Text>
               </TouchableOpacity>
@@ -167,7 +178,10 @@ export default function AddToPlaylistModal() {
             <CreatePlaylistModal
               visible={modalVisible}
               onCreate={handleCreatePlaylist}
-              onCancel={() => setModalVisible(false)}
+              onCancel={() => {
+                triggerHaptic();
+                setModalVisible(false);
+              }}
             />
           </View>
         </View>
