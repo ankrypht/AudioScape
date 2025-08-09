@@ -1,6 +1,9 @@
 const IS_DEV = process.env.APP_VARIANT === "development";
 const packageJson = require("./package.json");
 
+const [major, minor, patch] = packageJson.version.split(".").map(Number);
+const versionCode = major * 100000 + minor * 1000 + patch * 10;
+
 export default {
   name: IS_DEV ? "AudioScape (Dev)" : "AudioScape",
   owner: "ankushsarkar",
@@ -30,6 +33,7 @@ export default {
     },
     backgroundColor: "#000",
     edgeToEdgeEnabled: true,
+    versionCode: versionCode,
   },
   plugins: [
     "expo-router",
