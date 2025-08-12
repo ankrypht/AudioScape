@@ -10,15 +10,14 @@
 // === START === Polyfills for youtubei.js in React Native
 // The following section includes polyfills and global assignments required for youtubei.js
 // to function correctly in a non-browser environment like React Native.
-import "event-target-polyfill";
-import "web-streams-polyfill";
-import "text-encoding-polyfill";
-import "react-native-url-polyfill/auto";
 import { decode, encode } from "base-64";
+import "event-target-polyfill";
 import { MMKV } from "react-native-mmkv";
-import Innertube, { UniversalCache } from "youtubei.js";
 import { Track } from "react-native-track-player";
-import { fetch } from "expo/fetch";
+import "react-native-url-polyfill/auto";
+import "text-encoding-polyfill";
+import "web-streams-polyfill";
+import { Innertube } from "youtubei.js";
 
 // Polyfill for btoa and atob, which are not available in React Native's JavaScriptCore.
 if (!global.btoa) {
@@ -61,18 +60,29 @@ global.CustomEvent = CustomEvent as any;
  */
 export const innertube: Promise<Innertube> = (async () => {
   // Fetch the PO token and visitor data required to initialize Innertube.
+  console.log(
+    `[MusicPlayer] Fetching YouTube PO token and visitor data from ${process.env.EXPO_PUBLIC_PO_TOKEN_API}`,
+  );
+
   const res = await fetch(`${process.env.EXPO_PUBLIC_PO_TOKEN_API}`);
   const data = await res.json();
   const poToken = data.poToken;
   const visitorData = data.visitorData;
 
+  console.log(
+    `[MusicPlayer] Fetched PO token: ${poToken}, Visitor Data: ${visitorData}`,
+  );
+
   // Create the Innertube instance with the fetched credentials and a universal cache.
-  return Innertube.create({
+  const client = await Innertube.create({
     po_token: poToken,
     visitor_data: visitorData,
-    cache: new UniversalCache(true),
     generate_session_locally: true,
   });
+
+  console.log("[MusicPlayer] Innertube instance created successfully.");
+
+  return client;
 })();
 
 /**

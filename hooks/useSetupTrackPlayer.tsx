@@ -8,10 +8,9 @@
 
 import { useEffect, useRef } from "react";
 import TrackPlayer, {
-  Capability,
-  RatingType,
-  RepeatMode,
   AppKilledPlaybackBehavior,
+  Capability,
+  RepeatMode,
 } from "react-native-track-player";
 
 /**
@@ -31,13 +30,6 @@ const setupPlayer = async () => {
       appKilledPlaybackBehavior:
         AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
     },
-    // Set the notification icon.
-    icon: require("@/assets/images/transparent-icon.png"),
-    // Set the jump intervals for seeking forward and backward.
-    forwardJumpInterval: 10, // 10 seconds
-    backwardJumpInterval: 10, // 10 seconds
-    // Configure the rating type for the notification controls.
-    ratingType: RatingType.Heart,
     // Define the capabilities of the player (i.e., what controls are available).
     capabilities: [
       Capability.Play,
@@ -48,6 +40,15 @@ const setupPlayer = async () => {
       Capability.SeekTo,
       Capability.JumpForward,
       Capability.JumpBackward,
+    ],
+    // Define the capabilities available in the notification.
+    notificationCapabilities: [
+      Capability.Play,
+      Capability.Pause,
+      Capability.SkipToNext,
+      Capability.SkipToPrevious,
+      Capability.Stop,
+      Capability.SeekTo,
     ],
   });
 

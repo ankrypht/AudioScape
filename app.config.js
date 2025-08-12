@@ -11,7 +11,7 @@ export default {
   icon: "./assets/images/icon.png",
   scheme: IS_DEV ? "audioscape-dev" : "audioscape",
   userInterfaceStyle: "automatic",
-  newArchEnabled: false,
+  newArchEnabled: true,
   android: {
     softwareKeyboardLayoutMode: "pan",
     permissions: [

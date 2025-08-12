@@ -29,6 +29,9 @@ yarn-error.*
 *.pem
 
 .env
+credentials.json
+android/
+builds/
 
 # typescript
 *.tsbuildinfo

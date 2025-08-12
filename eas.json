@@ -2,7 +2,6 @@
   "cli": {
     "version": ">= 12.3.0",
     "appVersionSource": "remote"
-    //"requireCommit": true
   },
   "build": {
     "development": {
@@ -10,11 +9,13 @@
       "distribution": "internal",
       "env": {
         "APP_VARIANT": "development"
-      }
+      },
+      "autoIncrement": true
     },
     "preview": {
       "developmentClient": false,
-      "distribution": "internal"
+      "distribution": "internal",
+      "autoIncrement": true
     },
     "production": {
       "autoIncrement": true
