@@ -55,7 +55,7 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-size-matters": "^0.4.2",
-    "react-native-track-player": "github:doublesymmetry/react-native-track-player#feat/media3-newarch",
+    "react-native-track-player": "^5.0.0-alpha0",
     "react-native-url-polyfill": "^2.0.0",
     "react-redux": "^9.2.0",
     "text-encoding-polyfill": "^0.6.7",
