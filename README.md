@@ -8,7 +8,7 @@
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/ankrypht/AudioScape/total?label=Downloads&logo=refinedgithub&logoColor=white)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/ankrypht/AudioScape/latest)
 ![GitHub License](https://img.shields.io/github/license/ankrypht/AudioScape?label=License&logo=gnu&logoColor=white)
-![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/ankrypht/AudioScape?label=Code%20Quality&logo=codefactor&logoColor=white)
+![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/ankrypht/AudioScape/main?label=Code%20Quality&logo=codefactor&logoColor=white)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/ankrypht/AudioScape/main?label=Last%20Commit&logo=Git&logoColor=white)
 ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/ankrypht/AudioScape?label=Total%20Commits)
 ![GitHub top language](https://img.shields.io/github/languages/top/ankrypht/AudioScape?label=TypeScript&logo=typescript&logoColor=white)
