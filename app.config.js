@@ -30,6 +30,7 @@ export default {
     },
     backgroundColor: "#000",
     edgeToEdgeEnabled: true,
+    versionCode: 1,
   },
   plugins: [
     "expo-router",
