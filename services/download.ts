@@ -272,7 +272,7 @@ export const downloadAndSaveSong = async (
     console.log(`Starting audio download for: ${title} (as ${trackFileName})`);
 
     // Create and start the track download.
-    const trackDownloadResumable = FileSystem.createDownloadResumable(
+    const trackDownloadResumable = await FileSystem.createDownloadResumable(
       remoteTrackUrl,
       tempTrackUriInCache,
       {},
@@ -299,7 +299,7 @@ export const downloadAndSaveSong = async (
     let storedArtworkPath: string | undefined = undefined;
     if (remoteArtworkUrl && tempArtworkUriInCache && finalArtworkUriInDocs) {
       console.log(`Starting artwork download for: ${title}`);
-      const artworkDownloadResumable = FileSystem.createDownloadResumable(
+      const artworkDownloadResumable = await FileSystem.createDownloadResumable(
         remoteArtworkUrl,
         tempArtworkUriInCache,
         {},
