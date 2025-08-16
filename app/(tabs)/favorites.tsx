@@ -16,14 +16,9 @@ import { defaultStyles } from "@/styles";
 import FastImage from "@d11/react-native-fast-image";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { FlashList } from "@shopify/flash-list";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import LoaderKit from "react-native-loader-kit";
 import { Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -78,10 +73,73 @@ const FavoritesScreen = () => {
    * Handles playing a single favorite song.
    * @param song - The `Song` object to play.
    */
-  const handleSongSelect = (song: Song) => {
-    triggerHaptic();
-    playAudio(song, formattedTracks);
-  };
+  const handleSongSelect = useCallback(
+    (song: Song) => {
+      triggerHaptic();
+      playAudio(song, formattedTracks);
+    },
+    [playAudio, formattedTracks],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: Song }) => (
+      <View style={styles.songItem}>
+        <TouchableOpacity
+          style={styles.songItemTouchableArea}
+          onPress={() => handleSongSelect(item)}
+        >
+          <FastImage
+            source={{ uri: item.thumbnail }}
+            style={styles.resultThumbnail}
+          />
+          {/* Playing indicator for the active track */}
+          {activeTrack?.id === item.id && (
+            <LoaderKit
+              style={styles.trackPlayingIconIndicator}
+              name="LineScalePulseOutRapid"
+              color={"white"}
+            />
+          )}
+          <View style={styles.resultText}>
+            <Text style={styles.resultTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.resultArtist} numberOfLines={1}>
+              {item.artist}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Options menu button for the song */}
+        <TouchableOpacity
+          onPress={() => {
+            triggerHaptic();
+            // Prepare song data for the menu modal.
+            const songData = JSON.stringify({
+              id: item.id,
+              title: item.title,
+              artist: item.artist,
+              thumbnail: item.thumbnail,
+            });
+
+            // Navigate to the menu modal.
+            router.push({
+              pathname: "/(modals)/menu",
+              params: { songData: songData, type: "song" },
+            });
+          }}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <Entypo
+            name="dots-three-vertical"
+            size={moderateScale(15)}
+            color="white"
+          />
+        </TouchableOpacity>
+      </View>
+    ),
+    [handleSongSelect, activeTrack, router],
+  );
 
   return (
     <FullScreenGradientBackground index={gradientIndex}>
@@ -108,12 +166,14 @@ const FavoritesScreen = () => {
         {isLoading ? (
           <ActivityIndicator color="white" size="large" />
         ) : (
-          <ScrollView
-            style={styles.songList}
-            contentContainerStyle={[
-              { paddingBottom: verticalScale(190) + bottom },
-              formattedTracks.length === 0 && { flex: 1 },
-            ]}
+          <FlashList
+            data={formattedTracks}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            estimatedItemSize={moderateScale(75)}
+            contentContainerStyle={{
+              paddingBottom: verticalScale(190) + bottom,
+            }}
             showsVerticalScrollIndicator={false}
             onScroll={(e) => {
               const currentScrollPosition =
@@ -121,9 +181,7 @@ const FavoritesScreen = () => {
               setIsScrolling(currentScrollPosition > 5);
             }}
             scrollEventThrottle={16}
-          >
-            {/* Message when no favorites are added */}
-            {formattedTracks.length === 0 ? (
+            ListEmptyComponent={
               <View
                 style={{
                   flex: 1,
@@ -142,79 +200,22 @@ const FavoritesScreen = () => {
                   No favorites yet! {"\n"}Start adding your favorite songs.
                 </Text>
               </View>
-            ) : (
-              // Map and render each favorite song item.
-              formattedTracks.map((item) => (
-                <View key={item.id} style={styles.songItem}>
-                  <TouchableOpacity
-                    style={styles.songItemTouchableArea}
-                    onPress={() => handleSongSelect(item)}
-                  >
-                    <FastImage
-                      source={{ uri: item.thumbnail }}
-                      style={styles.resultThumbnail}
-                    />
-                    {/* Playing indicator for the active track */}
-                    {activeTrack?.id === item.id && (
-                      <LoaderKit
-                        style={styles.trackPlayingIconIndicator}
-                        name="LineScalePulseOutRapid"
-                        color={"white"}
-                      />
-                    )}
-                    <View style={styles.resultText}>
-                      <Text style={styles.resultTitle} numberOfLines={1}>
-                        {item.title}
-                      </Text>
-                      <Text style={styles.resultArtist} numberOfLines={1}>
-                        {item.artist}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  {/* Options menu button for the song */}
-                  <TouchableOpacity
-                    onPress={() => {
-                      triggerHaptic();
-                      // Prepare song data for the menu modal.
-                      const songData = JSON.stringify({
-                        id: item.id,
-                        title: item.title,
-                        artist: item.artist,
-                        thumbnail: item.thumbnail,
-                      });
-
-                      // Navigate to the menu modal.
-                      router.push({
-                        pathname: "/(modals)/menu",
-                        params: { songData: songData, type: "song" },
-                      });
-                    }}
-                    hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                  >
-                    <Entypo
-                      name="dots-three-vertical"
-                      size={moderateScale(15)}
-                      color="white"
-                    />
-                  </TouchableOpacity>
-                </View>
-              ))
-            )}
-            {/* Display total number of favorite tracks */}
-            {formattedTracks.length !== 0 && (
-              <Text
-                style={{
-                  color: Colors.textMuted,
-                  textAlign: "center",
-                  fontSize: moderateScale(15),
-                }}
-              >
-                {formattedTracks.length}{" "}
-                {`Track${formattedTracks.length > 1 ? "s" : ""}`}
-              </Text>
-            )}
-          </ScrollView>
+            }
+            ListFooterComponent={
+              formattedTracks.length > 0 ? (
+                <Text
+                  style={{
+                    color: Colors.textMuted,
+                    textAlign: "center",
+                    fontSize: moderateScale(15),
+                  }}
+                >
+                  {formattedTracks.length}{" "}
+                  {`Track${formattedTracks.length > 1 ? "s" : ""}`}
+                </Text>
+              ) : null
+            }
+          />
         )}
 
         {/* Floating Action Button to play all favorite songs */}

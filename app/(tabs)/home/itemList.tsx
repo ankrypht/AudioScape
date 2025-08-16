@@ -12,17 +12,12 @@ import { Colors } from "@/constants/Colors";
 import { triggerHaptic } from "@/helpers/haptics";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import { defaultStyles } from "@/styles";
+import { FlashList } from "@shopify/flash-list";
 import FastImage from "@d11/react-native-fast-image";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import LoaderKit from "react-native-loader-kit";
 import { Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -56,63 +51,74 @@ const ItemList = () => {
 
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
+  const handleSongSelect = useCallback(
+    (song: Song) => {
+      triggerHaptic();
+      playAudio(song, formattedTracks);
+    },
+    [formattedTracks, playAudio],
+  );
+
   /**
    * Renders a song search result item.
    * @param item - The song item to render.
    * @returns A View component representing a song result.
    */
-  const renderSongResult = ({ item }: { item: Song }) => (
-    <View key={item.id} style={styles.searchResult}>
-      <TouchableOpacity
-        style={styles.searchResultTouchableArea}
-        onPress={() => handleSongSelect(item)}
-      >
-        <FastImage
-          source={{ uri: item.thumbnail }}
-          style={styles.songThumbnail}
-        />
-        {activeTrack?.id === item.id && (
-          <LoaderKit
-            style={styles.songTrackPlayingIconIndicator}
-            name="LineScalePulseOutRapid"
+  const renderSongResult = useCallback(
+    ({ item }: { item: Song }) => (
+      <View key={item.id} style={styles.searchResult}>
+        <TouchableOpacity
+          style={styles.searchResultTouchableArea}
+          onPress={() => handleSongSelect(item)}
+        >
+          <FastImage
+            source={{ uri: item.thumbnail }}
+            style={styles.songThumbnail}
+          />
+          {activeTrack?.id === item.id && (
+            <LoaderKit
+              style={styles.songTrackPlayingIconIndicator}
+              name="LineScalePulseOutRapid"
+              color="white"
+            />
+          )}
+          <View style={styles.resultText}>
+            <Text style={styles.resultTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.resultArtist} numberOfLines={1}>
+              {item.artist}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            triggerHaptic();
+            // Convert the song object to a JSON string
+            const songData = JSON.stringify({
+              id: item.id,
+              title: item.title,
+              artist: item.artist,
+              thumbnail: item.thumbnail,
+            });
+
+            router.push({
+              pathname: "/(modals)/menu",
+              params: { songData: songData, type: "song" },
+            });
+          }}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <Entypo
+            name="dots-three-vertical"
+            size={moderateScale(15)}
             color="white"
           />
-        )}
-        <View style={styles.resultText}>
-          <Text style={styles.resultTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <Text style={styles.resultArtist} numberOfLines={1}>
-            {item.artist}
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
-          triggerHaptic();
-          // Convert the song object to a JSON string
-          const songData = JSON.stringify({
-            id: item.id,
-            title: item.title,
-            artist: item.artist,
-            thumbnail: item.thumbnail,
-          });
-
-          router.push({
-            pathname: "/(modals)/menu",
-            params: { songData: songData, type: "song" },
-          });
-        }}
-        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-      >
-        <Entypo
-          name="dots-three-vertical"
-          size={moderateScale(15)}
-          color="white"
-        />
-      </TouchableOpacity>
-    </View>
+        </TouchableOpacity>
+      </View>
+    ),
+    [activeTrack, router, handleSongSelect],
   );
 
   /**
@@ -120,58 +126,61 @@ const ItemList = () => {
    * @param item - The video item to render.
    * @returns A View component representing a video result.
    */
-  const renderVideoResult = ({ item }: { item: Song }) => (
-    <View key={item.id} style={styles.searchResult}>
-      <TouchableOpacity
-        style={styles.searchResultTouchableArea}
-        onPress={() => handleSongSelect(item)}
-      >
-        <FastImage
-          source={{ uri: item.thumbnail }}
-          style={styles.videoThumbnail}
-        />
-        {activeTrack?.id === item.id && (
-          <LoaderKit
-            style={styles.videoTrackPlayingIconIndicator}
-            name="LineScalePulseOutRapid"
+  const renderVideoResult = useCallback(
+    ({ item }: { item: Song }) => (
+      <View key={item.id} style={styles.searchResult}>
+        <TouchableOpacity
+          style={styles.searchResultTouchableArea}
+          onPress={() => handleSongSelect(item)}
+        >
+          <FastImage
+            source={{ uri: item.thumbnail }}
+            style={styles.videoThumbnail}
+          />
+          {activeTrack?.id === item.id && (
+            <LoaderKit
+              style={styles.videoTrackPlayingIconIndicator}
+              name="LineScalePulseOutRapid"
+              color="white"
+            />
+          )}
+          <View style={styles.resultText}>
+            <Text style={styles.resultTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.resultArtist} numberOfLines={1}>
+              {item.artist}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            triggerHaptic();
+            // Convert the song object to a JSON string
+            const songData = JSON.stringify({
+              id: item.id,
+              title: item.title,
+              artist: item.artist,
+              thumbnail: item.thumbnail,
+            });
+
+            router.push({
+              pathname: "/(modals)/menu",
+              params: { songData: songData, type: "song" },
+            });
+          }}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <Entypo
+            name="dots-three-vertical"
+            size={moderateScale(15)}
             color="white"
           />
-        )}
-        <View style={styles.resultText}>
-          <Text style={styles.resultTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <Text style={styles.resultArtist} numberOfLines={1}>
-            {item.artist}
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
-          triggerHaptic();
-          // Convert the song object to a JSON string
-          const songData = JSON.stringify({
-            id: item.id,
-            title: item.title,
-            artist: item.artist,
-            thumbnail: item.thumbnail,
-          });
-
-          router.push({
-            pathname: "/(modals)/menu",
-            params: { songData: songData, type: "song" },
-          });
-        }}
-        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-      >
-        <Entypo
-          name="dots-three-vertical"
-          size={moderateScale(15)}
-          color="white"
-        />
-      </TouchableOpacity>
-    </View>
+        </TouchableOpacity>
+      </View>
+    ),
+    [activeTrack, router, handleSongSelect],
   );
 
   /**
@@ -179,65 +188,68 @@ const ItemList = () => {
    * @param item - The album item to render.
    * @returns A View component representing an album result.
    */
-  const renderAlbumResult = ({ item }: { item: Album }) => (
-    <View key={item.id} style={styles.searchResult}>
-      <TouchableOpacity
-        style={styles.searchResultTouchableArea}
-        onPress={() => {
-          triggerHaptic();
-          router.push({
-            pathname: "/(tabs)/home/album",
-            params: {
-              id: item.id,
-              title: item.title,
+  const renderAlbumResult = useCallback(
+    ({ item }: { item: Album }) => (
+      <View key={item.id} style={styles.searchResult}>
+        <TouchableOpacity
+          style={styles.searchResultTouchableArea}
+          onPress={() => {
+            triggerHaptic();
+            router.push({
+              pathname: "/(tabs)/home/album",
+              params: {
+                id: item.id,
+                title: item.title,
+                thumbnail: item.thumbnail,
+                artist: item.artist,
+              },
+            });
+          }}
+        >
+          <FastImage
+            source={{ uri: item.thumbnail }}
+            style={styles.songThumbnail}
+          />
+          <View style={styles.resultText}>
+            <Text style={styles.resultTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.resultArtist} numberOfLines={1}>
+              {item.artist} • {item.year}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            triggerHaptic();
+            // Convert the song object to a JSON string
+            const albumData = JSON.stringify({
+              name: item.title,
               thumbnail: item.thumbnail,
+              id: item.id,
               artist: item.artist,
-            },
-          });
-        }}
-      >
-        <FastImage
-          source={{ uri: item.thumbnail }}
-          style={styles.songThumbnail}
-        />
-        <View style={styles.resultText}>
-          <Text style={styles.resultTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <Text style={styles.resultArtist} numberOfLines={1}>
-            {item.artist} • {item.year}
-          </Text>
-        </View>
-      </TouchableOpacity>
+            });
 
-      <TouchableOpacity
-        onPress={() => {
-          triggerHaptic();
-          // Convert the song object to a JSON string
-          const albumData = JSON.stringify({
-            name: item.title,
-            thumbnail: item.thumbnail,
-            id: item.id,
-            artist: item.artist,
-          });
-
-          router.push({
-            pathname: "/(modals)/menu",
-            params: {
-              albumData: albumData,
-              type: "album",
-            },
-          });
-        }}
-        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-      >
-        <Entypo
-          name="dots-three-vertical"
-          size={moderateScale(15)}
-          color="white"
-        />
-      </TouchableOpacity>
-    </View>
+            router.push({
+              pathname: "/(modals)/menu",
+              params: {
+                albumData: albumData,
+                type: "album",
+              },
+            });
+          }}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <Entypo
+            name="dots-three-vertical"
+            size={moderateScale(15)}
+            color="white"
+          />
+        </TouchableOpacity>
+      </View>
+    ),
+    [router],
   );
 
   /**
@@ -245,32 +257,35 @@ const ItemList = () => {
    * @param item - The artist item to render.
    * @returns A View component representing an artist result.
    */
-  const renderArtistResult = ({ item }: { item: Artist }) => (
-    <View key={item.id} style={styles.searchResult}>
-      <TouchableOpacity
-        style={styles.searchResultTouchableArea}
-        onPress={() => {
-          triggerHaptic();
-          router.push({
-            pathname: "/(tabs)/home/artist",
-            params: { id: item.id, subtitle: item.subtitle },
-          });
-        }}
-      >
-        <FastImage
-          source={{ uri: item.thumbnail }}
-          style={styles.songThumbnail}
-        />
-        <View style={styles.resultText}>
-          <Text style={styles.resultTitle} numberOfLines={1}>
-            {item.name}
-          </Text>
-          <Text style={styles.resultArtist} numberOfLines={1}>
-            {item.subtitle}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    </View>
+  const renderArtistResult = useCallback(
+    ({ item }: { item: Artist }) => (
+      <View key={item.id} style={styles.searchResult}>
+        <TouchableOpacity
+          style={styles.searchResultTouchableArea}
+          onPress={() => {
+            triggerHaptic();
+            router.push({
+              pathname: "/(tabs)/home/artist",
+              params: { id: item.id, subtitle: item.subtitle },
+            });
+          }}
+        >
+          <FastImage
+            source={{ uri: item.thumbnail }}
+            style={styles.songThumbnail}
+          />
+          <View style={styles.resultText}>
+            <Text style={styles.resultTitle} numberOfLines={1}>
+              {item.name}
+            </Text>
+            <Text style={styles.resultArtist} numberOfLines={1}>
+              {item.subtitle}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    ),
+    [router],
   );
 
   useEffect(() => {
@@ -299,11 +314,6 @@ const ItemList = () => {
     fetchTracks();
   }, [data, type]);
 
-  const handleSongSelect = (song: Song) => {
-    triggerHaptic();
-    playAudio(song, formattedTracks);
-  };
-
   const getItems = () => {
     if (type === "song" || type === "video") return formattedTracks;
     if (type === "album") return formattedTracksAlbums;
@@ -311,6 +321,30 @@ const ItemList = () => {
     return [];
   };
   const items = getItems();
+
+  const renderItem = useCallback(
+    ({ item }: { item: any }) => {
+      switch (type) {
+        case "song":
+          return renderSongResult({ item });
+        case "video":
+          return renderVideoResult({ item });
+        case "album":
+          return renderAlbumResult({ item });
+        case "artist":
+          return renderArtistResult({ item });
+        default:
+          return null;
+      }
+    },
+    [
+      type,
+      renderAlbumResult,
+      renderArtistResult,
+      renderSongResult,
+      renderVideoResult,
+    ],
+  );
 
   return (
     <View style={defaultStyles.container}>
@@ -344,12 +378,16 @@ const ItemList = () => {
       {isLoading ? (
         <ActivityIndicator color="white" size="large" />
       ) : (
-        <ScrollView
+        <FlashList
           style={styles.songList}
-          contentContainerStyle={[
-            { paddingBottom: verticalScale(190) + bottom },
-            items.length === 0 && { flex: 1 },
-          ]}
+          data={items}
+          renderItem={renderItem}
+          getItemType={() => type}
+          keyExtractor={(item: any) => item.id}
+          estimatedItemSize={moderateScale(75)}
+          contentContainerStyle={{
+            paddingBottom: verticalScale(190) + bottom,
+          }}
           showsVerticalScrollIndicator={false}
           onScroll={(e) => {
             const currentScrollPosition =
@@ -357,8 +395,7 @@ const ItemList = () => {
             setIsScrolling(currentScrollPosition > 5);
           }}
           scrollEventThrottle={16}
-        >
-          {items.length === 0 ? (
+          ListEmptyComponent={
             <View
               style={{
                 flex: 1,
@@ -377,19 +414,8 @@ const ItemList = () => {
                 No Result Found
               </Text>
             </View>
-          ) : (
-            items.map((item) => {
-              if (type === "song")
-                return renderSongResult({ item: item as Song });
-              if (type === "video")
-                return renderVideoResult({ item: item as Song });
-              if (type === "album")
-                return renderAlbumResult({ item: item as Album });
-              if (type === "artist")
-                return renderArtistResult({ item: item as Artist });
-            })
-          )}
-        </ScrollView>
+          }
+        />
       )}
 
       {(type === "song" || type === "video") && formattedTracks.length > 0 && (

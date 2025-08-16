@@ -6,6 +6,7 @@
  * @packageDocumentation
  */
 
+import React, { useCallback, useMemo, useState } from "react";
 import CreatePlaylistModal from "@/app/(modals)/createPlaylist";
 import { FullScreenGradientBackground } from "@/components/GradientBackground";
 import { Colors } from "@/constants/Colors";
@@ -14,18 +15,12 @@ import { triggerHaptic } from "@/helpers/haptics";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import { usePlaylists } from "@/store/library";
 import { defaultStyles } from "@/styles";
+import { FlashList } from "@shopify/flash-list";
 import FastImage from "@d11/react-native-fast-image";
 import { Entypo } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import {
-  ScrollView,
-  Text,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 import { AnimatedFAB, Divider } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -55,10 +50,14 @@ export default function PlaylistScreen() {
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
   // Convert the playlists object into an array for rendering.
-  const playlistArray = Object.entries(playlists).map(([name, tracks]) => ({
-    name,
-    thumbnail: tracks.length > 0 ? tracks[0].thumbnail : null,
-  }));
+  const playlistArray = useMemo(
+    () =>
+      Object.entries(playlists).map(([name, tracks]) => ({
+        name,
+        thumbnail: tracks[0]?.thumbnail ?? null,
+      })),
+    [playlists],
+  );
 
   /**
    * Handles the creation of a new playlist.
@@ -83,54 +82,53 @@ export default function PlaylistScreen() {
    * @param item - The playlist item to render.
    * @returns A View component representing a playlist.
    */
-  const renderPlaylist = ({
-    item,
-  }: {
-    item: { name: string; thumbnail: string | null };
-  }) => (
-    <View key={item.name} style={styles.playlistItem}>
-      <TouchableOpacity
-        style={styles.playlistItemTouchableArea}
-        onPress={() => {
-          triggerHaptic();
-          // Navigate to the individual playlist screen.
-          router.push({
-            pathname: `/(tabs)/playlists/[playlistName]`,
-            params: { playlistName: item.name },
-          });
-        }}
-      >
-        <FastImage
-          source={{ uri: item.thumbnail ?? unknownTrackImageUri }}
-          style={styles.thumbnail}
-        />
-        <Text style={styles.playlistName}>{item.name}</Text>
-      </TouchableOpacity>
-      {/* Options menu button for the playlist */}
-      <TouchableOpacity
-        onPress={() => {
-          triggerHaptic();
-          // Prepare playlist data for the menu modal.
-          const playlistData = JSON.stringify({
-            name: item.name,
-            thumbnail: item.thumbnail,
-          });
+  const renderPlaylist = useCallback(
+    ({ item }: { item: { name: string; thumbnail: string | null } }) => (
+      <View style={styles.playlistItem}>
+        <TouchableOpacity
+          style={styles.playlistItemTouchableArea}
+          onPress={() => {
+            triggerHaptic();
+            // Navigate to the individual playlist screen.
+            router.push({
+              pathname: `/(tabs)/playlists/[playlistName]`,
+              params: { playlistName: item.name },
+            });
+          }}
+        >
+          <FastImage
+            source={{ uri: item.thumbnail ?? unknownTrackImageUri }}
+            style={styles.thumbnail}
+          />
+          <Text style={styles.playlistName}>{item.name}</Text>
+        </TouchableOpacity>
+        {/* Options menu button for the playlist */}
+        <TouchableOpacity
+          onPress={() => {
+            triggerHaptic();
+            // Prepare playlist data for the menu modal.
+            const playlistData = JSON.stringify({
+              name: item.name,
+              thumbnail: item.thumbnail,
+            });
 
-          // Navigate to the menu modal.
-          router.push({
-            pathname: "/(modals)/menu",
-            params: { playlistData: playlistData, type: "playlist" },
-          });
-        }}
-        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-      >
-        <Entypo
-          name="dots-three-vertical"
-          size={moderateScale(15)}
-          color="white"
-        />
-      </TouchableOpacity>
-    </View>
+            // Navigate to the menu modal.
+            router.push({
+              pathname: "/(modals)/menu",
+              params: { playlistData: playlistData, type: "playlist" },
+            });
+          }}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <Entypo
+            name="dots-three-vertical"
+            size={moderateScale(15)}
+            color="white"
+          />
+        </TouchableOpacity>
+      </View>
+    ),
+    [router],
   );
 
   return (
@@ -154,22 +152,22 @@ export default function PlaylistScreen() {
           />
         )}
 
-        <ScrollView
-          style={styles.playlistList}
-          contentContainerStyle={[
-            { paddingBottom: verticalScale(190) + bottom },
-            playlistArray.length === 0 && { flex: 1 },
-          ]}
+        <FlashList
+          data={playlistArray}
+          renderItem={renderPlaylist}
+          estimatedItemSize={moderateScale(75)}
+          contentContainerStyle={{
+            paddingBottom: verticalScale(190) + bottom,
+          }}
           showsVerticalScrollIndicator={false}
           onScroll={(e) => {
             const currentScrollPosition =
               Math.floor(e.nativeEvent.contentOffset.y) || 0;
             setIsScrolling(currentScrollPosition > 5);
           }}
+          keyExtractor={(item) => item.name}
           scrollEventThrottle={16}
-        >
-          {/* Message when no playlists are found */}
-          {playlistArray.length === 0 ? (
+          ListEmptyComponent={
             <View
               style={{
                 flex: 1,
@@ -189,24 +187,22 @@ export default function PlaylistScreen() {
                 your favorite songs.
               </Text>
             </View>
-          ) : (
-            // Render each playlist item.
-            playlistArray.map((item) => renderPlaylist({ item }))
-          )}
-          {/* Display total number of playlists */}
-          {playlistArray.length !== 0 && (
-            <Text
-              style={{
-                color: Colors.textMuted,
-                textAlign: "center",
-                fontSize: moderateScale(15),
-              }}
-            >
-              {playlistArray.length}{" "}
-              {`Playlist${playlistArray.length > 1 ? "s" : ""}`}
-            </Text>
-          )}
-        </ScrollView>
+          }
+          ListFooterComponent={
+            playlistArray.length > 0 ? (
+              <Text
+                style={{
+                  color: Colors.textMuted,
+                  textAlign: "center",
+                  fontSize: moderateScale(15),
+                }}
+              >
+                {playlistArray.length}{" "}
+                {`Playlist${playlistArray.length > 1 ? "s" : ""}`}
+              </Text>
+            ) : null
+          }
+        />
 
         {/* Floating Action Button to create a new playlist */}
         <AnimatedFAB

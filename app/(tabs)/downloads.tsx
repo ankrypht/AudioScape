@@ -18,17 +18,12 @@ import {
   useDownloadedTracks,
 } from "@/store/library";
 import { defaultStyles } from "@/styles";
+import { FlashList } from "@shopify/flash-list";
 import FastImage from "@d11/react-native-fast-image";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useMemo, useState, useCallback } from "react";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import LoaderKit from "react-native-loader-kit";
 import { AnimatedFAB, Divider } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -74,10 +69,13 @@ const DownloadsScreen = () => {
    * Handles playing a single downloaded song.
    * @param song - The `DownloadedSongMetadata` of the song to play.
    */
-  const handleSongSelect = (song: DownloadedSongMetadata) => {
-    triggerHaptic();
-    playDownloadedSong(song, formattedTracks);
-  };
+  const handleSongSelect = useCallback(
+    (song: DownloadedSongMetadata) => {
+      triggerHaptic();
+      playDownloadedSong(song, formattedTracks);
+    },
+    [formattedTracks, playDownloadedSong],
+  );
 
   /**
    * Handles playing all downloaded songs.
@@ -93,28 +91,117 @@ const DownloadsScreen = () => {
    * Handles opening the menu for a specific downloaded song.
    * @param song - The `DownloadedSongMetadata` of the song to open the menu for.
    */
-  const handleOpenMenu = (song: DownloadedSongMetadata) => {
-    triggerHaptic();
-    // Find the original metadata to ensure all necessary fields are passed.
-    const originalMetadata = downloadedTracksMeta.find((m) => m.id === song.id);
-    if (!originalMetadata) return;
+  const handleOpenMenu = useCallback(
+    (song: DownloadedSongMetadata) => {
+      triggerHaptic();
+      // Find the original metadata to ensure all necessary fields are passed.
+      const originalMetadata = downloadedTracksMeta.find(
+        (m) => m.id === song.id,
+      );
+      if (!originalMetadata) return;
 
-    // Prepare song data for the menu modal.
-    const songDataForMenu = JSON.stringify({
-      id: originalMetadata.id,
-      title: originalMetadata.title,
-      artist: originalMetadata.artist,
-      thumbnail: originalMetadata.localArtworkUri,
-      url: originalMetadata.localTrackUri,
-      duration: originalMetadata.duration,
-    });
+      // Prepare song data for the menu modal.
+      const songDataForMenu = JSON.stringify({
+        id: originalMetadata.id,
+        title: originalMetadata.title,
+        artist: originalMetadata.artist,
+        thumbnail: originalMetadata.localArtworkUri,
+        url: originalMetadata.localTrackUri,
+        duration: originalMetadata.duration,
+      });
 
-    // Navigate to the menu modal.
-    router.push({
-      pathname: "/(modals)/menu",
-      params: { songData: songDataForMenu, type: "downloadedSong" },
-    });
-  };
+      // Navigate to the menu modal.
+      router.push({
+        pathname: "/(modals)/menu",
+        params: { songData: songDataForMenu, type: "downloadedSong" },
+      });
+    },
+    [downloadedTracksMeta, router],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: DownloadedSongMetadata }) => (
+      <View style={styles.songItem}>
+        <TouchableOpacity
+          style={styles.songItemTouchableArea}
+          onPress={() => handleSongSelect(item)}
+        >
+          <FastImage
+            source={{
+              uri: item.localArtworkUri ?? unknownTrackImageUri,
+            }}
+            style={styles.resultThumbnail}
+          />
+          {/* Playing indicator for downloaded active track */}
+          {activeTrack?.id === item.id &&
+            activeTrack.url === item.localTrackUri && (
+              <LoaderKit
+                style={styles.trackPlayingIconIndicator}
+                name="LineScalePulseOutRapid"
+                color={"white"}
+              />
+            )}
+          <View style={styles.resultText}>
+            <Text style={styles.resultTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.resultArtist} numberOfLines={1}>
+              {item.artist}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Options menu button for downloaded song */}
+        <TouchableOpacity
+          onPress={() => handleOpenMenu(item)}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <Entypo
+            name="dots-three-vertical"
+            size={moderateScale(15)}
+            color={"white"}
+          />
+        </TouchableOpacity>
+      </View>
+    ),
+    [handleSongSelect, handleOpenMenu, activeTrack],
+  );
+
+  const activeDownloadsHeader = useMemo(
+    () =>
+      activeDownloads.length > 0 ? (
+        <View style={{ marginBottom: 10 }}>
+          {activeDownloads.map((song) => (
+            <View key={song.id} style={styles.songItem}>
+              <FastImage
+                source={{
+                  uri: song.thumbnail ?? unknownTrackImageUri,
+                }}
+                style={[styles.resultThumbnail, { opacity: 0.6 }]}
+              />
+              <View style={{ flex: 1 }}>
+                <Text numberOfLines={1} style={styles.resultTitle}>
+                  {song.title}
+                </Text>
+                <Text style={styles.resultArtist}>
+                  {song.progress.toFixed(0)}%
+                </Text>
+                {/* Simple progress bar for active downloads */}
+                <View style={styles.progressBarBackground}>
+                  <View
+                    style={[
+                      styles.progressBarFill,
+                      { width: `${Math.floor(song.progress)}%` },
+                    ]}
+                  />
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      ) : null,
+    [activeDownloads],
+  );
 
   return (
     <FullScreenGradientBackground index={gradientIndex}>
@@ -143,14 +230,14 @@ const DownloadsScreen = () => {
             <ActivityIndicator color={Colors.text} size="large" />
           </View>
         ) : (
-          <ScrollView
-            style={styles.songList}
-            contentContainerStyle={[
-              { paddingBottom: verticalScale(190) + bottom },
-              formattedTracks.length === 0 &&
-                activeDownloads.length === 0 &&
-                styles.centeredMessageContainer,
-            ]}
+          <FlashList
+            data={formattedTracks}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            estimatedItemSize={moderateScale(75)}
+            contentContainerStyle={{
+              paddingBottom: verticalScale(190) + bottom,
+            }}
             showsVerticalScrollIndicator={false}
             onScroll={(e) => {
               const currentScrollPosition =
@@ -158,103 +245,26 @@ const DownloadsScreen = () => {
               setIsScrolling(currentScrollPosition > 5);
             }}
             scrollEventThrottle={16}
-          >
-            {/* Message when no songs are downloaded */}
-            {formattedTracks.length === 0 && activeDownloads.length === 0 ? (
-              <Text style={styles.centeredMessageText}>
-                No songs downloaded yet! {"\n"}Find songs and tap the download
-                icon.
-              </Text>
-            ) : (
-              <>
-                {/* Display active downloads */}
-                {activeDownloads.length > 0 && (
-                  <View style={{ marginBottom: 10 }}>
-                    {activeDownloads.map((song) => (
-                      <View key={song.id} style={styles.songItem}>
-                        <FastImage
-                          source={{
-                            uri: song.thumbnail ?? unknownTrackImageUri,
-                          }}
-                          style={[styles.resultThumbnail, { opacity: 0.6 }]}
-                        />
-                        <View style={{ flex: 1 }}>
-                          <Text numberOfLines={1} style={styles.resultTitle}>
-                            {song.title}
-                          </Text>
-                          <Text style={styles.resultArtist}>
-                            {song.progress.toFixed(0)}%
-                          </Text>
-                          {/* Simple progress bar for active downloads */}
-                          <View style={styles.progressBarBackground}>
-                            <View
-                              style={[
-                                styles.progressBarFill,
-                                { width: `${Math.floor(song.progress)}%` },
-                              ]}
-                            />
-                          </View>
-                        </View>
-                      </View>
-                    ))}
-                  </View>
-                )}
-                {/* Display downloaded songs */}
-                {formattedTracks.map((item) => (
-                  <View key={item.id} style={styles.songItem}>
-                    <TouchableOpacity
-                      style={styles.songItemTouchableArea}
-                      onPress={() => handleSongSelect(item)}
-                    >
-                      <FastImage
-                        source={{
-                          uri: item.localArtworkUri ?? unknownTrackImageUri,
-                        }}
-                        style={styles.resultThumbnail}
-                      />
-                      {/* Playing indicator for downloaded active track */}
-                      {activeTrack?.id === item.id &&
-                        activeTrack.url === item.localTrackUri && (
-                          <LoaderKit
-                            style={styles.trackPlayingIconIndicator}
-                            name="LineScalePulseOutRapid"
-                            color={"white"}
-                          />
-                        )}
-                      <View style={styles.resultText}>
-                        <Text style={styles.resultTitle} numberOfLines={1}>
-                          {item.title}
-                        </Text>
-                        <Text style={styles.resultArtist} numberOfLines={1}>
-                          {item.artist}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-
-                    {/* Options menu button for downloaded song */}
-                    <TouchableOpacity
-                      onPress={() => handleOpenMenu(item)}
-                      hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                    >
-                      <Entypo
-                        name="dots-three-vertical"
-                        size={moderateScale(15)}
-                        color={"white"}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </>
-            )}
-
-            {/* Display total number of downloaded tracks */}
-            {formattedTracks.length > 0 && (
-              <Text style={styles.trackCountText}>
-                {formattedTracks.length}{" "}
-                {`Track${formattedTracks.length > 1 ? "s" : ""}`}
-              </Text>
-            )}
-          </ScrollView>
+            ListHeaderComponent={activeDownloadsHeader}
+            ListEmptyComponent={
+              activeDownloads.length === 0 ? (
+                <View style={styles.centeredMessageContainer}>
+                  <Text style={styles.centeredMessageText}>
+                    No songs downloaded yet! {"\n"}Find songs and tap the
+                    download icon.
+                  </Text>
+                </View>
+              ) : null
+            }
+            ListFooterComponent={
+              formattedTracks.length > 0 ? (
+                <Text style={styles.trackCountText}>
+                  {formattedTracks.length}{" "}
+                  {`Track${formattedTracks.length > 1 ? "s" : ""}`}
+                </Text>
+              ) : null
+            }
+          />
         )}
 
         {/* Floating Action Button to play all downloaded songs */}
@@ -295,10 +305,6 @@ const styles = ScaledSheet.create({
   },
   headerScrolled: {
     backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  songList: {
-    flexDirection: "column",
-    width: "100%",
   },
   songItem: {
     flexDirection: "row",
@@ -352,6 +358,7 @@ const styles = ScaledSheet.create({
     color: Colors.textMuted,
     textAlign: "center",
     fontSize: "15@ms",
+    paddingTop: 10,
   },
   fab: {
     position: "absolute",

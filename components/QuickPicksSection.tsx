@@ -6,15 +6,16 @@
  * @packageDocumentation
  */
 
+import React, { useMemo } from "react";
 import { Colors } from "@/constants/Colors";
 import { triggerHaptic } from "@/helpers/haptics";
+import { FlashList } from "@shopify/flash-list";
 import FastImage from "@d11/react-native-fast-image";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import LoaderKit from "react-native-loader-kit";
-import { ScaledSheet } from "react-native-size-matters/extend";
+import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 import { useActiveTrack } from "react-native-track-player";
 
 /**
@@ -90,10 +91,13 @@ export const QuickPicksSection: React.FC<QuickPicksSectionProps> = ({
     </TouchableOpacity>
   );
 
-  // Split the results into two rows for display.
-  const middleIndex = Math.ceil(results.length / 2);
-  const topRowItems = results.slice(0, middleIndex);
-  const bottomRowItems = results.slice(middleIndex);
+  const data = useMemo(() => {
+    const mid = Math.ceil(results.length / 2);
+    return results.slice(0, mid).map((top, idx) => ({
+      top,
+      bottom: results.slice(mid)[idx],
+    }));
+  }, [results]);
 
   // If there are no results, return null to avoid rendering the section.
   if (results.length === 0) {
@@ -103,16 +107,22 @@ export const QuickPicksSection: React.FC<QuickPicksSectionProps> = ({
   return (
     <View>
       <Text style={styles.header}>Quick Picks</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingLeft: 13 }}
-      >
-        <View style={styles.rowsContainer}>
-          <View style={styles.row}>{topRowItems.map(renderItem)}</View>
-          <View style={styles.row}>{bottomRowItems.map(renderItem)}</View>
-        </View>
-      </ScrollView>
+      <View style={styles.listContainer}>
+        <FlashList
+          data={data}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingLeft: 13 }}
+          estimatedItemSize={moderateScale(100)}
+          keyExtractor={(col) => `${col.top.id}-${col.bottom?.id || "none"}`}
+          renderItem={({ item }) => (
+            <View style={styles.column}>
+              {renderItem(item.top)}
+              {item.bottom && renderItem(item.bottom)}
+            </View>
+          )}
+        />
+      </View>
     </View>
   );
 };
@@ -126,17 +136,17 @@ const styles = ScaledSheet.create({
     paddingHorizontal: 15,
     paddingBottom: 12,
   },
-  rowsContainer: {
-    flexDirection: "column",
+  listContainer: {
+    height: "300@ms",
   },
-  row: {
-    flexDirection: "row",
-    marginBottom: "10@vs",
+  column: {
+    flexDirection: "column",
   },
   itemContainer: {
     marginRight: "10@ms",
     width: "100@ms",
     height: "145@ms",
+    marginBottom: "10@vs",
   },
   imageContainer: {
     position: "relative",

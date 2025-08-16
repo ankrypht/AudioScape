@@ -12,9 +12,10 @@ import { unknownTrackImageUri } from "@/constants/images";
 import { triggerHaptic } from "@/helpers/haptics";
 import FastImage from "@d11/react-native-fast-image";
 import { Entypo } from "@expo/vector-icons";
+import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import LoaderKit from "react-native-loader-kit";
 import { Divider } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -38,6 +39,7 @@ export default function QueueModal() {
   const activeTrack = useActiveTrack();
   const router = useRouter();
   const { bottom } = useSafeAreaInsets();
+  const activeTrackId = activeTrack?.id;
 
   /**
    * Fetches the current queue and active track index from TrackPlayer.
@@ -76,84 +78,90 @@ export default function QueueModal() {
    * Handles selecting a song from the queue, skipping to that song.
    * @param song - The selected song from the queue.
    */
-  const handleSongSelect = async (song: Track) => {
-    triggerHaptic();
-    await TrackPlayer.skip(queue.indexOf(song));
-  };
+  const handleSongSelect = useCallback(
+    async (song: Track) => {
+      triggerHaptic();
+      await TrackPlayer.skip(queue.indexOf(song));
+    },
+    [queue],
+  );
 
   /**
-   * Renders an individual song item in the FlatList.
+   * Renders an individual song item in the FlashList.
    * @param item - The song item to render.
    * @param index - Its index in the queue.
    * @returns A View component representing a song in the queue.
    */
-  const renderSongItem = ({ item, index }: { item: Track; index: number }) => (
-    <View
-      key={item.id}
-      style={[
-        styles.songItem,
-        activeTrack?.id === item.id && styles.activeSongItem, // Highlight active song.
-      ]}
-    >
-      <TouchableOpacity
-        style={styles.songItemTouchableArea}
-        onPress={() => handleSongSelect(item)}
+  const renderSongItem = useCallback(
+    ({ item, index }: { item: Track; index: number }) => (
+      <View
+        key={item.id}
+        style={[
+          styles.songItem,
+          activeTrackId === item.id && styles.activeSongItem, // Highlight active song.
+        ]}
       >
-        {/* Song index in the queue */}
-        <View style={styles.indexContainer}>
-          <Text style={styles.indexText}>{index + 1}</Text>
-        </View>
-        {/* Song artwork */}
-        <FastImage
-          source={{ uri: item.artwork ?? unknownTrackImageUri }}
-          style={styles.thumbnail}
-        />
-        {/* Playing indicator for the active track */}
-        {activeTrack?.id === item.id && (
-          <LoaderKit
-            style={styles.trackPlayingIconIndicator}
-            name="LineScalePulseOutRapid"
-            color={"white"}
-          />
-        )}
-        {/* Song title and artist */}
-        <View style={styles.songText}>
-          <Text style={styles.songTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <Text style={styles.songArtist} numberOfLines={1}>
-            {item.artist}
-          </Text>
-        </View>
-
-        {/* Options menu button for the song */}
         <TouchableOpacity
-          onPress={() => {
-            triggerHaptic();
-            // Prepare song data for the menu modal.
-            const songData = JSON.stringify({
-              id: item.id,
-              title: item.title,
-              artist: item.artist,
-              thumbnail: item.artwork ?? unknownTrackImageUri,
-            });
-
-            // Navigate to the menu modal with song details.
-            router.push({
-              pathname: "/(modals)/menu",
-              params: { songData: songData, type: "queueSong" },
-            });
-          }}
-          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          style={styles.songItemTouchableArea}
+          onPress={() => handleSongSelect(item)}
         >
-          <Entypo
-            name="dots-three-vertical"
-            size={moderateScale(15)}
-            color="white"
+          {/* Song index in the queue */}
+          <View style={styles.indexContainer}>
+            <Text style={styles.indexText}>{index + 1}</Text>
+          </View>
+          {/* Song artwork */}
+          <FastImage
+            source={{ uri: item.artwork ?? unknownTrackImageUri }}
+            style={styles.thumbnail}
           />
+          {/* Playing indicator for the active track */}
+          {activeTrack?.id === item.id && (
+            <LoaderKit
+              style={styles.trackPlayingIconIndicator}
+              name="LineScalePulseOutRapid"
+              color={"white"}
+            />
+          )}
+          {/* Song title and artist */}
+          <View style={styles.songText}>
+            <Text style={styles.songTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.songArtist} numberOfLines={1}>
+              {item.artist}
+            </Text>
+          </View>
+
+          {/* Options menu button for the song */}
+          <TouchableOpacity
+            onPress={() => {
+              triggerHaptic();
+              // Prepare song data for the menu modal.
+              const songData = JSON.stringify({
+                id: item.id,
+                title: item.title,
+                artist: item.artist,
+                thumbnail: item.artwork ?? unknownTrackImageUri,
+              });
+
+              // Navigate to the menu modal with song details.
+              router.push({
+                pathname: "/(modals)/menu",
+                params: { songData: songData, type: "queueSong" },
+              });
+            }}
+            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          >
+            <Entypo
+              name="dots-three-vertical"
+              size={moderateScale(15)}
+              color="white"
+            />
+          </TouchableOpacity>
         </TouchableOpacity>
-      </TouchableOpacity>
-    </View>
+      </View>
+    ),
+    [activeTrack, activeTrackId, handleSongSelect, router],
   );
 
   return (
@@ -187,15 +195,15 @@ export default function QueueModal() {
               />
             )}
 
-            {/* FlatList to display the song queue */}
-            <View>
-              <FlatList
+            {/* FlashList to display the song queue */}
+            <View style={{ flex: 1 }}>
+              <FlashList
                 data={queue}
                 keyExtractor={(item) => item.id}
                 renderItem={renderSongItem}
                 showsVerticalScrollIndicator={false}
+                estimatedItemSize={moderateScale(75)}
                 contentContainerStyle={{
-                  flexGrow: 1,
                   paddingBottom: bottom + 10,
                 }}
                 onScroll={(e) => {
@@ -224,8 +232,9 @@ const styles = ScaledSheet.create({
     backgroundColor: "#101010",
     borderTopLeftRadius: "25@ms",
     borderTopRightRadius: "25@ms",
-    paddingVertical: 15,
+    paddingTop: 15,
     maxHeight: "60%",
+    flex: 1,
   },
   header: {
     flexDirection: "row",

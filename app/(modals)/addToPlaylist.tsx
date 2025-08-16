@@ -12,18 +12,13 @@ import { Colors } from "@/constants/Colors";
 import { unknownTrackImageUri } from "@/constants/images";
 import { triggerHaptic } from "@/helpers/haptics";
 import { usePlaylists } from "@/store/library";
+import { FlashList } from "@shopify/flash-list";
 import FastImage from "@d11/react-native-fast-image";
 import { Entypo } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams } from "expo-router";
-import React, { useMemo, useState } from "react";
-import {
-  FlatList,
-  Text,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 import { Divider } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
@@ -44,11 +39,15 @@ export default function AddToPlaylistModal() {
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Convert the playlists object into an array for FlatList rendering.
-  const playlistArray = Object.entries(playlists).map(([name, tracks]) => ({
-    name,
-    thumbnail: tracks.length > 0 ? tracks[0].thumbnail : null,
-  }));
+  // Convert the playlists object into an array for FlashList rendering.
+  const playlistArray = useMemo(
+    () =>
+      Object.entries(playlists).map(([name, tracks]) => ({
+        name,
+        thumbnail: tracks[0]?.thumbnail ?? null,
+      })),
+    [playlists],
+  );
 
   /**
    * Handles the creation of a new playlist.
@@ -73,28 +72,31 @@ export default function AddToPlaylistModal() {
     return params?.track ? JSON.parse(params.track as string) : null;
   }, [params]);
 
-  const track =
-    trackFromParams ??
-    (activeTrack
-      ? {
-          id: activeTrack.id,
-          title: activeTrack.title || "",
-          artist: activeTrack.artist || "",
-          thumbnail: activeTrack.artwork || "https://placehold.co/50",
-        }
-      : undefined);
+  const track = useMemo(() => {
+    return (
+      trackFromParams ??
+      (activeTrack
+        ? {
+            id: activeTrack.id,
+            title: activeTrack.title || "",
+            artist: activeTrack.artist || "",
+            thumbnail: activeTrack.artwork || unknownTrackImageUri,
+          }
+        : undefined)
+    );
+  }, [activeTrack, trackFromParams]);
 
   /**
-   * Renders an individual playlist item in the FlatList.
+   * Renders an individual playlist item in the FlashList.
    * @param item - The playlist item to render.
    * @param handleDismiss - Function to dismiss the modal.
    * @returns A TouchableOpacity component representing a playlist.
    */
-  const renderPlaylistItem = (
-    { item }: { item: { name: string; thumbnail: string | null } },
-    handleDismiss: () => void,
-  ) => {
-    return (
+  const renderPlaylistItem = useCallback(
+    (
+      { item }: { item: { name: string; thumbnail: string | null } },
+      handleDismiss: () => void,
+    ) => (
       <TouchableOpacity
         style={styles.playlistItem}
         onPress={() => {
@@ -111,8 +113,9 @@ export default function AddToPlaylistModal() {
         />
         <Text style={styles.playlistName}>{item.name}</Text>
       </TouchableOpacity>
-    );
-  };
+    ),
+    [track, addTrackToPlaylist],
+  );
 
   return (
     <VerticalDismiss>
@@ -155,14 +158,14 @@ export default function AddToPlaylistModal() {
             )}
 
             {/* List of playlists */}
-            <View>
-              <FlatList
+            <View style={{ flex: 1 }}>
+              <FlashList
                 data={playlistArray}
                 keyExtractor={(item) => item.name}
                 renderItem={(props) => renderPlaylistItem(props, handleDismiss)}
                 showsVerticalScrollIndicator={false}
+                estimatedItemSize={70}
                 contentContainerStyle={{
-                  flexGrow: 1,
                   paddingBottom: bottom + 10,
                 }}
                 onScroll={(e) => {
@@ -201,8 +204,9 @@ const styles = ScaledSheet.create({
     backgroundColor: "#101010",
     borderTopLeftRadius: "25@ms",
     borderTopRightRadius: "25@ms",
-    paddingVertical: 20,
+    paddingTop: 20,
     maxHeight: "60%",
+    flex: 1,
   },
   header: {
     flexDirection: "row",
@@ -226,7 +230,7 @@ const styles = ScaledSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 10,
-    paddingHorizontal: 30,
+    paddingHorizontal: 25,
   },
   thumbnail: {
     width: "50@ms",
@@ -237,6 +241,7 @@ const styles = ScaledSheet.create({
   playlistName: {
     fontSize: "16@ms",
     color: Colors.text,
+    paddingRight: 50,
   },
   createButton: {
     backgroundColor: "white",

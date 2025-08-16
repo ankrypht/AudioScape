@@ -13,13 +13,14 @@ import { triggerHaptic } from "@/helpers/haptics";
 import { useImageColors } from "@/hooks/useImageColors";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import { usePlaylists } from "@/store/library";
+import { FlashList } from "@shopify/flash-list";
 import FastImage from "@d11/react-native-fast-image";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import color from "color";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import LoaderKit from "react-native-loader-kit";
 import { Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -69,6 +70,105 @@ const PlaylistView = () => {
     triggerHaptic();
     playAudio(song, playlist);
   };
+
+  const ListHeader = () => (
+    <>
+      {/* Playlist artwork (first song's thumbnail) */}
+      <View style={styles.artworkImageContainer}>
+        <FastImage
+          source={{
+            uri: playlist[0]?.thumbnail ?? unknownTrackImageUri,
+            priority: FastImage.priority.high,
+          }}
+          style={styles.artworkImage}
+        />
+      </View>
+
+      <Text
+        onLayout={(event) => {
+          const layout = event.nativeEvent.layout;
+          setTitleLayout({ y: layout.y, height: layout.height });
+        }}
+        style={styles.titleText}
+      >
+        {playlistName}
+      </Text>
+
+      {/* Display total number of tracks in the playlist */}
+      {playlist.length !== 0 && (
+        <Text
+          style={{
+            color: Colors.text,
+            textAlign: "center",
+            fontSize: moderateScale(15),
+            marginBottom: 5,
+          }}
+        >
+          {playlist.length} {`Track${playlist.length > 1 ? "s" : ""}`}
+        </Text>
+      )}
+    </>
+  );
+
+  const renderSongItem = ({ item }: { item: Song }) => (
+    <View style={styles.songItem}>
+      <TouchableOpacity
+        style={styles.songItemTouchableArea}
+        onPress={() => handleSongSelect(item)}
+      >
+        <FastImage
+          source={{ uri: item.thumbnail }}
+          style={styles.resultThumbnail}
+        />
+        {/* Playing indicator for the active track */}
+        {activeTrack?.id === item.id && (
+          <LoaderKit
+            style={styles.trackPlayingIconIndicator}
+            name="LineScalePulseOutRapid"
+            color="white"
+          />
+        )}
+        <View style={styles.resultText}>
+          <Text style={styles.resultTitle} numberOfLines={1}>
+            {item.title}
+          </Text>
+          <Text style={styles.resultArtist} numberOfLines={1}>
+            {item.artist}
+          </Text>
+        </View>
+      </TouchableOpacity>
+      {/* Options menu button for the song */}
+      <TouchableOpacity
+        onPress={() => {
+          triggerHaptic();
+          // Prepare song data for the menu modal.
+          const songData = JSON.stringify({
+            id: item.id,
+            title: item.title,
+            artist: item.artist,
+            thumbnail: item.thumbnail,
+          });
+
+          // Navigate to the menu modal.
+          router.push({
+            pathname: "/(modals)/menu",
+            params: {
+              songData: songData,
+              type: "playlistSong",
+              playlistName: playlistName,
+            },
+          });
+        }}
+        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+      >
+        <Entypo
+          name="dots-three-vertical"
+          size={moderateScale(15)}
+          color="white"
+        />
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <LinearGradient
@@ -125,10 +225,15 @@ const PlaylistView = () => {
           />
         )}
 
-        <ScrollView
+        <FlashList
+          data={playlist}
+          renderItem={renderSongItem}
+          keyExtractor={(item: any) => item.id}
+          ListHeaderComponent={ListHeader}
+          estimatedItemSize={moderateScale(75)}
           contentContainerStyle={{
-            paddingBottom: verticalScale(190) + bottom,
             paddingHorizontal: 15,
+            paddingBottom: verticalScale(190) + bottom,
           }}
           showsVerticalScrollIndicator={false}
           onScroll={(e) => {
@@ -140,105 +245,7 @@ const PlaylistView = () => {
             );
           }}
           scrollEventThrottle={16}
-        >
-          {/* Playlist artwork (first song's thumbnail) */}
-          <View style={styles.artworkImageContainer}>
-            <FastImage
-              source={{
-                uri: playlist[0]?.thumbnail ?? unknownTrackImageUri,
-                priority: FastImage.priority.high,
-              }}
-              style={styles.artworkImage}
-            />
-          </View>
-
-          <Text
-            onLayout={(event) => {
-              const layout = event.nativeEvent.layout;
-              setTitleLayout({ y: layout.y, height: layout.height });
-            }}
-            style={styles.titleText}
-          >
-            {playlistName}
-          </Text>
-
-          {/* Display total number of tracks in the playlist */}
-          {playlist.length !== 0 && (
-            <Text
-              style={{
-                color: Colors.text,
-                textAlign: "center",
-                fontSize: moderateScale(15),
-                marginBottom: 5,
-              }}
-            >
-              {playlist.length} {`Track${playlist.length > 1 ? "s" : ""}`}
-            </Text>
-          )}
-
-          {/* List of songs in the playlist */}
-          <View>
-            {playlist.map((item: Song) => (
-              <View key={item.id} style={styles.songItem}>
-                <TouchableOpacity
-                  style={styles.songItemTouchableArea}
-                  onPress={() => handleSongSelect(item)}
-                >
-                  <FastImage
-                    source={{ uri: item.thumbnail }}
-                    style={styles.resultThumbnail}
-                  />
-                  {/* Playing indicator for the active track */}
-                  {activeTrack?.id === item.id && (
-                    <LoaderKit
-                      style={styles.trackPlayingIconIndicator}
-                      name="LineScalePulseOutRapid"
-                      color="white"
-                    />
-                  )}
-                  <View style={styles.resultText}>
-                    <Text style={styles.resultTitle} numberOfLines={1}>
-                      {item.title}
-                    </Text>
-                    <Text style={styles.resultArtist} numberOfLines={1}>
-                      {item.artist}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                {/* Options menu button for the song */}
-                <TouchableOpacity
-                  onPress={() => {
-                    triggerHaptic();
-                    // Prepare song data for the menu modal.
-                    const songData = JSON.stringify({
-                      id: item.id,
-                      title: item.title,
-                      artist: item.artist,
-                      thumbnail: item.thumbnail,
-                    });
-
-                    // Navigate to the menu modal.
-                    router.push({
-                      pathname: "/(modals)/menu",
-                      params: {
-                        songData: songData,
-                        type: "playlistSong",
-                        playlistName: playlistName,
-                      },
-                    });
-                  }}
-                  hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                >
-                  <Entypo
-                    name="dots-three-vertical"
-                    size={moderateScale(15)}
-                    color="white"
-                  />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-        </ScrollView>
+        />
 
         {/* Floating Action Button to play the entire playlist */}
         {playlist.length > 0 && (

@@ -15,6 +15,7 @@ import {
   processArtistPageData,
   processItems,
 } from "@/services/youtube";
+import { FlashList } from "@shopify/flash-list";
 import FastImage from "@d11/react-native-fast-image";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -87,7 +88,7 @@ export default function ArtistPageScreen() {
    * @returns A View component representing the song item.
    */
   const renderSong = ({ item }: { item: Song }) => (
-    <View key={item.id} style={styles.song}>
+    <View style={styles.song}>
       <TouchableOpacity
         style={styles.songTouchableArea}
         onPress={() => handleSongSelect(item)}
@@ -212,61 +213,51 @@ export default function ArtistPageScreen() {
     );
   }
 
-  return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{
-        paddingBottom: verticalScale(138) + bottom,
-      }}
-      showsVerticalScrollIndicator={false}
-    >
-      <View
-        style={[
-          styles.headerContainer,
-          { height: moderateScale(HEADER_HEIGHT) },
-        ]}
-      >
-        <ImageBackground
-          source={{ uri: artistData?.thumbnail }}
-          style={styles.headerImage}
-          resizeMode="cover"
-        >
-          <LinearGradient
-            colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.4)", "rgba(0,0,0,1)"]}
-            style={StyleSheet.absoluteFill}
-          />
-        </ImageBackground>
+  const listData: any[] = [];
+  if (artistData?.songs && artistData.songs.length > 0) {
+    listData.push({ type: "songs_header", id: "songs_header" });
+    listData.push(
+      ...artistData.songs.map((song) => ({
+        type: "song",
+        data: song,
+        id: song.id,
+      })),
+    );
+    listData.push({ type: "songs_footer", id: "songs_footer" });
+  }
+  if (artistData?.albums && artistData.albums.length > 0) {
+    listData.push({ type: "albums_header", id: "albums_header" });
+    listData.push({
+      type: "albums_carousel",
+      data: artistData.albums,
+      id: "albums_carousel",
+    });
+  }
+  if (artistData?.singlesAndEPs && artistData.singlesAndEPs.length > 0) {
+    listData.push({ type: "singles_header", id: "singles_header" });
+    listData.push({
+      type: "singles_carousel",
+      data: artistData.singlesAndEPs,
+      id: "singles_carousel",
+    });
+  }
+  if (artistData?.videos && artistData.videos.length > 0) {
+    listData.push({ type: "videos_header", id: "videos_header" });
+    listData.push({
+      type: "videos_carousel",
+      data: artistData.videos,
+      id: "videos_carousel",
+    });
+  }
 
-        {/* --- TOP NAVIGATION ICONS --- */}
-        <View style={[styles.topNav, { top: top }]}>
-          <TouchableOpacity
-            onPress={() => {
-              triggerHaptic();
-              router.back();
-            }}
-          >
-            <Ionicons
-              name="arrow-back"
-              size={moderateScale(26)}
-              color="white"
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* --- ARTIST TITLE AND INFO --- */}
-        <View style={styles.artistInfoContainer}>
-          <Text style={styles.artistName}>{artistData?.title}</Text>
-          <Text style={styles.artistSubtext}>
-            {(params.subtitle as string).replace("Artist • ", "")}
-          </Text>
-        </View>
-      </View>
-
-      {artistData?.songs && artistData?.songs.length > 0 && (
-        <>
-          <Text style={styles.resultTypeText}>Top Songs</Text>
-          {(artistData?.songs || []).map((item) => renderSong({ item }))}
-
+  const renderItem = ({ item }: { item: any }) => {
+    switch (item.type) {
+      case "songs_header":
+        return <Text style={styles.resultTypeText}>Top Songs</Text>;
+      case "song":
+        return renderSong({ item: item.data });
+      case "songs_footer":
+        return (
           <TouchableOpacity
             style={styles.button}
             onPress={async () => {
@@ -302,60 +293,110 @@ export default function ArtistPageScreen() {
           >
             <Text style={styles.buttonText}>Show More</Text>
           </TouchableOpacity>
-        </>
-      )}
-
-      {artistData?.albums && artistData?.albums.length > 0 && (
-        <>
-          <Text style={styles.resultTypeText}>Albums</Text>
+        );
+      case "albums_header":
+        return <Text style={styles.resultTypeText}>Albums</Text>;
+      case "albums_carousel":
+        return (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingLeft: 13 }}
           >
             <View style={styles.largeItemRow}>
-              {(artistData?.albums || []).map((item) =>
-                renderLargeItem(item, "album"),
+              {(item.data || []).map((albumItem: any) =>
+                renderLargeItem(albumItem, "album"),
               )}
             </View>
           </ScrollView>
-        </>
-      )}
-
-      {artistData?.singlesAndEPs && artistData?.singlesAndEPs.length > 0 && (
-        <>
-          <Text style={styles.resultTypeText}>Singles & EPs</Text>
+        );
+      case "singles_header":
+        return <Text style={styles.resultTypeText}>Singles & EPs</Text>;
+      case "singles_carousel":
+        return (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingLeft: 13 }}
           >
             <View style={styles.largeItemRow}>
-              {(artistData?.singlesAndEPs || []).map((item) =>
-                renderLargeItem(item, "album"),
+              {(item.data || []).map((singleItem: any) =>
+                renderLargeItem(singleItem, "album"),
               )}
             </View>
           </ScrollView>
-        </>
-      )}
-
-      {artistData?.videos && artistData?.videos.length > 0 && (
-        <>
-          <Text style={styles.resultTypeText}>Videos</Text>
+        );
+      case "videos_header":
+        return <Text style={styles.resultTypeText}>Videos</Text>;
+      case "videos_carousel":
+        return (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingLeft: 13 }}
           >
             <View style={styles.largeItemRow}>
-              {(artistData?.videos || []).map((item) =>
-                renderLargeItem(item, "video"),
+              {(item.data || []).map((videoItem: any) =>
+                renderLargeItem(videoItem, "video"),
               )}
             </View>
           </ScrollView>
-        </>
-      )}
-    </ScrollView>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const ListHeader = () => (
+    <View
+      style={[styles.headerContainer, { height: moderateScale(HEADER_HEIGHT) }]}
+    >
+      <ImageBackground
+        source={{ uri: artistData?.thumbnail }}
+        style={styles.headerImage}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.4)", "rgba(0,0,0,1)"]}
+          style={StyleSheet.absoluteFill}
+        />
+      </ImageBackground>
+
+      {/* --- TOP NAVIGATION ICONS --- */}
+      <View style={[styles.topNav, { top: top }]}>
+        <TouchableOpacity
+          onPress={() => {
+            triggerHaptic();
+            router.back();
+          }}
+        >
+          <Ionicons name="arrow-back" size={moderateScale(26)} color="white" />
+        </TouchableOpacity>
+      </View>
+
+      {/* --- ARTIST TITLE AND INFO --- */}
+      <View style={styles.artistInfoContainer}>
+        <Text style={styles.artistName}>{artistData?.title}</Text>
+        <Text style={styles.artistSubtext}>
+          {(params.subtitle as string).replace("Artist • ", "")}
+        </Text>
+      </View>
+    </View>
+  );
+
+  return (
+    <FlashList
+      style={styles.container}
+      contentContainerStyle={{
+        paddingBottom: verticalScale(138) + bottom,
+      }}
+      showsVerticalScrollIndicator={false}
+      data={listData}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.id}
+      ListHeaderComponent={ListHeader}
+      estimatedItemSize={moderateScale(70)}
+    />
   );
 }
 

@@ -32,6 +32,8 @@ yarn-error.*
 credentials.json
 android/
 builds/
+build*.ps1
+.keys/
 
 # typescript
 *.tsbuildinfo

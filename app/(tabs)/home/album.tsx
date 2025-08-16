@@ -14,19 +14,14 @@ import { triggerHaptic } from "@/helpers/haptics";
 import { useImageColors } from "@/hooks/useImageColors";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import { innertube, processAlbumPageData } from "@/services/youtube";
+import { FlashList } from "@shopify/flash-list";
 import FastImage from "@d11/react-native-fast-image";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import color from "color";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -104,6 +99,108 @@ export default function AlbumPageScreen() {
     );
   }
 
+  const ListHeader = () => (
+    <>
+      {/* Artwork Image */}
+      <View style={styles.artworkImageContainer}>
+        <FastImage
+          source={{
+            uri: albumData?.thumbnail ?? unknownTrackImageUri,
+            priority: FastImage.priority.high,
+          }}
+          style={styles.artworkImage}
+        />
+      </View>
+
+      <Text
+        onLayout={(event) => {
+          const layout = event.nativeEvent.layout;
+          setTitleLayout({ y: layout.y, height: layout.height });
+        }}
+        style={styles.titleText}
+      >
+        {albumData?.title}
+      </Text>
+
+      <Text
+        style={{
+          color: Colors.text,
+          textAlign: "center",
+          fontSize: moderateScale(15),
+          marginBottom: 5,
+        }}
+      >
+        {albumData?.subtitle}
+      </Text>
+      <Text
+        style={{
+          color: Colors.text,
+          textAlign: "center",
+          fontSize: moderateScale(15),
+          marginBottom: 5,
+        }}
+      >
+        {albumData?.second_subtitle}
+      </Text>
+    </>
+  );
+
+  const renderSongItem = ({ item, index }: { item: any; index: number }) => (
+    <View key={item.id + index} style={styles.songItem}>
+      <TouchableOpacity
+        style={styles.songItemTouchableArea}
+        onPress={() => {
+          triggerHaptic();
+          handleSongSelect(
+            {
+              id: item.id,
+              title: item.title,
+              artist: artist,
+              thumbnail: albumData?.thumbnail ?? unknownTrackImageUri,
+            },
+            playableSongList,
+          );
+        }}
+      >
+        <View style={styles.indexContainer}>
+          <Text style={styles.indexText}>{index + 1}</Text>
+        </View>
+        <View style={styles.resultText}>
+          <Text style={styles.resultTitle} numberOfLines={1}>
+            {item.title}
+          </Text>
+          <Text style={styles.resultArtist} numberOfLines={1}>
+            {item.duration}
+          </Text>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => {
+          triggerHaptic();
+          // Convert the song object to a JSON string
+          const songData = JSON.stringify({
+            id: item.id,
+            title: item.title,
+            artist: artist,
+            thumbnail: albumData?.thumbnail ?? unknownTrackImageUri,
+          });
+
+          router.push({
+            pathname: "/(modals)/menu",
+            params: { songData: songData, type: "song" },
+          });
+        }}
+        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+      >
+        <Entypo
+          name="dots-three-vertical"
+          size={moderateScale(15)}
+          color="white"
+        />
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <LinearGradient
       style={{ flex: 1 }}
@@ -157,10 +254,15 @@ export default function AlbumPageScreen() {
           />
         )}
 
-        <ScrollView
+        <FlashList
+          data={albumData?.songs}
+          renderItem={renderSongItem}
+          keyExtractor={(item: any) => item.id}
+          ListHeaderComponent={ListHeader}
+          estimatedItemSize={moderateScale(50)}
           contentContainerStyle={{
-            paddingBottom: verticalScale(190) + bottom,
             paddingHorizontal: 15,
+            paddingBottom: verticalScale(190) + bottom,
           }}
           showsVerticalScrollIndicator={false}
           onScroll={(e) => {
@@ -172,107 +274,7 @@ export default function AlbumPageScreen() {
             );
           }}
           scrollEventThrottle={16}
-        >
-          {/* Artwork Image */}
-          <View style={styles.artworkImageContainer}>
-            <FastImage
-              source={{
-                uri: albumData?.thumbnail ?? unknownTrackImageUri,
-                priority: FastImage.priority.high,
-              }}
-              style={styles.artworkImage}
-            />
-          </View>
-
-          <Text
-            onLayout={(event) => {
-              const layout = event.nativeEvent.layout;
-              setTitleLayout({ y: layout.y, height: layout.height });
-            }}
-            style={styles.titleText}
-          >
-            {albumData?.title}
-          </Text>
-
-          <Text
-            style={{
-              color: Colors.text,
-              textAlign: "center",
-              fontSize: moderateScale(15),
-              marginBottom: 5,
-            }}
-          >
-            {albumData?.subtitle}
-          </Text>
-          <Text
-            style={{
-              color: Colors.text,
-              textAlign: "center",
-              fontSize: moderateScale(15),
-              marginBottom: 5,
-            }}
-          >
-            {albumData?.second_subtitle}
-          </Text>
-
-          <View>
-            {albumData?.songs.map((item, index) => (
-              <View key={item.id + index} style={styles.songItem}>
-                <TouchableOpacity
-                  style={styles.songItemTouchableArea}
-                  onPress={() => {
-                    triggerHaptic();
-                    handleSongSelect(
-                      {
-                        id: item.id,
-                        title: item.title,
-                        artist: artist,
-                        thumbnail: albumData?.thumbnail ?? unknownTrackImageUri,
-                      },
-                      playableSongList,
-                    );
-                  }}
-                >
-                  <View style={styles.indexContainer}>
-                    <Text style={styles.indexText}>{index + 1}</Text>
-                  </View>
-                  <View style={styles.resultText}>
-                    <Text style={styles.resultTitle} numberOfLines={1}>
-                      {item.title}
-                    </Text>
-                    <Text style={styles.resultArtist} numberOfLines={1}>
-                      {item.duration}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    triggerHaptic();
-                    // Convert the song object to a JSON string
-                    const songData = JSON.stringify({
-                      id: item.id,
-                      title: item.title,
-                      artist: artist,
-                      thumbnail: albumData?.thumbnail ?? unknownTrackImageUri,
-                    });
-
-                    router.push({
-                      pathname: "/(modals)/menu",
-                      params: { songData: songData, type: "song" },
-                    });
-                  }}
-                  hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                >
-                  <Entypo
-                    name="dots-three-vertical"
-                    size={moderateScale(15)}
-                    color="white"
-                  />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-        </ScrollView>
+        />
 
         {albumData?.songs && albumData?.songs.length > 0 && (
           <FAB
