@@ -6,9 +6,9 @@
  * @packageDocumentation
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Linking } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, usePathname } from "expo-router";
 
 /**
  * A custom hook that sets up a listener for notification click events.
@@ -17,6 +17,12 @@ import { useRouter } from "expo-router";
  */
 const useNotificationClickHandler = () => {
   const router = useRouter();
+  const pathname = usePathname();
+  const latestPath = useRef(pathname);
+
+  useEffect(() => {
+    latestPath.current = pathname;
+  }, [pathname]);
 
   useEffect(() => {
     /**
@@ -29,11 +35,12 @@ const useNotificationClickHandler = () => {
       if (url === "trackplayer://notification.click") {
         // Navigate to the player screen.
         // The logic here attempts to dismiss any existing modals before navigating.
-        await router.push("..");
-        if (await router.canDismiss()) {
-          await router.dismissTo("/player");
+        if (latestPath.current !== "/player") {
+          await router.dismissAll();
+          await router.push("/player");
         } else {
-          await router.navigate("/player");
+          await router.push("..");
+          await router.push("/player");
         }
       }
     };
