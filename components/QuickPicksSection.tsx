@@ -112,6 +112,7 @@ export const QuickPicksSection: React.FC<QuickPicksSectionProps> = ({
           data={data}
           horizontal
           showsHorizontalScrollIndicator={false}
+          extraData={activeTrack}
           contentContainerStyle={{ paddingLeft: 13 }}
           estimatedItemSize={moderateScale(100)}
           keyExtractor={(col) => `${col.top.id}-${col.bottom?.id || "none"}`}

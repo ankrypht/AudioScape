@@ -6,7 +6,6 @@
  * @packageDocumentation
  */
 
-import { FullScreenGradientBackground } from "@/components/GradientBackground";
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { Colors } from "@/constants/Colors";
 import { triggerHaptic } from "@/helpers/haptics";
@@ -18,7 +17,13 @@ import Entypo from "@expo/vector-icons/Entypo";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { FlashList } from "@shopify/flash-list";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+} from "react-native";
 import LoaderKit from "react-native-loader-kit";
 import { Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -28,9 +33,7 @@ import {
   verticalScale,
 } from "react-native-size-matters/extend";
 import { useActiveTrack } from "react-native-track-player";
-
-// Randomly select a gradient background for the screen.
-const gradientIndex = Math.floor(Math.random() * 11);
+import { LinearGradient } from "expo-linear-gradient";
 
 /**
  * `FavoritesScreen` component.
@@ -39,6 +42,7 @@ const gradientIndex = Math.floor(Math.random() * 11);
 const FavoritesScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
+  const [headerHeight, setHeaderHeight] = useState(0);
   const [formattedTracks, setFormattedTracks] = useState<Song[]>([]);
   const { top, bottom } = useSafeAreaInsets();
   const { playAudio, playPlaylist } = useMusicPlayer();
@@ -142,107 +146,119 @@ const FavoritesScreen = () => {
   );
 
   return (
-    <FullScreenGradientBackground index={gradientIndex}>
-      <View style={defaultStyles.container}>
-        {/* Header with screen title */}
-        <Text
-          style={[
-            styles.header,
-            isScrolling ? styles.headerScrolled : {},
-            { paddingTop: top },
-          ]}
-        >
-          Favorites
-        </Text>
+    <View style={defaultStyles.container}>
+      {/* Header Overlay */}
+      <View
+        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          overflow: "hidden",
+        }}
+      >
+        {/* Gradient background */}
+        {isScrolling && (
+          <LinearGradient
+            colors={["rgba(0,0,0,1)", "rgba(0,0,0,0.9)"]}
+            locations={[0.2, 1]}
+            style={StyleSheet.absoluteFillObject}
+          />
+        )}
 
-        {/* Divider that appears when scrolling */}
+        <Text style={[styles.header, { paddingTop: top }]}>Favorites</Text>
+
         {isScrolling && (
           <Divider
             style={{ backgroundColor: "rgba(255,255,255,0.3)", height: 0.3 }}
           />
         )}
+      </View>
 
-        {/* Loading Indicator */}
-        {isLoading ? (
-          <ActivityIndicator color="white" size="large" />
-        ) : (
-          <FlashList
-            data={formattedTracks}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            estimatedItemSize={moderateScale(75)}
-            contentContainerStyle={{
-              paddingBottom: verticalScale(190) + bottom,
-            }}
-            showsVerticalScrollIndicator={false}
-            onScroll={(e) => {
-              const currentScrollPosition =
-                Math.floor(e.nativeEvent.contentOffset.y) || 0;
-              setIsScrolling(currentScrollPosition > 5);
-            }}
-            scrollEventThrottle={16}
-            ListEmptyComponent={
-              <View
+      {/* Loading Indicator */}
+      {isLoading ? (
+        <ActivityIndicator color="white" size="large" />
+      ) : (
+        <FlashList
+          data={formattedTracks}
+          renderItem={renderItem}
+          extraData={activeTrack}
+          keyExtractor={(item) => item.id}
+          estimatedItemSize={moderateScale(75)}
+          contentContainerStyle={{
+            paddingTop: headerHeight,
+            paddingBottom: verticalScale(190) + bottom,
+          }}
+          showsVerticalScrollIndicator={false}
+          onScroll={(e) => {
+            const currentScrollPosition =
+              Math.floor(e.nativeEvent.contentOffset.y) || 0;
+            setIsScrolling(currentScrollPosition > 5);
+          }}
+          scrollEventThrottle={16}
+          ListEmptyComponent={
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text
                 style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
+                  color: Colors.text,
+                  textAlign: "center",
+                  fontSize: moderateScale(20),
+                  paddingHorizontal: 20,
                 }}
               >
-                <Text
-                  style={{
-                    color: Colors.text,
-                    textAlign: "center",
-                    fontSize: moderateScale(20),
-                    paddingHorizontal: 20,
-                  }}
-                >
-                  No favorites yet! {"\n"}Start adding your favorite songs.
-                </Text>
-              </View>
-            }
-            ListFooterComponent={
-              formattedTracks.length > 0 ? (
-                <Text
-                  style={{
-                    color: Colors.textMuted,
-                    textAlign: "center",
-                    fontSize: moderateScale(15),
-                  }}
-                >
-                  {formattedTracks.length}{" "}
-                  {`Track${formattedTracks.length > 1 ? "s" : ""}`}
-                </Text>
-              ) : null
-            }
-          />
-        )}
+                No favorites yet! {"\n"}Start adding your favorite songs.
+              </Text>
+            </View>
+          }
+          ListFooterComponent={
+            formattedTracks.length > 0 ? (
+              <Text
+                style={{
+                  color: Colors.textMuted,
+                  textAlign: "center",
+                  fontSize: moderateScale(15),
+                }}
+              >
+                {formattedTracks.length}{" "}
+                {`Track${formattedTracks.length > 1 ? "s" : ""}`}
+              </Text>
+            ) : null
+          }
+        />
+      )}
 
-        {/* Floating Action Button to play all favorite songs */}
-        {formattedTracks.length > 0 && (
-          <FAB
-            style={{
-              position: "absolute",
-              marginRight: 16,
-              marginBottom:
-                (isFloatingPlayerNotVisible ? 60 : moderateScale(138)) + bottom,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "white",
-            }}
-            theme={{ roundness: 7 }}
-            icon="play"
-            color="black"
-            onPress={async () => {
-              triggerHaptic();
-              if (formattedTracks.length === 0) return;
-              await playPlaylist(formattedTracks);
-              await router.navigate("/player");
-            }}
-          />
-        )}
-      </View>
-    </FullScreenGradientBackground>
+      {/* Floating Action Button to play all favorite songs */}
+      {formattedTracks.length > 0 && (
+        <FAB
+          style={{
+            position: "absolute",
+            marginRight: 16,
+            marginBottom:
+              (isFloatingPlayerNotVisible ? 60 : moderateScale(138)) + bottom,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "white",
+          }}
+          theme={{ roundness: 7 }}
+          icon="play"
+          color="black"
+          onPress={async () => {
+            triggerHaptic();
+            if (formattedTracks.length === 0) return;
+            await playPlaylist(formattedTracks);
+            await router.navigate("/player");
+          }}
+        />
+      )}
+    </View>
   );
 };
 
@@ -256,9 +272,6 @@ const styles = ScaledSheet.create({
     fontFamily: "Meriva",
     textAlign: "center",
     paddingVertical: 10,
-  },
-  headerScrolled: {
-    backgroundColor: "rgba(0,0,0,0.3)",
   },
   songList: {
     flexDirection: "column",

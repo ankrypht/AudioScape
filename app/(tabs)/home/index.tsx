@@ -7,7 +7,6 @@
  * @packageDocumentation
  */
 
-import { FullScreenGradientBackground } from "@/components/GradientBackground";
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { QuickPicksSection } from "@/components/QuickPicksSection";
 import { TrendingSection } from "@/components/TrendingSection";
@@ -82,9 +81,6 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
-  const [gradientIndex, setGradientIndex] = useState(
-    Math.floor(Math.random() * 11),
-  );
   const { top, bottom } = useSafeAreaInsets();
   const { playAudio } = useMusicPlayer();
   const router = useRouter();
@@ -210,7 +206,6 @@ export default function HomeScreen() {
     const yt = await innertube;
     await getQuickPicks(yt);
     await getTrending(yt);
-    setGradientIndex(Math.floor(Math.random() * 11)); // Change background gradient on refresh.
     setRefreshing(false);
   }, []);
 
@@ -268,108 +263,104 @@ export default function HomeScreen() {
   // Render content based on network connectivity.
   if (netInfo.isInternetReachable === false) {
     return (
-      <FullScreenGradientBackground index={gradientIndex}>
-        <View style={styles.container}>
-          {headerView()}
-          <View style={styles.centeredMessageContainer}>
-            <Ionicons name="cloud-offline-outline" size={40} color="white" />
-            <Text style={styles.centeredMessageText}>
-              There is no network connection now
-            </Text>
+      <View style={styles.container}>
+        {headerView()}
+        <View style={styles.centeredMessageContainer}>
+          <Ionicons name="cloud-offline-outline" size={40} color="white" />
+          <Text style={styles.centeredMessageText}>
+            There is no network connection now
+          </Text>
 
-            <TouchableOpacity
+          <TouchableOpacity
+            style={{
+              backgroundColor: "white",
+              paddingVertical: 9,
+              paddingHorizontal: 18,
+              borderRadius: 100,
+              marginBottom: 10,
+            }}
+            onPress={() => {
+              triggerHaptic();
+              router.navigate("/(tabs)/downloads");
+            }}
+          >
+            <Text
               style={{
-                backgroundColor: "white",
-                paddingVertical: 9,
-                paddingHorizontal: 18,
-                borderRadius: 100,
-                marginBottom: 10,
-              }}
-              onPress={() => {
-                triggerHaptic();
-                router.navigate("/(tabs)/downloads");
+                color: "black",
+                fontSize: moderateScale(15),
+                fontWeight: "bold",
               }}
             >
-              <Text
-                style={{
-                  color: "black",
-                  fontSize: moderateScale(15),
-                  fontWeight: "bold",
-                }}
-              >
-                Go to Downloads
-              </Text>
-            </TouchableOpacity>
-          </View>
+              Go to Downloads
+            </Text>
+          </TouchableOpacity>
         </View>
-      </FullScreenGradientBackground>
+      </View>
     );
   }
 
   return (
-    <FullScreenGradientBackground index={gradientIndex}>
-      <View style={styles.container}>
-        {headerView()}
+    <View style={styles.container}>
+      {headerView()}
 
-        {/* Divider that appears when scrolling */}
-        {isScrolling && (
-          <Divider
-            style={{ backgroundColor: "rgba(255,255,255,0.3)", height: 0.3 }}
+      {/* Divider that appears when scrolling */}
+      {isScrolling && (
+        <Divider
+          style={{ backgroundColor: "rgba(255,255,255,0.3)", height: 0.3 }}
+        />
+      )}
+
+      {/* Loading indicator for initial data fetch */}
+      {isLoading ? (
+        <View style={styles.centeredMessageContainer}>
+          <LoaderKit
+            style={{
+              width: moderateScale(50),
+              height: moderateScale(50),
+              alignSelf: "center",
+            }}
+            name="BallSpinFadeLoader"
+            color="white"
           />
-        )}
-
-        {/* Loading indicator for initial data fetch */}
-        {isLoading ? (
-          <View style={styles.centeredMessageContainer}>
-            <LoaderKit
-              style={{
-                width: moderateScale(50),
-                height: moderateScale(50),
-                alignSelf: "center",
-              }}
-              name="BallSpinFadeLoader"
-              color="white"
+          <Text style={styles.centeredMessageText}>
+            Please Wait Sometimes It May Take Longer Than Usual To Load
+          </Text>
+        </View>
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingBottom: verticalScale(138) + bottom,
+            marginTop: 3,
+          }}
+          onScroll={(e) => {
+            const currentScrollPosition =
+              Math.floor(e.nativeEvent.contentOffset.y) || 0;
+            setIsScrolling(currentScrollPosition > 5);
+          }}
+          scrollEventThrottle={16}
+          refreshControl={
+            // Pull-to-refresh functionality.
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["orange"]}
             />
-            <Text style={styles.centeredMessageText}>
-              Please Wait Sometimes It May Take Longer Than Usual To Load
-            </Text>
-          </View>
-        ) : (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingBottom: verticalScale(138) + bottom,
-              marginTop: 3,
-            }}
-            onScroll={(e) => {
-              const currentScrollPosition =
-                Math.floor(e.nativeEvent.contentOffset.y) || 0;
-              setIsScrolling(currentScrollPosition > 5);
-            }}
-            scrollEventThrottle={16}
-            refreshControl={
-              // Pull-to-refresh functionality.
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={["orange"]}
-              />
-            }
-          >
-            {/* Quick Picks Section */}
-            <QuickPicksSection
-              results={quickPicksResults}
-              onItemClick={handleSongSelect}
-            />
-            {/* Trending Section */}
-            <TrendingSection
-              results={trendingResults}
-              onItemClick={handleSongSelect}
-            />
-          </ScrollView>
-        )}
-      </View>
-    </FullScreenGradientBackground>
+          }
+        >
+          {/* Quick Picks Section */}
+          <QuickPicksSection
+            results={quickPicksResults}
+            onItemClick={handleSongSelect}
+          />
+          {/* Trending Section */}
+          <TrendingSection
+            results={trendingResults}
+            onItemClick={handleSongSelect}
+          />
+        </ScrollView>
+      )}
+    </View>
   );
 }
 

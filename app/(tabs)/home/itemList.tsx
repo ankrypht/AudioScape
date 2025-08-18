@@ -379,11 +379,11 @@ const ItemList = () => {
         <ActivityIndicator color="white" size="large" />
       ) : (
         <FlashList
-          style={styles.songList}
           data={items}
           renderItem={renderItem}
           getItemType={() => type}
           keyExtractor={(item: any) => item.id}
+          extraData={activeTrack}
           estimatedItemSize={moderateScale(75)}
           contentContainerStyle={{
             paddingBottom: verticalScale(190) + bottom,
@@ -462,10 +462,6 @@ const styles = ScaledSheet.create({
   },
   headerScrolled: {
     backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  songList: {
-    flexDirection: "column",
-    width: "100%",
   },
   searchResult: {
     flexDirection: "row",

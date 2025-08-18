@@ -201,6 +201,7 @@ export default function QueueModal() {
                 data={queue}
                 keyExtractor={(item) => item.id}
                 renderItem={renderSongItem}
+                extraData={activeTrackId}
                 showsVerticalScrollIndicator={false}
                 estimatedItemSize={moderateScale(75)}
                 contentContainerStyle={{

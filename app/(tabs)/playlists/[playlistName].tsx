@@ -229,6 +229,7 @@ const PlaylistView = () => {
           data={playlist}
           renderItem={renderSongItem}
           keyExtractor={(item: any) => item.id}
+          extraData={activeTrack}
           ListHeaderComponent={ListHeader}
           estimatedItemSize={moderateScale(75)}
           contentContainerStyle={{

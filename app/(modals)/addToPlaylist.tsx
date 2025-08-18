@@ -44,7 +44,7 @@ export default function AddToPlaylistModal() {
         name,
         thumbnail: tracks[0]?.thumbnail ?? null,
       })),
-    [playlists]
+    [playlists],
   );
 
   /**
@@ -56,7 +56,7 @@ export default function AddToPlaylistModal() {
       triggerHaptic(Haptics.AndroidHaptics.Reject);
       ToastAndroid.show(
         "A playlist with this name already exists.",
-        ToastAndroid.SHORT
+        ToastAndroid.SHORT,
       );
       return;
     }
@@ -79,7 +79,7 @@ export default function AddToPlaylistModal() {
   const renderPlaylistItem = useCallback(
     (
       { item }: { item: { name: string; thumbnail: string | null } },
-      handleDismiss: () => void
+      handleDismiss: () => void,
     ) => (
       <TouchableOpacity
         style={styles.playlistItem}
@@ -98,7 +98,7 @@ export default function AddToPlaylistModal() {
         <Text style={styles.playlistName}>{item.name}</Text>
       </TouchableOpacity>
     ),
-    [track, addTrackToPlaylist]
+    [track, addTrackToPlaylist],
   );
 
   return (

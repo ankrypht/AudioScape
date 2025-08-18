@@ -6,7 +6,6 @@
  * @packageDocumentation
  */
 
-import { FullScreenGradientBackground } from "@/components/GradientBackground";
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { Colors } from "@/constants/Colors";
 import { unknownTrackImageUri } from "@/constants/images";
@@ -23,7 +22,14 @@ import FastImage from "@d11/react-native-fast-image";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState, useCallback } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import {
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+} from "react-native";
 import LoaderKit from "react-native-loader-kit";
 import { AnimatedFAB, Divider } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -34,9 +40,6 @@ import {
 } from "react-native-size-matters/extend";
 import { useActiveTrack } from "react-native-track-player";
 
-// Randomly select a gradient background for the screen.
-const gradientIndex = Math.floor(Math.random() * 11);
-
 /**
  * `DownloadsScreen` component.
  * Displays a list of downloaded songs and active downloads.
@@ -44,6 +47,7 @@ const gradientIndex = Math.floor(Math.random() * 11);
 const DownloadsScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
+  const [headerHeight, setHeaderHeight] = useState(0);
   const { top, bottom } = useSafeAreaInsets();
   const { playDownloadedSong, playAllDownloadedSongs } = useMusicPlayer();
   const lastActiveTrack = useLastActiveTrack();
@@ -204,91 +208,102 @@ const DownloadsScreen = () => {
   );
 
   return (
-    <FullScreenGradientBackground index={gradientIndex}>
-      <View style={defaultStyles.container}>
-        {/* Header with screen title */}
-        <Text
-          style={[
-            styles.header,
-            isScrolling ? styles.headerScrolled : {},
-            { paddingTop: top },
-          ]}
-        >
-          Downloads
-        </Text>
+    <View style={defaultStyles.container}>
+      {/* Header Overlay */}
+      <View
+        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          overflow: "hidden",
+        }}
+      >
+        {/* Gradient background */}
+        {isScrolling && (
+          <LinearGradient
+            colors={["rgba(0,0,0,1)", "rgba(0,0,0,0.9)"]}
+            locations={[0.2, 1]}
+            style={StyleSheet.absoluteFillObject}
+          />
+        )}
 
-        {/* Divider that appears when scrolling */}
+        <Text style={[styles.header, { paddingTop: top }]}>Downloads</Text>
+
         {isScrolling && (
           <Divider
             style={{ backgroundColor: "rgba(255,255,255,0.3)", height: 0.3 }}
           />
         )}
-
-        {/* Loading indicator */}
-        {isLoading ? (
-          <View style={styles.centeredMessageContainer}>
-            <ActivityIndicator color={Colors.text} size="large" />
-          </View>
-        ) : (
-          <FlashList
-            data={formattedTracks}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            estimatedItemSize={moderateScale(75)}
-            contentContainerStyle={{
-              paddingBottom: verticalScale(190) + bottom,
-            }}
-            showsVerticalScrollIndicator={false}
-            onScroll={(e) => {
-              const currentScrollPosition =
-                Math.floor(e.nativeEvent.contentOffset.y) || 0;
-              setIsScrolling(currentScrollPosition > 5);
-            }}
-            scrollEventThrottle={16}
-            ListHeaderComponent={activeDownloadsHeader}
-            ListEmptyComponent={
-              activeDownloads.length === 0 ? (
-                <View style={styles.centeredMessageContainer}>
-                  <Text style={styles.centeredMessageText}>
-                    No songs downloaded yet! {"\n"}Find songs and tap the
-                    download icon.
-                  </Text>
-                </View>
-              ) : null
-            }
-            ListFooterComponent={
-              formattedTracks.length > 0 ? (
-                <Text style={styles.trackCountText}>
-                  {formattedTracks.length}{" "}
-                  {`Track${formattedTracks.length > 1 ? "s" : ""}`}
-                </Text>
-              ) : null
-            }
-          />
-        )}
-
-        {/* Floating Action Button to play all downloaded songs */}
-        {formattedTracks.length > 0 && (
-          <AnimatedFAB
-            style={[
-              styles.fab,
-              {
-                marginBottom:
-                  (isFloatingPlayerNotVisible ? 60 : moderateScale(138)) +
-                  bottom,
-              },
-            ]}
-            theme={{ roundness: 1 }}
-            extended={!isScrolling}
-            animateFrom={"right"}
-            icon="play"
-            label="Play All"
-            color="black"
-            onPress={handlePlayAllDownloads}
-          />
-        )}
       </View>
-    </FullScreenGradientBackground>
+
+      {/* Loading indicator */}
+      {isLoading ? (
+        <View style={styles.centeredMessageContainer}>
+          <ActivityIndicator color={Colors.text} size="large" />
+        </View>
+      ) : (
+        <FlashList
+          data={formattedTracks}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          extraData={activeTrack}
+          estimatedItemSize={moderateScale(75)}
+          contentContainerStyle={{
+            paddingTop: headerHeight,
+            paddingBottom: verticalScale(190) + bottom,
+          }}
+          showsVerticalScrollIndicator={false}
+          onScroll={(e) => {
+            const currentScrollPosition =
+              Math.floor(e.nativeEvent.contentOffset.y) || 0;
+            setIsScrolling(currentScrollPosition > 5);
+          }}
+          scrollEventThrottle={16}
+          ListHeaderComponent={activeDownloadsHeader}
+          ListEmptyComponent={
+            activeDownloads.length === 0 ? (
+              <View style={styles.centeredMessageContainer}>
+                <Text style={styles.centeredMessageText}>
+                  No songs downloaded yet! {"\n"}Find songs and tap the download
+                  icon.
+                </Text>
+              </View>
+            ) : null
+          }
+          ListFooterComponent={
+            formattedTracks.length > 0 ? (
+              <Text style={styles.trackCountText}>
+                {formattedTracks.length}{" "}
+                {`Track${formattedTracks.length > 1 ? "s" : ""}`}
+              </Text>
+            ) : null
+          }
+        />
+      )}
+
+      {/* Floating Action Button to play all downloaded songs */}
+      {formattedTracks.length > 0 && (
+        <AnimatedFAB
+          style={[
+            styles.fab,
+            {
+              marginBottom:
+                (isFloatingPlayerNotVisible ? 60 : moderateScale(138)) + bottom,
+            },
+          ]}
+          theme={{ roundness: 1 }}
+          extended={!isScrolling}
+          animateFrom={"right"}
+          icon="play"
+          label="Play All"
+          color="black"
+          onPress={handlePlayAllDownloads}
+        />
+      )}
+    </View>
   );
 };
 
@@ -302,9 +317,6 @@ const styles = ScaledSheet.create({
     fontFamily: "Meriva",
     textAlign: "center",
     paddingVertical: 10,
-  },
-  headerScrolled: {
-    backgroundColor: "rgba(0,0,0,0.3)",
   },
   songItem: {
     flexDirection: "row",

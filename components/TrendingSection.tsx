@@ -134,6 +134,7 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingLeft: 16 }}
           estimatedItemSize={moderateScale(280)}
+          extraData={activeTrack}
           keyExtractor={(col) => col.map((song) => song.id).join("-")}
           renderItem={({ item: column, index: colIndex }) => (
             <View style={styles.column}>
