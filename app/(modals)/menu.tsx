@@ -179,7 +179,7 @@ export default function MenuModal() {
       },
     },
     {
-      types: ["song", "playlistSong", "queueSong", "downloadedSong"], //incomplete
+      types: ["song", "playlistSong", "queueSong", "downloadedSong"],
       label: "Play next",
       icon: (
         <MaterialIcons

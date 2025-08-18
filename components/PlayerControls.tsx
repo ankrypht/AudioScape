@@ -166,13 +166,26 @@ export const SkipToPreviousButton = ({
  */
 export const AddToPlaylistButton = ({ iconSize = moderateScale(30) }) => {
   const router = useRouter();
+  const activeTrack = useActiveTrack();
 
   return (
     <View>
       <TouchableOpacity
-        onPress={() => {
+        onPress={async () => {
           triggerHaptic();
-          router.push({ pathname: "/(modals)/addToPlaylist" });
+          await router.push({
+            pathname: "/(modals)/addToPlaylist",
+            params: activeTrack
+              ? {
+                  track: JSON.stringify({
+                    id: activeTrack.id,
+                    title: activeTrack.title || "",
+                    artist: activeTrack.artist || "",
+                    thumbnail: activeTrack.artwork || "https://placehold.co/50",
+                  }),
+                }
+              : undefined,
+          });
         }}
       >
         <MaterialIcons

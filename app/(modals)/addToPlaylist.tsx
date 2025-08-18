@@ -22,7 +22,6 @@ import { Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 import { Divider } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
-import { useActiveTrack } from "react-native-track-player";
 
 /**
  * `AddToPlaylistModal` component.
@@ -35,7 +34,6 @@ export default function AddToPlaylistModal() {
   const { playlists, addTrackToPlaylist, createNewPlaylist } = usePlaylists();
   const { bottom } = useSafeAreaInsets();
   const params = useLocalSearchParams();
-  const activeTrack = useActiveTrack();
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -46,7 +44,7 @@ export default function AddToPlaylistModal() {
         name,
         thumbnail: tracks[0]?.thumbnail ?? null,
       })),
-    [playlists],
+    [playlists]
   );
 
   /**
@@ -58,7 +56,7 @@ export default function AddToPlaylistModal() {
       triggerHaptic(Haptics.AndroidHaptics.Reject);
       ToastAndroid.show(
         "A playlist with this name already exists.",
-        ToastAndroid.SHORT,
+        ToastAndroid.SHORT
       );
       return;
     }
@@ -67,24 +65,10 @@ export default function AddToPlaylistModal() {
     setModalVisible(false);
   };
 
-  // Determine the track to add: either from navigation params or the active track.
-  const trackFromParams = useMemo(() => {
+  // Determine the track to add.
+  const track = useMemo(() => {
     return params?.track ? JSON.parse(params.track as string) : null;
   }, [params]);
-
-  const track = useMemo(() => {
-    return (
-      trackFromParams ??
-      (activeTrack
-        ? {
-            id: activeTrack.id,
-            title: activeTrack.title || "",
-            artist: activeTrack.artist || "",
-            thumbnail: activeTrack.artwork || unknownTrackImageUri,
-          }
-        : undefined)
-    );
-  }, [activeTrack, trackFromParams]);
 
   /**
    * Renders an individual playlist item in the FlashList.
@@ -95,7 +79,7 @@ export default function AddToPlaylistModal() {
   const renderPlaylistItem = useCallback(
     (
       { item }: { item: { name: string; thumbnail: string | null } },
-      handleDismiss: () => void,
+      handleDismiss: () => void
     ) => (
       <TouchableOpacity
         style={styles.playlistItem}
@@ -114,7 +98,7 @@ export default function AddToPlaylistModal() {
         <Text style={styles.playlistName}>{item.name}</Text>
       </TouchableOpacity>
     ),
-    [track, addTrackToPlaylist],
+    [track, addTrackToPlaylist]
   );
 
   return (
