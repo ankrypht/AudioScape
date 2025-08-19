@@ -180,6 +180,7 @@ export default function SearchScreen() {
         onPress={() => {
           triggerHaptic();
           // Navigate to song/video player or artist page based on item type.
+          console.log("Top Result Item:", item);
           if (item.type === "song" || item.type === "video")
             handleSongSelect({
               id: item.id,
@@ -191,6 +192,17 @@ export default function SearchScreen() {
             router.push({
               pathname: "/(tabs)/home/artist",
               params: { id: item.id, subtitle: item.subtitle },
+            });
+          }
+          if (item.type === "album") {
+            router.push({
+              pathname: "/(tabs)/home/album",
+              params: {
+                id: item.id,
+                title: item.title,
+                thumbnail: item.thumbnail,
+                artist: item.artist,
+              },
             });
           }
         }}
@@ -224,7 +236,9 @@ export default function SearchScreen() {
         </View>
       </TouchableOpacity>
 
-      {(item.type === "song" || item.type === "video") && (
+      {(item.type === "song" ||
+        item.type === "video" ||
+        item.type === "album") && (
         <TouchableOpacity
           onPress={() => {
             triggerHaptic();
@@ -239,6 +253,19 @@ export default function SearchScreen() {
               router.push({
                 pathname: "/(modals)/menu",
                 params: { songData: songData, type: "song" },
+              });
+            }
+            if (item.type === "album") {
+              const albumData = JSON.stringify({
+                name: item.title,
+                thumbnail: item.thumbnail,
+                id: item.id,
+                artist: item.artist,
+              });
+
+              router.push({
+                pathname: "/(modals)/menu",
+                params: { albumData: albumData, type: "album" },
               });
             }
           }}
