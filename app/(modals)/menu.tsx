@@ -17,7 +17,12 @@ import {
   isSongDownloaded,
   removeDownloadedSong,
 } from "@/services/download";
-import { getInfo, innertube, processAlbumPageData } from "@/services/youtube";
+import {
+  getInfo,
+  innertube,
+  processAlbumPageData,
+  processPlaylistPageData,
+} from "@/services/youtube";
 import { usePlaylists } from "@/store/library";
 import FastImage from "@d11/react-native-fast-image";
 import {
@@ -47,14 +52,21 @@ import TrackPlayer from "react-native-track-player";
  */
 export default function MenuModal() {
   const { bottom } = useSafeAreaInsets();
-  const { songData, type, playlistName, playlistData, albumData } =
-    useLocalSearchParams<{
-      songData: string;
-      playlistData: string;
-      type: string;
-      playlistName: string;
-      albumData: string;
-    }>();
+  const {
+    songData,
+    type,
+    playlistName,
+    playlistData,
+    albumData,
+    remotePlaylistData,
+  } = useLocalSearchParams<{
+    songData: string;
+    playlistData: string;
+    type: string;
+    playlistName: string;
+    albumData: string;
+    remotePlaylistData: string;
+  }>();
   const { playNext, playAudio, playPlaylist } = useMusicPlayer();
   const { playlists, removeTrackFromPlaylist } = usePlaylists();
   const router = useRouter();
@@ -70,6 +82,12 @@ export default function MenuModal() {
     artist: string;
     thumbnail: string | null;
   } | null = albumData ? JSON.parse(albumData) : null;
+  const selectedRemotePlaylist: {
+    name: string;
+    id: string;
+    artist: string;
+    thumbnail: string | null;
+  } | null = remotePlaylistData ? JSON.parse(remotePlaylistData) : null;
 
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -407,6 +425,55 @@ export default function MenuModal() {
         }
       },
     },
+    {
+      types: ["remotePlaylist"],
+      label: "Play playlist",
+      icon: (
+        <MaterialIcons
+          name="playlist-play"
+          size={moderateScale(26)}
+          color={Colors.text}
+        />
+      ),
+      onPress: async () => {
+        triggerHaptic();
+        if (selectedRemotePlaylist) {
+          const yt = await innertube;
+          const playlist = await yt.music.getPlaylist(
+            selectedRemotePlaylist.id,
+          );
+          const playlistData = processPlaylistPageData(playlist);
+          if (playlistData.songs.length === 0) return;
+          await playPlaylist(playlistData.songs);
+        }
+        router.back();
+      },
+    },
+    {
+      types: ["remotePlaylist"],
+      label: "Play next",
+      icon: (
+        <MaterialIcons
+          name="playlist-play"
+          size={moderateScale(26)}
+          color={Colors.text}
+        />
+      ),
+      onPress: async () => {
+        triggerHaptic();
+        if (selectedRemotePlaylist) {
+          const yt = await innertube;
+          const playlist = await yt.music.getPlaylist(
+            selectedRemotePlaylist.id,
+          );
+          const playlistData = processPlaylistPageData(playlist);
+          if (playlistData.songs.length === 0) return;
+          ToastAndroid.show("Playlist will play next", ToastAndroid.SHORT);
+          router.back();
+          playNext(playlistData.songs ? playlistData.songs : null);
+        }
+      },
+    },
   ];
 
   return (
@@ -424,7 +491,11 @@ export default function MenuModal() {
                   ? renderPlaylistItem({ item: selectedPlaylist })
                   : selectedAlbum !== null && type === "album"
                     ? renderPlaylistItem({ item: selectedAlbum })
-                    : null}
+                    : selectedRemotePlaylist !== null &&
+                        type === "remotePlaylist"
+                      ? renderPlaylistItem({ item: selectedRemotePlaylist })
+                      : null}
+
               <Divider
                 style={{
                   backgroundColor: "rgba(255,255,255,0.3)",

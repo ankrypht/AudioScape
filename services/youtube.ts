@@ -264,6 +264,33 @@ export function processAlbumPageData(albumResponse: any): AlbumPageData {
 }
 
 /**
+ * Processes the response from a playlist page query into a structured PlaylistPageData object.
+ * @param playlistResponse - The raw playlist page response from the YouTube API.
+ * @returns {PlaylistPageData} A structured object containing playlist details and a list of its songs.
+ */
+export function processPlaylistPageData(
+  playlistResponse: any,
+): PlaylistPageData {
+  return {
+    title: playlistResponse?.header?.title?.text,
+    subtitle: playlistResponse?.header?.subtitle?.text,
+    second_subtitle: playlistResponse?.header?.second_subtitle?.text,
+    thumbnail:
+      playlistResponse?.header?.thumbnail?.contents?.[0]?.url ??
+      "https://placehold.co/50",
+    songs:
+      playlistResponse?.contents?.map((song: any) => ({
+        id: song?.id,
+        title: song?.title,
+        duration: song?.duration?.seconds,
+        thumbnail:
+          song?.thumbnail?.contents?.[0]?.url ?? "https://placehold.co/50",
+        artist: song?.authors?.[0]?.name ?? "Unknown Artist",
+      })) ?? [],
+  };
+}
+
+/**
  * A helper function to process items for an artist's page (albums or videos).
  * @param items - The raw items to process.
  * @param type - The type of item ("album" or "video").

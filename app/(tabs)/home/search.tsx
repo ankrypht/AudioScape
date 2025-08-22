@@ -179,8 +179,7 @@ export default function SearchScreen() {
         style={styles.searchResultTouchableArea}
         onPress={() => {
           triggerHaptic();
-          // Navigate to song/video player or artist page based on item type.
-          console.log("Top Result Item:", item);
+          // Navigate to song/video player or artist/playlist page based on item type.
           if (item.type === "song" || item.type === "video")
             handleSongSelect({
               id: item.id,
@@ -202,6 +201,14 @@ export default function SearchScreen() {
                 title: item.title,
                 thumbnail: item.thumbnail,
                 artist: item.artist,
+              },
+            });
+          }
+          if (item.type === "playlist") {
+            router.push({
+              pathname: "/(tabs)/home/playlist",
+              params: {
+                id: item.id,
               },
             });
           }
@@ -238,7 +245,8 @@ export default function SearchScreen() {
 
       {(item.type === "song" ||
         item.type === "video" ||
-        item.type === "album") && (
+        item.type === "album" ||
+        item.type === "playlist") && (
         <TouchableOpacity
           onPress={() => {
             triggerHaptic();
@@ -266,6 +274,22 @@ export default function SearchScreen() {
               router.push({
                 pathname: "/(modals)/menu",
                 params: { albumData: albumData, type: "album" },
+              });
+            }
+            if (item.type === "playlist") {
+              const remotePlaylistData = JSON.stringify({
+                name: item.title,
+                thumbnail: item.thumbnail,
+                id: item.id,
+                artist: item.artist,
+              });
+
+              router.push({
+                pathname: "/(modals)/menu",
+                params: {
+                  remotePlaylistData: remotePlaylistData,
+                  type: "remotePlaylist",
+                },
               });
             }
           }}

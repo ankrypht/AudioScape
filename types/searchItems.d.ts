@@ -86,6 +86,23 @@ interface AlbumPageData {
 }
 
 /**
+ * Defines the structure of data returned for a playlist's page.
+ */
+interface PlaylistPageData {
+  title: string;
+  subtitle: string;
+  second_subtitle: string;
+  thumbnail: string;
+  songs: {
+    id: string;
+    title: string;
+    duration: number;
+    thumbnail: string;
+    artist: string;
+  }[];
+}
+
+/**
  * Represents an item (album or video) displayed on an artist's page.
  */
 interface ArtistPageItem {

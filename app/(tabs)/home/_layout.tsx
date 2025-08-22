@@ -22,6 +22,8 @@ export default function HomeStackLayout() {
       <Stack.Screen name="artist" options={{ headerShown: false }} />
       {/* Album detail screen */}
       <Stack.Screen name="album" options={{ headerShown: false }} />
+      {/* Playlist detail screen */}
+      <Stack.Screen name="playlist" options={{ headerShown: false }} />
       {/* Search screen */}
       <Stack.Screen name="search" options={{ headerShown: false }} />
       {/* Generic item list screen */}
