@@ -1,5 +1,7 @@
 const IS_DEV = process.env.APP_VARIANT === "development";
 const packageJson = require("./package.json");
+const withAbiSplit = require("./plugins/withAbiSplit");
+const withIconXml = require("./plugins/withIconXml");
 
 export default {
   name: IS_DEV ? "AudioScape (Dev)" : "AudioScape",
@@ -33,6 +35,8 @@ export default {
     versionCode: 1,
   },
   plugins: [
+    withAbiSplit,
+    withIconXml,
     "expo-router",
     "expo-font",
     [
