@@ -513,3 +513,15 @@ export const isSongDownloaded = (id: string): boolean => {
   const state = store.getState();
   return state.library.downloadedTracks.some((track) => track.id === id);
 };
+
+/**
+ * Checks if a song is currently downloading by looking for it in the Redux store.
+ * @param id The ID of the song to check.
+ * @returns True if the song is downloading, false otherwise.
+ */
+export const isSongDownloading = (id: string): boolean => {
+  const state = store.getState();
+  return Object.values(state.library.activeDownloads).some(
+    (download) => download.song.id === id,
+  );
+};

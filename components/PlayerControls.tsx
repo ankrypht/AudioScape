@@ -10,7 +10,7 @@ import { Colors } from "@/constants/Colors";
 import { triggerHaptic } from "@/helpers/haptics";
 import { useTrackPlayerRepeatMode } from "@/hooks/useTrackPlayerRepeatMode";
 import { downloadAndSaveSong } from "@/services/download";
-import { useIsSongDownloaded } from "@/store/library";
+import { useIsSongDownloaded, useIsSongDownloading } from "@/store/library";
 import {
   Entypo,
   FontAwesome6,
@@ -19,7 +19,13 @@ import {
 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { ComponentProps, useCallback } from "react";
-import { StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+  ToastAndroid,
+} from "react-native";
 import { moderateScale } from "react-native-size-matters/extend";
 import TrackPlayer, {
   RepeatMode,
@@ -209,12 +215,18 @@ export const DownloadSongButton = ({
   const activeTrack = useActiveTrack();
   // Check if the active track is already downloaded.
   const downloaded = useIsSongDownloaded(activeTrack?.id || "");
+  // Check if the active track is currently downloading.
+  const downloading = useIsSongDownloading(activeTrack?.id || "");
 
   /**
    * Handles the download action for the active track.
    */
   const handleDownload = useCallback(async () => {
     if (!activeTrack || downloaded) return; // Do nothing if no active track or already downloaded.
+    if (downloading) {
+      ToastAndroid.show("Song is already downloading", ToastAndroid.SHORT);
+      return;
+    }
     triggerHaptic();
     await downloadAndSaveSong({
       id: activeTrack.id,
@@ -226,7 +238,7 @@ export const DownloadSongButton = ({
     });
 
     // No local setState is needed as Redux update will trigger re-render.
-  }, [activeTrack, downloaded]);
+  }, [activeTrack, downloaded, downloading]);
 
   return (
     <View style={[{ height: iconSize }, style]}>

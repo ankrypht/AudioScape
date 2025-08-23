@@ -101,7 +101,7 @@ export async function getInfo(
     // Await the singleton Innertube instance.
     const yt = await innertube;
     // Fetch basic video information.
-    const info = await yt.getBasicInfo(inid, { client: "MWEB" });
+    const info = await yt.getBasicInfo(inid, { client: "YTMUSIC" });
 
     // Check if the video is playable.
     if (info.playability_status?.status !== "OK") {

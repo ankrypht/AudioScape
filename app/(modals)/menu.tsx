@@ -15,6 +15,7 @@ import { useTrackPlayerFavorite } from "@/hooks/useTrackPlayerFavorite";
 import {
   downloadAndSaveSong,
   isSongDownloaded,
+  isSongDownloading,
   removeDownloadedSong,
 } from "@/services/download";
 import {
@@ -352,8 +353,20 @@ export default function MenuModal() {
             ToastAndroid.show("Song already downloaded", ToastAndroid.SHORT);
             return;
           }
+          const isDownloading = isSongDownloading(selectedSong.id);
+          if (isDownloading) {
+            ToastAndroid.show(
+              "Song is already downloading",
+              ToastAndroid.SHORT,
+            );
+            return;
+          }
 
-          const info = await getInfo(selectedSong.id);
+          const info = await getInfo(
+            selectedSong.id,
+            selectedSong.title,
+            selectedSong.artist,
+          );
           if (!info) return;
 
           downloadAndSaveSong({

@@ -346,6 +346,20 @@ export const useIsSongDownloaded = (songId: string) => {
 };
 
 /**
+ * A custom hook to check if a specific song is currently downloading.
+ * @param songId The ID of the song to check
+ * @returns True if the song is downloading, false otherwise.
+ */
+export const useIsSongDownloading = (songId: string) => {
+  const downloadingTracks = useAppSelector(
+    (state) => state.library.activeDownloads,
+  );
+  return Object.values(downloadingTracks).some(
+    (download) => download.song.id === songId,
+  );
+};
+
+/**
  * A custom hook to get the details of a specific downloaded song.
  * @param songId The ID of the song to get details for.
  * @returns The `DownloadedSongMetadata` object for the song, or `undefined` if not found.
