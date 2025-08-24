@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { View, Text, useWindowDimensions, ViewStyle } from "react-native";
 import { useProgress, useActiveTrack } from "react-native-track-player";
 import { useImageColors } from "@/hooks/useImageColors";
@@ -20,9 +20,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
-import VerticalDismiss from "@/components/navigation/VerticalArrowDismiss";
-import { Entypo } from "@expo/vector-icons";
-import color from "color";
+import Color from "color";
+import { ensureReadable } from "@/helpers/miscellaneous";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLyricsContext } from "@/hooks/useLyricsContext";
 import { useKeepAwake } from "expo-keep-awake";
@@ -31,10 +30,10 @@ import { PlayerProgressBar } from "@/components/PlayerProgressbar";
 import VerticalSwipeGesture from "@/components/navigation/VerticalGesture";
 import {
   ScaledSheet,
-  moderateScale,
   scale,
   verticalScale,
 } from "react-native-size-matters/extend";
+import FastImage from "@d11/react-native-fast-image";
 
 const THRESHOLD = 150; // Threshold for lyric line activation in milliseconds.
 const GRADIENT_HEIGHT = 50; // Height of the top and bottom gradient overlays.
@@ -62,6 +61,11 @@ export default function LyricsModal() {
   const { imageColors } = useImageColors(
     activeTrack?.artwork ?? "https://placehold.co/50",
   );
+
+  // Memoized dominant color with ensured readability against white text.
+  const dominantColor = useMemo(() => {
+    return ensureReadable(Color(imageColors?.dominant ?? "#000"));
+  }, [imageColors?.dominant]);
 
   // Shared values for performance, to avoid re-renders of the component.
   const heightsShared = useSharedValue<number[]>([]);
@@ -208,112 +212,97 @@ export default function LyricsModal() {
   return (
     // Enable vertical swipe gesture to dismiss the modal.
     <VerticalSwipeGesture>
-      <VerticalDismiss>
-        {(handleDismiss) => (
-          <View style={styles.modalOverlay}>
-            <View
-              style={[
-                styles.backgroundGradient,
-                {
-                  marginTop: top,
-                  backgroundColor: imageColors?.average ?? Colors.background,
-                },
-              ]}
-            >
-              <View style={styles.modalContent}>
-                {/* Dismiss symbol at the top of the modal */}
-                <DismissLyricsModalSymbol />
+      <View style={styles.modalOverlay}>
+        <View
+          style={[
+            styles.backgroundGradient,
+            {
+              marginTop: top,
+              backgroundColor: dominantColor,
+            },
+          ]}
+        >
+          <View style={styles.modalContent}>
+            {/* Dismiss symbol at the top of the modal */}
+            <DismissLyricsModalSymbol />
 
-                {/* Header with dismiss button */}
-                <View style={styles.header}>
-                  <Entypo
-                    name="chevron-down"
-                    size={moderateScale(28)}
-                    style={styles.dismissButton}
-                    activeOpacity={0.7}
-                    color={Colors.text}
-                    onPress={handleDismiss}
-                    hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                  />
-                </View>
-
-                {/* Song title and artist */}
+            {/* Song title and artist */}
+            <View style={styles.trackInfoContainer}>
+              <FastImage
+                source={{
+                  uri: activeTrack?.artwork ?? "https://placehold.co/50",
+                  priority: FastImage.priority.high,
+                }}
+                style={styles.artworkImage}
+              />
+              <View style={{ flex: 1 }}>
                 <Text numberOfLines={1} style={styles.songTitle}>
                   {activeTrack?.title ?? "Unknown Track"}
                 </Text>
                 <Text numberOfLines={1} style={styles.artistName}>
                   {activeTrack?.artist ?? "Unknown Artist"}
                 </Text>
-
-                {/* Top gradient overlay for fading effect */}
-                <AnimatedLinearGradient
-                  colors={[
-                    color(imageColors?.average).darken(0.15).hex() ??
-                      Colors.background,
-                    "transparent",
-                  ]}
-                  style={[topGradientDynamicStyle, topGradientAnimatedStyle]}
-                />
-
-                {/* Scrollable lyrics content */}
-                <Animated.ScrollView
-                  style={styles.scrollView}
-                  overScrollMode={"never"}
-                  showsVerticalScrollIndicator={false}
-                  scrollEnabled={false} // Disable manual scrolling, controlled by animation.
-                  contentContainerStyle={{ flexGrow: 1, paddingBottom: 25 }}
-                  onLayout={(event) => {
-                    const layout = event.nativeEvent.layout;
-                    setScrollLayout({ y: layout.y, height: layout.height });
-                  }}
-                >
-                  <Animated.View style={scrollViewStyle}>
-                    {lyrics.map((line, index) => (
-                      <View
-                        key={`${index}_${line.startTime ?? 0}_${line.text}`}
-                        onLayout={(event) => {
-                          const { height: layoutHeight } =
-                            event.nativeEvent.layout;
-                          updateHeight(index, layoutHeight); // Measure and update height of each lyric line.
-                        }}
-                      >
-                        <Lyrics
-                          data={line}
-                          seekTime={positionShared}
-                          nextLineStartTime={
-                            index < lyrics.length - 1
-                              ? lyrics[index + 1]?.startTime
-                              : undefined
-                          }
-                        />
-                      </View>
-                    ))}
-                    {/* Spacer at the bottom to allow last lyrics to scroll to center */}
-                    <View style={{ height: 0.3 * height }} />
-                  </Animated.View>
-                </Animated.ScrollView>
-
-                {/* Bottom gradient overlay for fading effect */}
-                <LinearGradient
-                  colors={[
-                    "transparent",
-                    color(imageColors?.average).darken(0.15).hex() ??
-                      Colors.background,
-                  ]}
-                  style={bottomGradientDynamicStyle}
-                />
-                {/* Player progress bar and reduced controls */}
-                <PlayerProgressBar
-                  style={{ marginTop: 15, marginHorizontal: 20 }}
-                />
-                <ReducedPlayerControls
-                  style={{ marginBottom: verticalScale(20) + bottom }}
-                />
               </View>
             </View>
+
+            {/* Top gradient overlay for fading effect */}
+            <AnimatedLinearGradient
+              colors={[dominantColor, "transparent"]}
+              style={[topGradientDynamicStyle, topGradientAnimatedStyle]}
+            />
+
+            {/* Scrollable lyrics content */}
+            <Animated.ScrollView
+              style={styles.scrollView}
+              overScrollMode={"never"}
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false} // Disable manual scrolling, controlled by animation.
+              contentContainerStyle={{ flexGrow: 1, paddingBottom: 25 }}
+              onLayout={(event) => {
+                const layout = event.nativeEvent.layout;
+                setScrollLayout({ y: layout.y, height: layout.height });
+              }}
+            >
+              <Animated.View style={scrollViewStyle}>
+                {lyrics.map((line, index) => (
+                  <View
+                    key={`${index}_${line.startTime ?? 0}_${line.text}`}
+                    onLayout={(event) => {
+                      const { height: layoutHeight } = event.nativeEvent.layout;
+                      updateHeight(index, layoutHeight); // Measure and update height of each lyric line.
+                    }}
+                  >
+                    <Lyrics
+                      data={line}
+                      seekTime={positionShared}
+                      nextLineStartTime={
+                        index < lyrics.length - 1
+                          ? lyrics[index + 1]?.startTime
+                          : undefined
+                      }
+                    />
+                  </View>
+                ))}
+                {/* Spacer at the bottom to allow last lyrics to scroll to center */}
+                <View style={{ height: 0.3 * height }} />
+              </Animated.View>
+            </Animated.ScrollView>
+
+            {/* Bottom gradient overlay for fading effect */}
+            <LinearGradient
+              colors={["transparent", dominantColor]}
+              style={bottomGradientDynamicStyle}
+            />
+            {/* Player progress bar and reduced controls */}
+            <PlayerProgressBar
+              style={{ marginTop: 15, marginHorizontal: 20, zIndex: 3 }}
+            />
+            <ReducedPlayerControls
+              style={{ marginBottom: verticalScale(20) + bottom }}
+            />
           </View>
-        )}
-      </VerticalDismiss>
+        </View>
+      </View>
     </VerticalSwipeGesture>
   );
 }
@@ -365,37 +354,36 @@ const styles = ScaledSheet.create({
     overflow: "hidden",
   },
   modalContent: {
-    backgroundColor: "rgba(0,0,0,0.15)",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     paddingTop: 20,
     height: "100%",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    paddingLeft: 20,
+  artworkImage: {
+    width: "50@ms",
+    height: "50@ms",
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: Colors.text,
   },
-  dismissButton: {
-    marginTop: -11,
-    elevation: 3,
+  trackInfoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 10,
   },
   songTitle: {
     fontSize: "18@ms",
     color: Colors.text,
     fontFamily: "Meriva",
-    textAlign: "center",
-    marginTop: 10,
-    marginHorizontal: 20,
+    marginLeft: "15@s",
   },
   artistName: {
     fontSize: "14@ms",
     color: Colors.text,
     fontFamily: "Meriva",
-    textAlign: "center",
-    marginBottom: 10,
-    marginHorizontal: 20,
+    marginLeft: "15@s",
   },
   scrollView: {
     backgroundColor: "transparent",

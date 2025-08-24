@@ -3,6 +3,7 @@
  *
  * @packageDocumentation
  */
+import Color, { ColorInstance } from "color";
 
 /**
  * Converts a given number of seconds into a MM:SS time format.
@@ -36,3 +37,24 @@ export const generateTracksListId = (
   // Concatenate the track list name with the search term (if it exists).
   return `${trackListName}${`-${search}` || ""}`;
 };
+
+/**
+ * Ensures that the provided background color has sufficient contrast against the text color.
+ * If not, it darkens the background color until the contrast ratio is acceptable.
+ * @param bg - The background color to check and adjust.
+ * @param text - The text color to ensure contrast against (default is white).
+ * @returns A hex string of the adjusted background color with sufficient contrast.
+ */
+export function ensureReadable(
+  bg: ColorInstance,
+  text: ColorInstance = Color("#fff"),
+) {
+  let c = bg;
+  let steps = 0;
+
+  while (c.contrast(text) < 4.5) {
+    c = c.mix(Color("black"), 0.1 * (steps + 1)); // blend more black each step
+    steps++;
+  }
+  return c.hex();
+}
