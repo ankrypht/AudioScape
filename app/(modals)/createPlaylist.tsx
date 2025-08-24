@@ -16,6 +16,7 @@ import {
   ToastAndroid,
   TouchableOpacity,
   View,
+  KeyboardAvoidingView,
 } from "react-native";
 import { ScaledSheet } from "react-native-size-matters/extend";
 
@@ -71,29 +72,34 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({
       onRequestClose={onCancel}
     >
       <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Create New Playlist</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter playlist name"
-            placeholderTextColor={Colors.textMuted}
-            value={playlistName}
-            onChangeText={setPlaylistName}
-          />
-          <View style={styles.modalButtons}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={onCancel}
-            >
-              <Text style={[styles.modalButtonText, styles.cancelButtonText]}>
-                Cancel
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={handleCreate}>
-              <Text style={styles.modalButtonText}>Create</Text>
-            </TouchableOpacity>
+        <KeyboardAvoidingView behavior="position">
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Create New Playlist</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter playlist name"
+              placeholderTextColor={Colors.textMuted}
+              value={playlistName}
+              onChangeText={setPlaylistName}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={onCancel}
+              >
+                <Text style={[styles.modalButtonText, styles.cancelButtonText]}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={handleCreate}
+              >
+                <Text style={styles.modalButtonText}>Create</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );
@@ -114,6 +120,7 @@ const styles = ScaledSheet.create({
     backgroundColor: "#101010",
     padding: "20@ms",
     borderRadius: 10,
+    marginBottom: 10,
   },
   modalTitle: {
     fontSize: "20@ms",
@@ -123,7 +130,7 @@ const styles = ScaledSheet.create({
     textAlign: "center",
   },
   input: {
-    height: "40@ms",
+    height: "45@ms",
     fontSize: "16@ms",
     borderColor: "#333",
     borderWidth: 1,
