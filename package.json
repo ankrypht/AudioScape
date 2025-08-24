@@ -64,7 +64,7 @@
     "react-redux": "^9.2.0",
     "text-encoding-polyfill": "^0.6.7",
     "ts-pattern": "^5.8.0",
-    "web-streams-polyfill": "^4.1.0",
+    "web-streams-polyfill": "^4.2.0",
     "youtubei.js": "^15.0.1"
   },
   "devDependencies": {

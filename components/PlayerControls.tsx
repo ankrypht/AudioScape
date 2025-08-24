@@ -12,10 +12,9 @@ import { useTrackPlayerRepeatMode } from "@/hooks/useTrackPlayerRepeatMode";
 import { downloadAndSaveSong } from "@/services/download";
 import { useIsSongDownloaded, useIsSongDownloading } from "@/store/library";
 import {
-  Entypo,
-  FontAwesome6,
   MaterialCommunityIcons,
   MaterialIcons,
+  FontAwesome6,
 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { ComponentProps, useCallback } from "react";
@@ -47,6 +46,7 @@ export type PlayerControlsProps = {
 export type PlayerButtonProps = {
   style?: ViewStyle; // Custom styles for the button's container View.
   iconSize?: number; // Size of the icon.
+  isFloatingPlayer?: boolean; // Whether the button is for the floating player.
 };
 
 /**
@@ -97,29 +97,50 @@ export const ReducedPlayerControls = ({ style }: PlayerControlsProps) => {
  */
 export const PlayPauseButton = ({
   style,
-  iconSize = moderateScale(50),
+  iconSize = moderateScale(65),
+  isFloatingPlayer = false,
 }: PlayerButtonProps) => {
   const { playing } = useIsPlaying();
 
   return (
-    <View style={[{ height: iconSize }, style]}>
-      <TouchableOpacity
-        onPress={() => {
-          triggerHaptic();
-          if (playing) {
-            TrackPlayer.pause();
-          } else {
-            TrackPlayer.play();
-          }
-        }}
-      >
+    <TouchableOpacity
+      activeOpacity={0.8}
+      style={[
+        isFloatingPlayer
+          ? { height: iconSize }
+          : {
+              height: iconSize,
+              width: iconSize,
+              borderRadius: playing ? iconSize * 0.35 : iconSize / 2,
+              backgroundColor: "#fff",
+              alignItems: "center",
+              justifyContent: "center",
+            },
+        style,
+      ]}
+      onPress={() => {
+        triggerHaptic();
+        if (playing) {
+          TrackPlayer.pause();
+        } else {
+          TrackPlayer.play();
+        }
+      }}
+    >
+      {isFloatingPlayer ? (
         <FontAwesome6
           name={playing ? "pause" : "play"}
           size={iconSize}
-          color={Colors.text}
+          color="#fff"
         />
-      </TouchableOpacity>
-    </View>
+      ) : (
+        <MaterialIcons
+          name={playing ? "pause" : "play-arrow"}
+          size={iconSize * 0.65}
+          color="#000"
+        />
+      )}
+    </TouchableOpacity>
   );
 };
 
@@ -129,6 +150,7 @@ export const PlayPauseButton = ({
  */
 export const SkipToNextButton = ({
   iconSize = moderateScale(40),
+  isFloatingPlayer = false,
 }: PlayerButtonProps) => {
   return (
     <TouchableOpacity
@@ -137,7 +159,15 @@ export const SkipToNextButton = ({
         TrackPlayer.skipToNext();
       }}
     >
-      <Entypo name="controller-next" size={iconSize} color={Colors.text} />
+      {isFloatingPlayer ? (
+        <FontAwesome6 name="forward-step" size={iconSize} color="#fff" />
+      ) : (
+        <MaterialCommunityIcons
+          name="skip-next-outline"
+          size={iconSize}
+          color={"#fff"}
+        />
+      )}
     </TouchableOpacity>
   );
 };
@@ -148,6 +178,7 @@ export const SkipToNextButton = ({
  */
 export const SkipToPreviousButton = ({
   iconSize = moderateScale(40),
+  isFloatingPlayer = false,
 }: PlayerButtonProps) => {
   return (
     <TouchableOpacity
@@ -156,11 +187,15 @@ export const SkipToPreviousButton = ({
         TrackPlayer.skipToPrevious();
       }}
     >
-      <Entypo
-        name="controller-jump-to-start"
-        size={iconSize}
-        color={Colors.text}
-      />
+      {isFloatingPlayer ? (
+        <FontAwesome6 name="backward-step" size={iconSize} color="#fff" />
+      ) : (
+        <MaterialCommunityIcons
+          name="skip-previous-outline"
+          size={iconSize}
+          color={"#fff"}
+        />
+      )}
     </TouchableOpacity>
   );
 };

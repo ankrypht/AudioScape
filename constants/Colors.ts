@@ -9,11 +9,11 @@ export const Colors = {
   /**
    * Color for the inactive part of a track progress bar.
    */
-  maximumTrackTintColor: "rgba(255,255,255,0.4)",
+  maximumTrackTintColor: "rgba(255,255,255,0.2)",
   /**
    * Color for the active part of a track progress bar.
    */
-  minimumTrackTintColor: "rgba(255,255,255,0.6)",
+  minimumTrackTintColor: "#fff",
   /**
    * Primary text color.
    */

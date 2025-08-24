@@ -21,7 +21,7 @@ import { useImageColors } from "@/hooks/useImageColors";
 import { useTrackPlayerFavorite } from "@/hooks/useTrackPlayerFavorite";
 import { defaultStyles } from "@/styles";
 import FastImage from "@d11/react-native-fast-image";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, MaterialIcons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
@@ -70,7 +70,7 @@ const PlayerScreen = () => {
         style={{ flex: 1 }}
         colors={
           imageColors
-            ? [imageColors.average, imageColors.dominant]
+            ? [imageColors.dominant, "#000"]
             : [Colors.background, "#000"]
         }
       >
@@ -114,7 +114,7 @@ const PlayerScreen = () => {
                     <FontAwesome
                       name={isFavorite ? "heart" : "heart-o"}
                       size={moderateScale(22)}
-                      color={isFavorite ? "#ff0000" : Colors.icon}
+                      color={isFavorite ? "#ff0000" : "#fff"}
                       style={{ marginRight: 13, marginLeft: 8 }}
                       onPress={() => {
                         triggerHaptic();
@@ -168,8 +168,14 @@ const PlayerScreen = () => {
                   router.push({ pathname: "/(modals)/queue" });
                 }}
               >
-                <Text style={styles.bottomButtonText}>QUEUE</Text>
+                <MaterialIcons
+                  name="queue-music"
+                  size={moderateScale(20)}
+                  color={Colors.text}
+                />
+                <Text style={styles.bottomButtonText}>Queue</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.bottomButton}
                 onPress={() => {
@@ -177,7 +183,12 @@ const PlayerScreen = () => {
                   router.push({ pathname: "/(modals)/lyrics" });
                 }}
               >
-                <Text style={styles.bottomButtonText}> LYRICS</Text>
+                <Feather
+                  name="align-center"
+                  size={moderateScale(20)}
+                  color={Colors.text}
+                />
+                <Text style={styles.bottomButtonText}>Lyrics</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -226,7 +237,7 @@ const styles = ScaledSheet.create({
   overlayContainer: {
     ...defaultStyles.container,
     paddingHorizontal: screenPadding.horizontal,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.25)",
   },
   artworkImageContainer: {
     elevation: 20,
@@ -266,9 +277,11 @@ const styles = ScaledSheet.create({
     flexShrink: 1,
     fontSize: "16@ms",
     fontWeight: "500",
+    marginLeft: 5,
   },
   bottomButton: {
-    backgroundColor: "rgba(0,0,0,0.2)",
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: "9@vs",
     paddingHorizontal: "15@s",
     borderRadius: 18,

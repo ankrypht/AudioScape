@@ -14,11 +14,7 @@ import { Text, View, ViewProps } from "react-native";
 import { Slider } from "react-native-awesome-slider";
 import { useSharedValue } from "react-native-reanimated";
 import TrackPlayer, { useProgress } from "react-native-track-player";
-import {
-  verticalScale,
-  scale,
-  ScaledSheet,
-} from "react-native-size-matters/extend";
+import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 
 /**
  * `PlayerProgressBar` component.
@@ -26,14 +22,13 @@ import {
  * @param {ViewProps} { style } Props for the container View.
  */
 export const PlayerProgressBar = ({ style }: ViewProps) => {
-  // Get current playback progress, duration, and buffered amount from TrackPlayer.
-  const { duration, position, buffered } = useProgress(250); // Update every 250ms.
+  // Get current playback progress and duration amount from TrackPlayer.
+  const { duration, position } = useProgress(250); // Update every 250ms.
 
   // Shared values for the slider's internal state, used with `react-native-reanimated`.
   const isSliding = useSharedValue(false);
   const progress = useSharedValue(0);
   const slidingValue = useSharedValue(0);
-  const cache = useSharedValue(0);
   const min = useSharedValue(0);
   const max = useSharedValue(1);
 
@@ -45,7 +40,6 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
   // Update progress and cache values only when the user is not actively sliding the bar.
   if (!isSliding.value) {
     progress.value = duration > 0 ? position / duration : 0;
-    cache.value = duration > 0 ? buffered / duration : 0;
   }
 
   return (
@@ -54,12 +48,10 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
         progress={progress} // Current playback progress (0-1).
         minimumValue={min} // Minimum value of the slider (0).
         maximumValue={max} // Maximum value of the slider (1).
-        cache={cache} // Buffered amount (0-1).
         containerStyle={{
-          height: verticalScale(3.5),
+          height: moderateScale(6),
           borderRadius: 16,
         }}
-        thumbWidth={scale(13)}
         // Custom bubble to display the time when sliding.
         renderBubble={() => (
           <View style={styles.bubbleContainer}>
@@ -67,6 +59,17 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
               {formatSecondsToMinutes(slidingValue.value * duration)}
             </Text>
           </View>
+        )}
+        // Custom thumb for the slider.
+        renderThumb={() => (
+          <View
+            style={{
+              width: moderateScale(8),
+              height: moderateScale(25),
+              borderRadius: moderateScale(8),
+              backgroundColor: "#fff",
+            }}
+          />
         )}
         theme={{
           minimumTrackTintColor: Colors.minimumTrackTintColor,
@@ -113,7 +116,6 @@ const styles = ScaledSheet.create({
   timeText: {
     ...defaultStyles.text,
     color: Colors.text,
-    opacity: 0.75,
     fontSize: fontSize.xs,
     letterSpacing: 0.7,
     fontWeight: "500",
@@ -121,7 +123,7 @@ const styles = ScaledSheet.create({
   bubbleContainer: {
     backgroundColor: "transparent",
     alignItems: "flex-end",
-    width: 67.5,
+    width: 64,
   },
   bubbleText: {
     color: Colors.text,
