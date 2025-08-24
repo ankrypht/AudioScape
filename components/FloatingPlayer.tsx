@@ -6,6 +6,7 @@
  * @packageDocumentation
  */
 
+import { useMemo } from "react";
 import { MovingText } from "@/components/MovingText";
 import {
   PlayPauseButton,
@@ -16,11 +17,13 @@ import { triggerHaptic } from "@/helpers/haptics";
 import { useImageColors } from "@/hooks/useImageColors";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import FastImage from "@d11/react-native-fast-image";
-import color from "color";
+import Color from "color";
+import { ensureReadable } from "@/helpers/miscellaneous";
 import { useRouter } from "expo-router";
 import { TouchableOpacity, View, ViewProps } from "react-native";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
-import { useActiveTrack } from "react-native-track-player";
+import { useActiveTrack, useProgress } from "react-native-track-player";
+import { Colors } from "@/constants/Colors";
 
 /**
  * `FloatingPlayer` component displays a compact music player at the bottom of the screen.
@@ -32,18 +35,17 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
   const lastActiveTrack = useLastActiveTrack();
   // Hook to get the currently active track from `react-native-track-player`.
   const activeTrack = useActiveTrack();
+  // Hook for getting track progress
+  const { position, duration } = useProgress(250);
   // Hook to extract dominant colors from the track's artwork.
   const { imageColors } = useImageColors(
     activeTrack?.artwork ?? "https://placehold.co/50",
   );
 
   // Determine the dominant color for the player's background.
-  const dominantColor = activeTrack ? imageColors?.dominant : "#101010";
-  // Darken the dominant color for a subtle background effect.
-  const darkerColor =
-    dominantColor === "#101010"
-      ? "#101010"
-      : color(dominantColor).darken(0.5).hex();
+  const dominantColor = useMemo(() => {
+    return ensureReadable(Color(imageColors?.dominant ?? "#000"));
+  }, [imageColors?.dominant]);
 
   const router = useRouter();
 
@@ -61,39 +63,57 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
   // If no track is available to display, render nothing.
   if (!displayedTrack) return null;
 
+  const progressPercentage = duration > 0 ? (position / duration) * 100 : 0;
+
   return (
-    <View style={[styles.container, { backgroundColor: darkerColor }, style]}>
-      <TouchableOpacity onPress={handlePress} style={styles.touchableArea}>
-        {/* Track artwork */}
-        <FastImage
-          source={{
-            uri: displayedTrack.artwork,
-            priority: FastImage.priority.high,
-          }}
-          style={styles.trackArtworkImage}
+    <View style={[styles.container, { backgroundColor: dominantColor }, style]}>
+      <View style={styles.playerContent}>
+        <TouchableOpacity onPress={handlePress} style={styles.touchableArea}>
+          {/* Track artwork */}
+          <FastImage
+            source={{
+              uri: displayedTrack.artwork,
+              priority: FastImage.priority.high,
+            }}
+            style={styles.trackArtworkImage}
+          />
+
+          {/* Track title and artist, using MovingText for marquee effect */}
+          <View style={styles.trackTitleContainer}>
+            <MovingText
+              style={styles.trackTitle}
+              text={displayedTrack.title ?? ""}
+              animationThreshold={18}
+            />
+            <MovingText
+              style={styles.trackArtist}
+              text={displayedTrack.artist ?? ""}
+              animationThreshold={48}
+            />
+          </View>
+        </TouchableOpacity>
+
+        {/* Playback controls */}
+        <TouchableOpacity style={styles.trackControlsContainer}>
+          <SkipToPreviousButton
+            iconSize={moderateScale(20)}
+            isFloatingPlayer={true}
+          />
+          <PlayPauseButton
+            iconSize={moderateScale(30)}
+            isFloatingPlayer={true}
+          />
+          <SkipToNextButton
+            iconSize={moderateScale(20)}
+            isFloatingPlayer={true}
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.progressBarContainer}>
+        <View
+          style={[styles.progressBar, { width: `${progressPercentage}%` }]}
         />
-
-        {/* Track title and artist, using MovingText for marquee effect */}
-        <View style={styles.trackTitleContainer}>
-          <MovingText
-            style={styles.trackTitle}
-            text={displayedTrack.title ?? ""}
-            animationThreshold={18}
-          />
-          <MovingText
-            style={styles.trackArtist}
-            text={displayedTrack.artist ?? ""}
-            animationThreshold={48}
-          />
-        </View>
-      </TouchableOpacity>
-
-      {/* Playback controls */}
-      <TouchableOpacity style={styles.trackControlsContainer}>
-        <SkipToPreviousButton iconSize={moderateScale(25)} />
-        <PlayPauseButton iconSize={moderateScale(25)} />
-        <SkipToNextButton iconSize={moderateScale(25)} />
-      </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -101,12 +121,15 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
 // Styles for the FloatingPlayer component.
 const styles = ScaledSheet.create({
   container: {
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  playerContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: "8@s",
     paddingVertical: "8@vs",
-    borderRadius: 12,
   },
   touchableArea: {
     flexDirection: "row",
@@ -117,25 +140,36 @@ const styles = ScaledSheet.create({
     width: "50@ms",
     height: "50@ms",
     borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: "#fff",
   },
   trackTitleContainer: {
     flex: 1,
     overflow: "hidden",
     marginLeft: 10,
+    marginRight: 8,
   },
   trackTitle: {
-    color: "#f2f2f0",
+    color: "#fff",
     fontSize: "18@ms",
     fontWeight: "600",
   },
   trackArtist: {
-    color: "#a9a9a9",
+    color: Colors.text,
     fontSize: "12@ms",
     fontWeight: "500",
   },
   trackControlsContainer: {
     flexDirection: "row",
     alignItems: "center",
-    columnGap: "13@s",
+    columnGap: "15@s",
+  },
+  progressBarContainer: {
+    height: "1.5@ms",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  },
+  progressBar: {
+    height: "100%",
+    backgroundColor: "#fff",
   },
 });
