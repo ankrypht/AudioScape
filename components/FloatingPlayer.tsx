@@ -96,15 +96,15 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
         {/* Playback controls */}
         <TouchableOpacity style={styles.trackControlsContainer}>
           <SkipToPreviousButton
-            iconSize={moderateScale(20)}
-            isFloatingPlayer={true}
-          />
-          <PlayPauseButton
             iconSize={moderateScale(30)}
             isFloatingPlayer={true}
           />
+          <PlayPauseButton
+            iconSize={moderateScale(40)}
+            isFloatingPlayer={true}
+          />
           <SkipToNextButton
-            iconSize={moderateScale(20)}
+            iconSize={moderateScale(30)}
             isFloatingPlayer={true}
           />
         </TouchableOpacity>
@@ -162,7 +162,6 @@ const styles = ScaledSheet.create({
   trackControlsContainer: {
     flexDirection: "row",
     alignItems: "center",
-    columnGap: "15@s",
   },
   progressBarContainer: {
     height: "1.5@ms",

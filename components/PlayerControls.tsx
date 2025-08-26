@@ -11,11 +11,7 @@ import { triggerHaptic } from "@/helpers/haptics";
 import { useTrackPlayerRepeatMode } from "@/hooks/useTrackPlayerRepeatMode";
 import { downloadAndSaveSong } from "@/services/download";
 import { useIsSongDownloaded, useIsSongDownloading } from "@/store/library";
-import {
-  MaterialCommunityIcons,
-  MaterialIcons,
-  FontAwesome6,
-} from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { ComponentProps, useCallback } from "react";
 import {
@@ -127,19 +123,11 @@ export const PlayPauseButton = ({
         }
       }}
     >
-      {isFloatingPlayer ? (
-        <FontAwesome6
-          name={playing ? "pause" : "play"}
-          size={iconSize}
-          color="#fff"
-        />
-      ) : (
-        <MaterialIcons
-          name={playing ? "pause" : "play-arrow"}
-          size={iconSize * 0.65}
-          color="#000"
-        />
-      )}
+      <MaterialIcons
+        name={playing ? "pause" : "play-arrow"}
+        size={isFloatingPlayer ? iconSize : iconSize * 0.65}
+        color={isFloatingPlayer ? "#fff" : "#000"}
+      />
     </TouchableOpacity>
   );
 };
@@ -160,7 +148,7 @@ export const SkipToNextButton = ({
       }}
     >
       {isFloatingPlayer ? (
-        <FontAwesome6 name="forward-step" size={iconSize} color="#fff" />
+        <MaterialIcons name="skip-next" size={iconSize} color="#fff" />
       ) : (
         <MaterialCommunityIcons
           name="skip-next-outline"
@@ -188,7 +176,7 @@ export const SkipToPreviousButton = ({
       }}
     >
       {isFloatingPlayer ? (
-        <FontAwesome6 name="backward-step" size={iconSize} color="#fff" />
+        <MaterialIcons name="skip-previous" size={iconSize} color="#fff" />
       ) : (
         <MaterialCommunityIcons
           name="skip-previous-outline"
