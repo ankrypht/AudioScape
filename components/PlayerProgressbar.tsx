@@ -49,7 +49,7 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
         minimumValue={min} // Minimum value of the slider (0).
         maximumValue={max} // Maximum value of the slider (1).
         containerStyle={{
-          height: moderateScale(6),
+          height: moderateScale(5),
           borderRadius: 16,
         }}
         // Custom bubble to display the time when sliding.
@@ -64,9 +64,9 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
         renderThumb={() => (
           <View
             style={{
-              width: moderateScale(8),
-              height: moderateScale(25),
-              borderRadius: moderateScale(8),
+              width: moderateScale(15),
+              height: moderateScale(15),
+              borderRadius: moderateScale(15) / 2,
               backgroundColor: "#fff",
             }}
           />
@@ -123,7 +123,7 @@ const styles = ScaledSheet.create({
   bubbleContainer: {
     backgroundColor: "transparent",
     alignItems: "flex-end",
-    width: 64,
+    width: 67.5,
   },
   bubbleText: {
     color: Colors.text,
