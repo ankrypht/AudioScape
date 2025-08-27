@@ -573,12 +573,10 @@ const DismissMenuModalSymbol = () => {
 const styles = ScaledSheet.create({
   modalBackground: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0)",
   },
   modalContent: {
     backgroundColor: "#151515",

@@ -127,6 +127,7 @@ export default function RootLayout() {
                     options={{
                       presentation: "transparentModal",
                       headerShown: false,
+                      animation: "fade_from_bottom",
                     }}
                   />
                   {/* Modals for various actions, presented as transparent modals without headers. */}
@@ -135,6 +136,7 @@ export default function RootLayout() {
                     options={{
                       presentation: "transparentModal",
                       headerShown: false,
+                      animation: "slide_from_bottom",
                     }}
                   />
                   <Stack.Screen
@@ -142,6 +144,7 @@ export default function RootLayout() {
                     options={{
                       presentation: "transparentModal",
                       headerShown: false,
+                      animation: "fade",
                     }}
                   />
                   <Stack.Screen
@@ -149,6 +152,7 @@ export default function RootLayout() {
                     options={{
                       presentation: "transparentModal",
                       headerShown: false,
+                      animation: "slide_from_bottom",
                     }}
                   />
                   <Stack.Screen
@@ -156,6 +160,7 @@ export default function RootLayout() {
                     options={{
                       presentation: "transparentModal",
                       headerShown: false,
+                      animation: "fade_from_bottom",
                     }}
                   />
                   <Stack.Screen
@@ -163,6 +168,7 @@ export default function RootLayout() {
                     options={{
                       presentation: "transparentModal",
                       headerShown: false,
+                      animation: "slide_from_bottom",
                     }}
                   />
                   {/* Catch-all screen for unmatched routes. */}
