@@ -32,6 +32,7 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import HeartButton from "@/components/HeartButton";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Text, ToastAndroid, TouchableOpacity, View } from "react-native";
@@ -124,16 +125,16 @@ export default function MenuModal() {
       </View>
 
       {/* Favorite button in the header */}
-      <FontAwesome
-        name={isFavorite ? "heart" : "heart-o"}
-        size={moderateScale(22)}
-        color={isFavorite ? "#ff0000" : Colors.icon}
-        onPress={() => {
+      <HeartButton
+        isFavorite={isFavorite}
+        onToggle={() => {
           triggerHaptic();
           toggleFavoriteFunc(song);
           setIsFavorite((prev) => !prev);
         }}
-        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        size={moderateScale(24)}
+        notFavoriteColor={Colors.icon}
+        favoriteColor={"#ff0000"}
       />
     </View>
   );
