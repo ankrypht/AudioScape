@@ -178,7 +178,7 @@ export const downloadAndSaveSong = async (
   );
   const artworkFileExtension = getFileExtensionFromUrlOrMime(
     remoteArtworkUrl || "",
-    remoteArtworkUrl ? undefined : "image/jpeg",
+    "image/jpeg",
   );
 
   const trackFileName = `${id}.${trackFileExtension}`;
