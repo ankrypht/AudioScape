@@ -19,7 +19,9 @@ import {
   TouchableOpacity,
   View,
   ViewStyle,
+  RegisteredStyle,
   ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 import { moderateScale } from "react-native-size-matters/extend";
 import TrackPlayer, {
@@ -40,7 +42,10 @@ export type PlayerControlsProps = {
  * Props for individual player button components.
  */
 export type PlayerButtonProps = {
-  style?: ViewStyle; // Custom styles for the button's container View.
+  style?:
+    | ViewStyle
+    | RegisteredStyle<ViewStyle>
+    | (ViewStyle | RegisteredStyle<ViewStyle>)[]; // Custom styles for the button's container View.
   iconSize?: number; // Size of the icon.
   isFloatingPlayer?: boolean; // Whether the button is for the floating player.
 };
@@ -233,7 +238,7 @@ export const AddToPlaylistButton = ({ iconSize = moderateScale(30) }) => {
  */
 export const DownloadSongButton = ({
   style,
-  iconSize = moderateScale(27),
+  iconSize = moderateScale(25),
 }: PlayerButtonProps) => {
   const activeTrack = useActiveTrack();
   // Check if the active track is already downloaded.
@@ -264,13 +269,17 @@ export const DownloadSongButton = ({
   }, [activeTrack, downloaded, downloading]);
 
   return (
-    <View style={[{ height: iconSize }, style]}>
+    <View style={style}>
       <TouchableOpacity onPress={handleDownload}>
-        <MaterialIcons
-          name={downloaded ? "download-done" : "download"}
-          size={iconSize}
-          color={downloaded ? "white" : Colors.icon}
-        />
+        {downloading ? (
+          <ActivityIndicator size={iconSize} color={"#000"} />
+        ) : (
+          <MaterialIcons
+            name={downloaded ? "file-download-done" : "file-download"}
+            size={iconSize}
+            color={"#000"}
+          />
+        )}
       </TouchableOpacity>
     </View>
   );

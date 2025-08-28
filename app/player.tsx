@@ -13,6 +13,7 @@ import {
   DownloadSongButton,
   PlayerControls,
 } from "@/components/PlayerControls";
+import HeartButton from "@/components/HeartButton";
 import { PlayerProgressBar } from "@/components/PlayerProgressbar";
 import { Colors } from "@/constants/Colors";
 import { screenPadding } from "@/constants/tokens";
@@ -21,10 +22,20 @@ import { useImageColors } from "@/hooks/useImageColors";
 import { useTrackPlayerFavorite } from "@/hooks/useTrackPlayerFavorite";
 import { defaultStyles } from "@/styles";
 import FastImage from "@d11/react-native-fast-image";
-import { FontAwesome, MaterialIcons, Feather } from "@expo/vector-icons";
+import {
+  MaterialIcons,
+  Feather,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  View,
+  Share,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   moderateScale,
@@ -52,6 +63,19 @@ const PlayerScreen = () => {
 
   // Hook to manage track favoriting.
   const { isFavorite, toggleFavoriteFunc } = useTrackPlayerFavorite();
+
+  // Function to handle sharing the current track.
+  const onShare = async () => {
+    triggerHaptic();
+    try {
+      await Share.share({
+        message: "https://music.youtube.com/watch?v=" + activeTrack?.id,
+        title: "Check out this song!",
+      });
+    } catch (error: any) {
+      console.error(error.message);
+    }
+  };
 
   // Show a loading indicator if no active track is available.
   if (!activeTrack) {
@@ -111,20 +135,30 @@ const PlayerScreen = () => {
                     </View>
 
                     {/* Favorite button */}
-                    <FontAwesome
-                      name={isFavorite ? "heart" : "heart-o"}
-                      size={moderateScale(22)}
-                      color={isFavorite ? "#ff0000" : "#fff"}
-                      style={{ marginRight: 13, marginLeft: 8 }}
-                      onPress={() => {
-                        triggerHaptic();
-                        toggleFavoriteFunc();
-                      }}
-                      hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                    />
+                    <View style={styles.favoriteBotton}>
+                      <HeartButton
+                        isFavorite={isFavorite}
+                        onToggle={() => {
+                          triggerHaptic();
+                          toggleFavoriteFunc();
+                        }}
+                        size={moderateScale(20)}
+                      />
+                    </View>
 
-                    {/* Download song button */}
-                    <DownloadSongButton style={{ paddingTop: 1 }} />
+                    <DownloadSongButton style={styles.downloadBotton} />
+
+                    {/* Share button */}
+                    <TouchableOpacity
+                      onPress={onShare}
+                      style={styles.shareButton}
+                    >
+                      <MaterialCommunityIcons
+                        name="share-outline"
+                        size={moderateScale(25)}
+                        color={"#000"}
+                      />
+                    </TouchableOpacity>
                   </View>
 
                   {/* Track artist */}
@@ -270,6 +304,38 @@ const styles = ScaledSheet.create({
     fontSize: "20@ms",
     opacity: 0.8,
     maxWidth: "90%",
+  },
+  favoriteBotton: {
+    height: "30@ms",
+    width: "30@ms",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    borderBottomRightRadius: 6,
+    borderTopRightRadius: 6,
+    borderBottomLeftRadius: 10,
+    borderTopLeftRadius: 10,
+    marginLeft: 4,
+  },
+  downloadBotton: {
+    height: "30@ms",
+    width: "30@ms",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    borderRadius: 6,
+    marginHorizontal: 4,
+  },
+  shareButton: {
+    height: "30@ms",
+    width: "30@ms",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    borderBottomRightRadius: 10,
+    borderTopRightRadius: 15,
+    borderBottomLeftRadius: 6,
+    borderTopLeftRadius: 6,
   },
   bottomButtonText: {
     textAlign: "center",

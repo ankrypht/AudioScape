@@ -28,14 +28,19 @@ import { usePlaylists } from "@/store/library";
 import FastImage from "@d11/react-native-fast-image";
 import {
   Feather,
-  FontAwesome,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
 import HeartButton from "@/components/HeartButton";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Text, ToastAndroid, TouchableOpacity, View } from "react-native";
+import {
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+  Share,
+} from "react-native";
 import { Divider } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -485,6 +490,26 @@ export default function MenuModal() {
           ToastAndroid.show("Playlist will play next", ToastAndroid.SHORT);
           router.back();
           playNext(playlistData.songs ? playlistData.songs : null);
+        }
+      },
+    },
+    {
+      types: ["song", "playlistSong", "queueSong", "downloadedSong"],
+      label: "Share",
+      icon: (
+        <MaterialCommunityIcons
+          name="share-outline"
+          size={moderateScale(24)}
+          color={Colors.text}
+        />
+      ),
+      onPress: async () => {
+        triggerHaptic();
+        if (selectedSong) {
+          await Share.share({
+            message: "https://music.youtube.com/watch?v=" + selectedSong.id,
+            title: "Check out this song!",
+          });
         }
       },
     },
