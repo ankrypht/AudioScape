@@ -40,6 +40,10 @@ import { YTMusic } from "youtubei.js";
 
 const HEADER_HEIGHT = 300;
 
+/**
+ * `ArtistPageScreen` component.
+ * Displays a detailed page for a specific artist.
+ */
 export default function ArtistPageScreen() {
   const { top, bottom } = useSafeAreaInsets();
   const router = useRouter();
@@ -51,6 +55,9 @@ export default function ArtistPageScreen() {
   const artistId = params.id as string;
 
   useEffect(() => {
+    /**
+     * Fetches the artist's data from the YouTube Music API.
+     */
     const fetchArtistData = async () => {
       if (!artistId) {
         setLoading(false);
@@ -75,6 +82,10 @@ export default function ArtistPageScreen() {
     fetchArtistData();
   }, [artistId]);
 
+  /**
+   * Handles the selection of a song, initiating playback.
+   * @param song - The selected song.
+   */
   const handleSongSelect = (song: Song) => {
     triggerHaptic();
     playAudio(song);
@@ -248,6 +259,11 @@ export default function ArtistPageScreen() {
     });
   }
 
+  /**
+   * Renders an item in the FlashList based on its type.
+   * @param item - The item to render.
+   * @returns The rendered component for the item.
+   */
   const renderItem = ({ item }: { item: any }) => {
     switch (item.type) {
       case "songs_header":
@@ -345,6 +361,10 @@ export default function ArtistPageScreen() {
     }
   };
 
+  /**
+   * Renders the header component for the artist page.
+   * @returns The rendered header component.
+   */
   const ListHeader = () => (
     <View
       style={[styles.headerContainer, { height: moderateScale(HEADER_HEIGHT) }]}
@@ -398,6 +418,7 @@ export default function ArtistPageScreen() {
   );
 }
 
+// Styles for the ArtistPageScreen component.
 const styles = ScaledSheet.create({
   container: {
     flex: 1,

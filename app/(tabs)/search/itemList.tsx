@@ -26,6 +26,10 @@ import {
 } from "react-native-size-matters/extend";
 import { useActiveTrack } from "react-native-track-player";
 
+/**
+ * `ItemList` component.
+ * A generic screen for displaying lists of various media types.
+ */
 const ItemList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
@@ -49,6 +53,10 @@ const ItemList = () => {
 
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
+  /**
+   * Handles the selection of a song, initiating playback.
+   * @param song - The selected song.
+   */
   const handleSongSelect = useCallback(
     (song: Song) => {
       triggerHaptic();
@@ -287,6 +295,9 @@ const ItemList = () => {
   );
 
   useEffect(() => {
+    /**
+     * Fetches and formats the track data from the navigation parameters.
+     */
     const fetchTracks = async () => {
       setIsLoading(true);
       try {
@@ -312,6 +323,10 @@ const ItemList = () => {
     fetchTracks();
   }, [data, type]);
 
+  /**
+   * Returns the appropriate array of items based on the `type`.
+   * @returns An array of items to be rendered in the list.
+   */
   const getItems = () => {
     if (type === "song" || type === "video") return formattedTracks;
     if (type === "album") return formattedTracksAlbums;
@@ -320,6 +335,11 @@ const ItemList = () => {
   };
   const items = getItems();
 
+  /**
+   * Renders the appropriate item component based on the `type`.
+   * @param item - The item to render.
+   * @returns The rendered item component.
+   */
   const renderItem = useCallback(
     ({ item }: { item: any }) => {
       switch (type) {
@@ -438,6 +458,7 @@ const ItemList = () => {
 
 export default ItemList;
 
+// Styles for the ItemList component.
 const styles = ScaledSheet.create({
   header: {
     flexDirection: "row",

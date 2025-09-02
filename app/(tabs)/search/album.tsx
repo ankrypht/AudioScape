@@ -30,6 +30,10 @@ import {
 } from "react-native-size-matters/extend";
 import { useActiveTrack } from "react-native-track-player";
 
+/**
+ * `AlbumPageScreen` component.
+ * Displays a detailed page for a specific album.
+ */
 export default function AlbumPageScreen() {
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
   const [showHeaderTitle, setShowHeaderTitle] = useState<boolean>(false);
@@ -57,6 +61,9 @@ export default function AlbumPageScreen() {
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
   useEffect(() => {
+    /**
+     * Fetches the album's data from the YouTube Music API.
+     */
     const fetchAlbumData = async () => {
       if (!id) {
         setLoading(false);
@@ -97,6 +104,10 @@ export default function AlbumPageScreen() {
     );
   }
 
+  /**
+   * Renders the header component for the album page.
+   * @returns The rendered header component.
+   */
   const ListHeader = () => (
     <>
       {/* Artwork Image */}
@@ -143,6 +154,12 @@ export default function AlbumPageScreen() {
     </>
   );
 
+  /**
+   * Renders a song item from the album.
+   * @param item - The song item to render.
+   * @param index - The index of the song in the list.
+   * @returns The rendered song item component.
+   */
   const renderSongItem = ({ item, index }: { item: any; index: number }) => (
     <View key={item.id + index} style={styles.songItem}>
       <TouchableOpacity
@@ -301,6 +318,7 @@ export default function AlbumPageScreen() {
   );
 }
 
+// Styles for the AlbumPageScreen component.
 const styles = ScaledSheet.create({
   container: {
     flex: 1,

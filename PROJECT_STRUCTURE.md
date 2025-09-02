@@ -28,7 +28,6 @@ The root directory contains essential configuration files, documentation, and th
   - `📁 workflows/`: Contains CI/CD workflow configurations.
     - `📄 release-please.yml`: A workflow for automating releases.
 - `📁 .vscode/`: Contains Visual Studio Code editor settings.
-  - `📄 settings.json`: Workspace-specific settings for VS Code.
 - `📁 app/`: Contains all the screens, navigation logic, and layouts.
 - `📁 assets/`: Holds all static assets like fonts and images.
 - `📁 components/`: Home to reusable React components used throughout the app.
@@ -61,21 +60,22 @@ This directory is the heart of the application, managing all routes and screen l
   - `📄 menu.tsx`: A generic menu modal for items.
   - `📄 queue.tsx`: Modal to show the upcoming tracks in the queue.
 - `📁 (tabs)/`: Defines the main tab navigation structure.
-  - `📁 home/`: The main home screen and its sub-pages.
-    - `📄 _layout.tsx`: Layout for the home screen.
+  - `📁 library/`: The library screen and its sub-pages.
+    - `📄 _layout.tsx`: Layout for the library screen.
+    - `📄 [playlistName].tsx`: Screen to display a single playlist.
+    - `📄 downloads.tsx`: Screen to show downloaded tracks.
+    - `📄 favorites.tsx`: Screen to show favorited tracks.
+    - `📄 index.tsx`: The main library screen.
+  - `📁 search/`: The search screen and its sub-pages.
+    - `📄 _layout.tsx`: Layout for the search screen.
     - `📄 album.tsx`: Screen to display a single album.
     - `📄 artist.tsx`: Screen to display a single artist.
-    - `📄 index.tsx`: The main home screen.
+    - `📄 index.tsx`: The main search screen.
     - `📄 itemList.tsx`: A generic list screen for items.
-    - `📄 search.tsx`: The search screen.
-  - `📁 playlists/`: The playlists screen and logic for viewing a specific playlist.
-    - `📄 _layout.tsx`: Layout for the playlists screen.
-    - `📄 [playlistName].tsx`: Screen to display a single playlist.
-    - `📄 index.tsx`: The main playlists screen.
+    - `📄 playlist.tsx`: Screen to display a single playlist.
   - `📄 _layout.tsx`: The layout for the tab navigator itself.
-  - `📄 downloads.tsx`: Screen to show downloaded tracks.
-  - `📄 favorites.tsx`: Screen to show favorited tracks.
   - `📄 index.tsx`: The default entry screen for the tabs (redirects to home).
+  - `📄 settings.tsx`: Screen for application settings.
 - `📄 _layout.tsx`: The root layout for the entire app. It sets up global providers (Theme, Redux, Gesture Handler), loads fonts, and initializes the track player.
 - `📄 player.tsx`: The full-screen music player UI.
 - `📄 +not-found.tsx`: A catch-all screen for handling invalid routes.
@@ -86,9 +86,9 @@ This directory is the heart of the application, managing all routes and screen l
   - `📄 Meriva.ttf`
   - `📄 SpaceMono-Regular.ttf`
 - `📁 images/`: Contains all images and icons.
-  - `📁 backgroundGradients/`: A collection of gradient images for backgrounds.
   - `📄 adaptive-icon-background.png`
   - `📄 adaptive-icon-foreground.png`
+  - `📄 adaptive-icon-monochrome.png`
   - `📄 favicon.png`
   - `📄 getItGithub.png`
   - `📄 icon.png`
@@ -112,7 +112,7 @@ This directory contains reusable UI components.
   - `📄 VerticalArrowDismiss.tsx`: A component for a vertical arrow dismiss gesture.
   - `📄 VerticalGesture.tsx`: A component for handling vertical gestures.
 - `📄 FloatingPlayer.tsx`: The mini-player that persists at the bottom of the screen.
-- `📄 GradientBackground.tsx`: A component for rendering a gradient background.
+- `📄 HeartButton.tsx`: An animated heart button for favoriting items.
 - `📄 Lyrics.tsx`: Component to display synchronized or static lyrics.
 - `📄 MessageModal.tsx`: A reusable modal for showing informational messages.
 - `📄 MovingText.tsx`: A marquee-style component for scrolling long text.

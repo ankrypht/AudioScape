@@ -1,3 +1,9 @@
+/**
+ * This file defines the `SettingsScreen` component, which provides users with
+ * options to manage their library data, such as importing and exporting playlists
+ * and favorite tracks. It also displays the current application version.
+ */
+
 import { Colors } from "@/constants/Colors";
 import { triggerHaptic } from "@/helpers/haptics";
 import { exportLibraryData, importLibraryData } from "@/store/library";
@@ -17,10 +23,18 @@ import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 import { Divider } from "react-native-paper";
 import * as Application from "expo-application";
 
+/**
+ * `SettingsScreen` component.
+ * Renders the settings page with options for library management and app information.
+ */
 const SettingsScreen = () => {
   const { top } = useSafeAreaInsets();
   const router = useRouter();
 
+  /**
+   * Handles the export of library data.
+   * Triggers a haptic feedback, calls the export function, and shows a toast message.
+   */
   const handleExport = async () => {
     triggerHaptic();
     try {
@@ -35,6 +49,10 @@ const SettingsScreen = () => {
     }
   };
 
+  /**
+   * Handles the import of library data.
+   * Triggers a haptic feedback, calls the import function, and shows a toast message.
+   */
   const handleImport = async () => {
     triggerHaptic();
     try {
@@ -54,6 +72,7 @@ const SettingsScreen = () => {
 
   return (
     <View style={defaultStyles.container}>
+      {/* Header section with back button and title */}
       <View style={[styles.header, { paddingTop: top }]}>
         <View
           style={{
@@ -82,6 +101,7 @@ const SettingsScreen = () => {
         }}
       />
       <View style={styles.content}>
+        {/* Library Management section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Library Management</Text>
           <Text style={styles.description}>
@@ -89,6 +109,7 @@ const SettingsScreen = () => {
             file.
           </Text>
 
+          {/* Import and Export buttons */}
           <TouchableOpacity style={styles.button} onPress={handleImport}>
             <Ionicons
               name="cloud-upload-outline"
@@ -107,6 +128,7 @@ const SettingsScreen = () => {
             <Text style={styles.buttonText}>Export Library</Text>
           </TouchableOpacity>
         </View>
+        {/* Footer with GitHub link and app version */}
         <View style={styles.footer}>
           <TouchableOpacity
             onPress={() =>
@@ -124,6 +146,7 @@ const SettingsScreen = () => {
   );
 };
 
+// Styles for the SettingsScreen component.
 const styles = ScaledSheet.create({
   content: {
     flex: 1,
