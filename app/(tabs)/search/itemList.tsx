@@ -3,8 +3,6 @@
  * lists of various media types (songs, videos, albums, artists). It dynamically renders
  * items based on the `type` parameter passed via navigation, and provides playback
  * and navigation functionalities.
- *
- * @packageDocumentation
  */
 
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
@@ -196,7 +194,7 @@ const ItemList = () => {
           onPress={() => {
             triggerHaptic();
             router.push({
-              pathname: "/(tabs)/home/album",
+              pathname: "/(tabs)/search/album",
               params: {
                 id: item.id,
                 title: item.title,
@@ -265,7 +263,7 @@ const ItemList = () => {
           onPress={() => {
             triggerHaptic();
             router.push({
-              pathname: "/(tabs)/home/artist",
+              pathname: "/(tabs)/search/artist",
               params: { id: item.id, subtitle: item.subtitle },
             });
           }}
@@ -349,13 +347,7 @@ const ItemList = () => {
   return (
     <View style={defaultStyles.container}>
       {/* Header */}
-      <View
-        style={[
-          styles.header,
-          isScrolling ? styles.headerScrolled : {},
-          { paddingTop: top },
-        ]}
-      >
+      <View style={[styles.header, { paddingTop: top }]}>
         <MaterialCommunityIcons
           name="arrow-left"
           size={moderateScale(25)}
@@ -459,9 +451,6 @@ const styles = ScaledSheet.create({
     fontWeight: "bold",
     color: Colors.text,
     paddingLeft: 15,
-  },
-  headerScrolled: {
-    backgroundColor: "rgba(0,0,0,0.3)",
   },
   searchResult: {
     flexDirection: "row",

@@ -3,8 +3,6 @@
  * information about a specific music artist. It fetches artist data from YouTube Music,
  * including their top songs, albums, singles, and videos. Users can play individual
  * songs or navigate to album/video detail pages from this screen.
- *
- * @packageDocumentation
  */
 
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
@@ -158,7 +156,7 @@ export default function ArtistPageScreen() {
           });
         else
           router.push({
-            pathname: "/(tabs)/home/album",
+            pathname: "/(tabs)/search/album",
             params: {
               id: item.id,
               title: item.title,
@@ -281,7 +279,7 @@ export default function ArtistPageScreen() {
                 );
 
                 router.push({
-                  pathname: "/(tabs)/home/itemList",
+                  pathname: "/(tabs)/search/itemList",
                   params: {
                     data: JSON.stringify(processedSongs),
                     type: "song",

@@ -2,8 +2,6 @@
  * This file defines the `FavoritesScreen` component, which displays a list of
  * songs marked as favorites by the user. It allows users to play individual favorite songs
  * or play all of them, and provides options to manage their favorite status.
- *
- * @packageDocumentation
  */
 
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
@@ -13,17 +11,11 @@ import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
 import { useFavorites } from "@/store/library";
 import { defaultStyles } from "@/styles";
 import FastImage from "@d11/react-native-fast-image";
-import Entypo from "@expo/vector-icons/Entypo";
+import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { FlashList } from "@shopify/flash-list";
-import {
-  ActivityIndicator,
-  Text,
-  TouchableOpacity,
-  View,
-  StyleSheet,
-} from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import LoaderKit from "react-native-loader-kit";
 import { Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -33,16 +25,13 @@ import {
   verticalScale,
 } from "react-native-size-matters/extend";
 import { useActiveTrack } from "react-native-track-player";
-import { LinearGradient } from "expo-linear-gradient";
 
 /**
  * `FavoritesScreen` component.
- * Displays a list of favorite songs.
- */
+ * Displays a list of favorite songs. */
 const FavoritesScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
-  const [headerHeight, setHeaderHeight] = useState(0);
   const [formattedTracks, setFormattedTracks] = useState<Song[]>([]);
   const { top, bottom } = useSafeAreaInsets();
   const { playAudio, playPlaylist } = useMusicPlayer();
@@ -148,34 +137,37 @@ const FavoritesScreen = () => {
   return (
     <View style={defaultStyles.container}>
       {/* Header Overlay */}
-      <View
-        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 10,
-          overflow: "hidden",
-        }}
-      >
-        {/* Gradient background */}
-        {isScrolling && (
-          <LinearGradient
-            colors={["rgba(0,0,0,1)", "rgba(0,0,0,0.9)"]}
-            locations={[0.2, 1]}
-            style={StyleSheet.absoluteFillObject}
+      <View style={[styles.header, { paddingTop: top }]}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={moderateScale(25)}
+            color={Colors.text}
+            onPress={() => {
+              triggerHaptic();
+              router.back();
+            }}
+            style={{ marginRight: 10 }}
           />
-        )}
 
-        <Text style={[styles.header, { paddingTop: top }]}>Favorites</Text>
-
-        {isScrolling && (
-          <Divider
-            style={{ backgroundColor: "rgba(255,255,255,0.3)", height: 0.3 }}
-          />
-        )}
+          <Text style={styles.headerText}>Favorites</Text>
+        </View>
       </View>
+
+      {/* Divider positioned at the bottom of the header */}
+      {isScrolling && (
+        <Divider
+          style={{
+            backgroundColor: "rgba(255,255,255,0.3)",
+            height: 0.3,
+          }}
+        />
+      )}
 
       {/* Loading Indicator */}
       {isLoading ? (
@@ -188,7 +180,6 @@ const FavoritesScreen = () => {
           keyExtractor={(item) => item.id}
           estimatedItemSize={moderateScale(75)}
           contentContainerStyle={{
-            paddingTop: headerHeight,
             paddingBottom: verticalScale(190) + bottom,
           }}
           showsVerticalScrollIndicator={false}
@@ -267,11 +258,17 @@ export default FavoritesScreen;
 // Styles for the FavoritesScreen component.
 const styles = ScaledSheet.create({
   header: {
-    fontSize: "24@ms",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    paddingBottom: 10,
+  },
+  headerText: {
+    fontSize: "22@ms",
     color: Colors.text,
     fontFamily: "Meriva",
     textAlign: "center",
-    paddingVertical: 10,
   },
   songList: {
     flexDirection: "column",

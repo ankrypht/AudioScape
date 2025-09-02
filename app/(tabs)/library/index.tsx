@@ -1,9 +1,7 @@
 /**
- * This file defines the `PlaylistScreen` component, which displays a list of
- * all user-created playlists. It allows users to navigate into a playlist to view its songs,
- * create new playlists, and access options to manage existing playlists.
- *
- * @packageDocumentation
+ * This file defines the `LibraryScreen` component, which serves as the main navigation hub
+ * for the user's personal music library. It provides access to different sections like
+ * Favorites, Downloads, and Playlists.
  */
 
 import React, { useCallback, useMemo, useState } from "react";
@@ -16,9 +14,9 @@ import { usePlaylists } from "@/store/library";
 import { defaultStyles } from "@/styles";
 import { FlashList } from "@shopify/flash-list";
 import FastImage from "@d11/react-native-fast-image";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { Route, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Text,
@@ -37,10 +35,9 @@ import {
 import { useActiveTrack } from "react-native-track-player";
 
 /**
- * `PlaylistScreen` component.
- * Displays a list of user-created playlists.
- */
-export default function PlaylistScreen() {
+ * `LibraryScreen` component.
+ * Displays the user's library. */
+export default function LibraryScreen() {
   const { playlists, createNewPlaylist } = usePlaylists();
   const router = useRouter();
   const { top, bottom } = useSafeAreaInsets();
@@ -63,6 +60,24 @@ export default function PlaylistScreen() {
     [playlists],
   );
 
+  // Predefined library sections (static items like Favorites, Downloads, etc.)
+  const sections: {
+    name: string;
+    icon: keyof typeof MaterialCommunityIcons.glyphMap;
+    path: Route;
+  }[] = [
+    {
+      name: "Favorites",
+      icon: "heart-outline",
+      path: "/library/favorites" as Route,
+    },
+    {
+      name: "Downloads",
+      icon: "download-outline",
+      path: "/library/downloads" as Route,
+    },
+  ];
+
   /**
    * Handles the creation of a new playlist.
    * @param playlistName - The name of the new playlist.
@@ -82,6 +97,41 @@ export default function PlaylistScreen() {
   };
 
   /**
+   * Renders an individual section item (Favorites, Downloaded, etc.).
+   * @param item - The section item to render.
+   * @returns A View component representing a section.
+   */
+  const renderSection = useCallback(
+    ({
+      item,
+    }: {
+      item: {
+        name: string;
+        icon: keyof typeof MaterialCommunityIcons.glyphMap;
+        path: Route;
+      };
+    }) => (
+      <TouchableOpacity
+        style={styles.sectionItem}
+        onPress={() => {
+          triggerHaptic();
+          router.push(item.path);
+        }}
+      >
+        <View style={styles.sectionIconBox}>
+          <MaterialCommunityIcons
+            name={item.icon}
+            size={moderateScale(25)}
+            color={"white"}
+          />
+        </View>
+        <Text style={styles.sectionName}>{item.name}</Text>
+      </TouchableOpacity>
+    ),
+    [router],
+  );
+
+  /**
    * Renders an individual playlist item.
    * @param item - The playlist item to render.
    * @returns A View component representing a playlist.
@@ -95,7 +145,7 @@ export default function PlaylistScreen() {
             triggerHaptic();
             // Navigate to the individual playlist screen.
             router.push({
-              pathname: `/(tabs)/playlists/[playlistName]`,
+              pathname: `/library/[playlistName]`,
               params: { playlistName: item.name },
             });
           }}
@@ -158,7 +208,7 @@ export default function PlaylistScreen() {
           />
         )}
 
-        <Text style={[styles.header, { paddingTop: top }]}>Playlists</Text>
+        <Text style={[styles.header, { paddingTop: top }]}>Library</Text>
 
         {isScrolling && (
           <Divider
@@ -183,40 +233,26 @@ export default function PlaylistScreen() {
         }}
         keyExtractor={(item) => item.name}
         scrollEventThrottle={16}
-        ListEmptyComponent={
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text
-              style={{
-                color: Colors.text,
-                textAlign: "center",
-                fontSize: moderateScale(18),
-                paddingHorizontal: 20,
-              }}
-            >
-              No playlists found! {"\n"}Create a playlist and start adding your
-              favorite songs.
-            </Text>
+        ListHeaderComponent={
+          <View>
+            {/* Sections List */}
+            <FlashList
+              data={sections}
+              renderItem={renderSection}
+              keyExtractor={(item) => item.name}
+              estimatedItemSize={50}
+              scrollEnabled={false}
+            />
+
+            {/* Playlists header */}
+            {playlistArray.length > 0 && (
+              <Text style={styles.playlistHeader}>
+                {`Playlist${playlistArray.length > 1 ? "s" : ""} (${
+                  playlistArray.length
+                })`}
+              </Text>
+            )}
           </View>
-        }
-        ListFooterComponent={
-          playlistArray.length > 0 ? (
-            <Text
-              style={{
-                color: Colors.textMuted,
-                textAlign: "center",
-                fontSize: moderateScale(15),
-              }}
-            >
-              {playlistArray.length}{" "}
-              {`Playlist${playlistArray.length > 1 ? "s" : ""}`}
-            </Text>
-          ) : null
         }
       />
 
@@ -256,7 +292,7 @@ export default function PlaylistScreen() {
   );
 }
 
-// Styles for the PlaylistScreen component.
+// Styles for the LibraryScreen component.
 const styles = ScaledSheet.create({
   header: {
     fontSize: "24@ms",
@@ -265,9 +301,32 @@ const styles = ScaledSheet.create({
     textAlign: "center",
     paddingVertical: 10,
   },
-  playlistList: {
-    flexDirection: "column",
-    width: "100%",
+  playlistHeader: {
+    color: Colors.text,
+    fontSize: "16@ms",
+    marginBottom: "10@ms",
+    marginLeft: 20,
+    marginTop: "10@ms",
+  },
+  sectionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: "12@ms",
+    paddingLeft: 20,
+  },
+  sectionIconBox: {
+    height: "55@ms",
+    width: "55@ms",
+    textAlign: "center",
+    marginRight: 20,
+    borderRadius: 6,
+    backgroundColor: "#222",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionName: {
+    fontSize: "16@ms",
+    color: "white",
   },
   playlistItem: {
     flexDirection: "row",

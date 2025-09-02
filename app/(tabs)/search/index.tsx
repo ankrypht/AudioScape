@@ -3,8 +3,6 @@
  * search functionality for music content (songs, videos, albums, artists) from YouTube Music.
  * It includes features like search suggestions, dynamic rendering of search results based on type,
  * and navigation to detailed content pages.
- *
- * @packageDocumentation
  */
 
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
@@ -42,16 +40,14 @@ import { useActiveTrack } from "react-native-track-player";
 
 /**
  * @interface SearchSuggestions
- * @description Defines the structure for a search suggestion item.
- */
+ * @description Defines the structure for a search suggestion item. */
 interface SearchSuggestions {
   text: string;
 }
 
 /**
  * `SearchScreen` component.
- * Provides a search interface for music content.
- */
+ * Provides a search interface for music content. */
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<SearchPageData>();
@@ -189,13 +185,13 @@ export default function SearchScreen() {
             });
           if (item.type === "artist") {
             router.push({
-              pathname: "/(tabs)/home/artist",
+              pathname: "/(tabs)/search/artist",
               params: { id: item.id, subtitle: item.subtitle },
             });
           }
           if (item.type === "album") {
             router.push({
-              pathname: "/(tabs)/home/album",
+              pathname: "/(tabs)/search/album",
               params: {
                 id: item.id,
                 title: item.title,
@@ -206,7 +202,7 @@ export default function SearchScreen() {
           }
           if (item.type === "playlist") {
             router.push({
-              pathname: "/(tabs)/home/playlist",
+              pathname: "/(tabs)/search/playlist",
               params: {
                 id: item.id,
               },
@@ -435,7 +431,7 @@ export default function SearchScreen() {
         onPress={() => {
           triggerHaptic();
           router.push({
-            pathname: "/(tabs)/home/album",
+            pathname: "/(tabs)/search/album",
             params: {
               id: item.id,
               title: item.title,
@@ -501,7 +497,7 @@ export default function SearchScreen() {
         onPress={() => {
           triggerHaptic();
           router.push({
-            pathname: "/(tabs)/home/artist",
+            pathname: "/(tabs)/search/artist",
             params: { id: item.id, subtitle: item.subtitle },
           });
         }}
@@ -594,7 +590,7 @@ export default function SearchScreen() {
               );
 
             router.push({
-              pathname: "/(tabs)/home/itemList",
+              pathname: "/(tabs)/search/itemList",
               params: {
                 data: JSON.stringify(processedSongs),
                 type: type,

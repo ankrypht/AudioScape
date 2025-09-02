@@ -2,8 +2,6 @@
  * This file defines the layout for the main tab navigation of the application.
  * It configures the appearance of the tab bar, including icons, labels, and background,
  * and specifies the screens accessible through each tab.
- *
- * @packageDocumentation
  */
 
 import React from "react";
@@ -65,7 +63,7 @@ function TabLayoutContent() {
       >
         {/* Home Tab */}
         <Tabs.Screen
-          name="home"
+          name="index"
           options={{
             title: "Home",
             tabBarIcon: ({ color, focused }) => (
@@ -76,47 +74,33 @@ function TabLayoutContent() {
             ),
           }}
         />
-        {/* Favorites Tab */}
         <Tabs.Screen
-          name="favorites"
+          name="search"
           options={{
-            title: "Favorites",
+            title: "Search",
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
-                name={focused ? "heart" : "heart-outline"}
+                name={focused ? "search" : "search-outline"}
                 color={color}
               />
             ),
           }}
         />
-        {/* Playlists Tab */}
+        {/* Library Tab */}
         <Tabs.Screen
-          name="playlists"
+          name="library"
           options={{
-            title: "Playlists",
+            title: "Library",
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
-                name={focused ? "list" : "list-outline"}
+                name={focused ? "albums" : "albums-outline"}
                 color={color}
               />
             ),
           }}
         />
-        {/* Downloads Tab */}
-        <Tabs.Screen
-          name="downloads"
-          options={{
-            title: "Downloads",
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? "download" : "download-outline"}
-                color={color}
-              />
-            ),
-          }}
-        />
-        {/* Index screen, hidden from tabs */}
-        <Tabs.Screen name="index" options={{ href: null }} />
+        {/* Settings Tab */}
+        <Tabs.Screen name="settings" options={{ href: null }} />
       </Tabs>
       {/* Floating player component, positioned above the tab bar */}
       <FloatingPlayer

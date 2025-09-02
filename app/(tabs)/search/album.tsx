@@ -1,9 +1,8 @@
 /**
- * This file defines the `PlaylistView` component for remote playlists, which displays the contents
- * of a specific playlist. It shows the playlist's name, its songs, and allows users to
- * play individual songs or the entire playlist. It also provides options to manage songs within the playlist.
- *
- * @packageDocumentation
+ * This file defines the `AlbumPageScreen` component, which displays detailed
+ * information about a specific music album. It fetches album data from YouTube Music,
+ * including its artwork, title, artist, and a list of its songs. Users can play
+ * individual songs or the entire album from this screen.
  */
 
 import { useMusicPlayer } from "@/components/MusicPlayerContext";
@@ -12,16 +11,15 @@ import { unknownTrackImageUri } from "@/constants/images";
 import { triggerHaptic } from "@/helpers/haptics";
 import { useImageColors } from "@/hooks/useImageColors";
 import { useLastActiveTrack } from "@/hooks/useLastActiveTrack";
-import { innertube, processPlaylistPageData } from "@/services/youtube";
+import { innertube, processAlbumPageData } from "@/services/youtube";
 import { FlashList } from "@shopify/flash-list";
 import FastImage from "@d11/react-native-fast-image";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import color from "color";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
-import { Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
-import LoaderKit from "react-native-loader-kit";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -32,34 +30,34 @@ import {
 } from "react-native-size-matters/extend";
 import { useActiveTrack } from "react-native-track-player";
 
-/**
- * `PlaylistView` component.
- * Displays the songs within a specific playlist.
- */
-const PlaylistView = () => {
+export default function AlbumPageScreen() {
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
   const [showHeaderTitle, setShowHeaderTitle] = useState<boolean>(false);
-  const [loading, setLoading] = useState(true);
-  const [titleLayout, setTitleLayout] = useState({ y: 0, height: 0 });
-  const [playlistData, setPlaylistData] = useState<PlaylistPageData>();
   const { top, bottom } = useSafeAreaInsets();
+  const [loading, setLoading] = useState(true);
+  const [albumData, setAlbumData] = useState<AlbumPageData>();
   const router = useRouter();
   const lastActiveTrack = useLastActiveTrack();
   const activeTrack = useActiveTrack();
   const { playAudio, playPlaylist } = useMusicPlayer();
-  // Get the playlist name from local search parameters.
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const [titleLayout, setTitleLayout] = useState({ y: 0, height: 0 });
+  const { id, artist } = useLocalSearchParams<{ id: string; artist: string }>();
 
-  // Get playlist thumbnail colors.
   const { imageColors } = useImageColors(
-    playlistData?.thumbnail ?? unknownTrackImageUri,
+    albumData?.thumbnail ?? unknownTrackImageUri,
   );
 
-  // Determine if the floating player should be visible.
+  const playableSongList =
+    albumData?.songs?.map(({ duration, ...rest }) => ({
+      ...rest,
+      artist: artist,
+      thumbnail: albumData?.thumbnail ?? unknownTrackImageUri,
+    })) ?? [];
+
   const isFloatingPlayerNotVisible = !(activeTrack ?? lastActiveTrack);
 
   useEffect(() => {
-    const fetchPlaylistData = async () => {
+    const fetchAlbumData = async () => {
       if (!id) {
         setLoading(false);
         return;
@@ -69,9 +67,9 @@ const PlaylistView = () => {
       try {
         console.log(`Fetching data for album: ${id}`);
         const yt = await innertube;
-        const album = await yt.music.getPlaylist(id);
-        const albumPage = processPlaylistPageData(album);
-        setPlaylistData(albumPage);
+        const album = await yt.music.getAlbum(id);
+        const albumPage = processAlbumPageData(album);
+        setAlbumData(albumPage);
       } catch (error) {
         console.error("Error fetching artist data:", error);
       } finally {
@@ -79,16 +77,16 @@ const PlaylistView = () => {
       }
     };
 
-    fetchPlaylistData();
+    fetchAlbumData();
   }, [id]);
 
   /**
    * Handles playing a selected song from the playlist.
    * @param song - The `Song` object to play.
+   * @param playList - An optional list of songs to play after the selected song.
    */
-  const handleSongSelect = (song: Song) => {
-    triggerHaptic();
-    playAudio(song, playlistData?.songs);
+  const handleSongSelect = (song: Song, playList?: Song[]) => {
+    playAudio(song, playList);
   };
 
   if (loading) {
@@ -101,11 +99,11 @@ const PlaylistView = () => {
 
   const ListHeader = () => (
     <>
-      {/* Playlist artwork */}
+      {/* Artwork Image */}
       <View style={styles.artworkImageContainer}>
         <FastImage
           source={{
-            uri: playlistData?.thumbnail ?? unknownTrackImageUri,
+            uri: albumData?.thumbnail ?? unknownTrackImageUri,
             priority: FastImage.priority.high,
           }}
           style={styles.artworkImage}
@@ -119,7 +117,7 @@ const PlaylistView = () => {
         }}
         style={styles.titleText}
       >
-        {playlistData?.title}
+        {albumData?.title}
       </Text>
 
       <Text
@@ -130,7 +128,7 @@ const PlaylistView = () => {
           marginBottom: 5,
         }}
       >
-        {playlistData?.subtitle}
+        {albumData?.subtitle}
       </Text>
       <Text
         style={{
@@ -140,51 +138,51 @@ const PlaylistView = () => {
           marginBottom: 5,
         }}
       >
-        {playlistData?.second_subtitle}
+        {albumData?.second_subtitle}
       </Text>
     </>
   );
 
-  const renderSongItem = ({ item }: { item: Song }) => (
-    <View style={styles.songItem}>
+  const renderSongItem = ({ item, index }: { item: any; index: number }) => (
+    <View key={item.id + index} style={styles.songItem}>
       <TouchableOpacity
         style={styles.songItemTouchableArea}
-        onPress={() => handleSongSelect(item)}
+        onPress={() => {
+          triggerHaptic();
+          handleSongSelect(
+            {
+              id: item.id,
+              title: item.title,
+              artist: artist,
+              thumbnail: albumData?.thumbnail ?? unknownTrackImageUri,
+            },
+            playableSongList,
+          );
+        }}
       >
-        <FastImage
-          source={{ uri: item.thumbnail }}
-          style={styles.resultThumbnail}
-        />
-        {/* Playing indicator for the active track */}
-        {activeTrack?.id === item.id && (
-          <LoaderKit
-            style={styles.trackPlayingIconIndicator}
-            name="LineScalePulseOutRapid"
-            color="white"
-          />
-        )}
+        <View style={styles.indexContainer}>
+          <Text style={styles.indexText}>{index + 1}</Text>
+        </View>
         <View style={styles.resultText}>
           <Text style={styles.resultTitle} numberOfLines={1}>
             {item.title}
           </Text>
           <Text style={styles.resultArtist} numberOfLines={1}>
-            {item.artist}
+            {item.duration}
           </Text>
         </View>
       </TouchableOpacity>
-      {/* Options menu button for the song */}
       <TouchableOpacity
         onPress={() => {
           triggerHaptic();
-          // Prepare song data for the menu modal.
+          // Convert the song object to a JSON string
           const songData = JSON.stringify({
             id: item.id,
             title: item.title,
-            artist: item.artist,
-            thumbnail: item.thumbnail,
+            artist: artist,
+            thumbnail: albumData?.thumbnail ?? unknownTrackImageUri,
           });
 
-          // Navigate to the menu modal.
           router.push({
             pathname: "/(modals)/menu",
             params: { songData: songData, type: "song" },
@@ -211,7 +209,6 @@ const PlaylistView = () => {
       }
     >
       <View style={styles.container}>
-        {/* Header with back button and playlist name */}
         <View
           style={[
             styles.header,
@@ -241,11 +238,10 @@ const PlaylistView = () => {
               !showHeaderTitle && { color: "transparent" },
             ]}
           >
-            {playlistData?.title}
+            {albumData?.title}
           </Text>
         </View>
 
-        {/* Divider that appears when scrolling */}
         {isScrolling && (
           <Divider
             style={{
@@ -257,12 +253,11 @@ const PlaylistView = () => {
         )}
 
         <FlashList
-          data={playlistData?.songs}
+          data={albumData?.songs}
           renderItem={renderSongItem}
           keyExtractor={(item: any) => item.id}
-          extraData={activeTrack}
           ListHeaderComponent={ListHeader}
-          estimatedItemSize={moderateScale(75)}
+          estimatedItemSize={moderateScale(50)}
           contentContainerStyle={{
             paddingHorizontal: 15,
             paddingBottom: verticalScale(190) + bottom,
@@ -279,8 +274,7 @@ const PlaylistView = () => {
           scrollEventThrottle={16}
         />
 
-        {/* Floating Action Button to play the entire playlist */}
-        {playlistData?.songs && playlistData.songs.length > 0 && (
+        {albumData?.songs && albumData?.songs.length > 0 && (
           <FAB
             style={{
               position: "absolute",
@@ -296,8 +290,8 @@ const PlaylistView = () => {
             color="black"
             onPress={async () => {
               triggerHaptic();
-              if (playlistData.songs.length === 0) return;
-              await playPlaylist(playlistData.songs);
+              if (albumData?.songs.length === 0) return;
+              await playPlaylist(playableSongList);
               await router.navigate("/player");
             }}
           />
@@ -305,11 +299,8 @@ const PlaylistView = () => {
       </View>
     </LinearGradient>
   );
-};
+}
 
-export default PlaylistView;
-
-// Styles for the PlaylistView component.
 const styles = ScaledSheet.create({
   container: {
     flex: 1,
@@ -366,24 +357,21 @@ const styles = ScaledSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
+    paddingLeft: 0,
   },
   songItemTouchableArea: {
     flexDirection: "row",
     alignItems: "center",
-    width: scale(360) - 60,
+    width: scale(370) - 60,
   },
-  resultThumbnail: {
-    width: "55@ms",
-    height: "55@ms",
-    marginRight: 10,
-    borderRadius: 8,
+  indexContainer: {
+    width: "40@ms",
+    alignItems: "center",
   },
-  trackPlayingIconIndicator: {
-    position: "absolute",
-    top: "18@ms",
-    left: "19@ms",
-    width: "20@ms",
-    height: "20@ms",
+  indexText: {
+    color: "#888",
+    fontSize: "18@ms",
+    fontWeight: "bold",
   },
   resultText: {
     flex: 1,
