@@ -2,8 +2,6 @@
  * This file defines the `FloatingPlayer` component, a mini-player that appears
  * at the bottom of the screen to provide quick access to playback controls and track information.
  * It displays the currently active or last active track and allows navigation to the full player screen.
- *
- * @packageDocumentation
  */
 
 import { useMemo } from "react";

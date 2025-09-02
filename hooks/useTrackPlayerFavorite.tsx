@@ -2,8 +2,6 @@
  * This file contains a custom React hook for managing the favorite status of a track.
  * It interacts with the Redux store to persist favorite tracks and updates the track metadata
  * in the `react-native-track-player` to reflect the favorite status in the notification controls.
- *
- * @packageDocumentation
  */
 
 import { useFavorites } from "@/store/library";

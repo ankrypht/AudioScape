@@ -2,8 +2,6 @@
  * This file defines the `LyricsModal` component, which displays synchronized lyrics
  * for the currently playing song. It features automatic scrolling to the active lyric line,
  * a gradient background based on album artwork, and playback controls.
- *
- * @packageDocumentation
  */
 
 import React, { useEffect, useState, useMemo } from "react";

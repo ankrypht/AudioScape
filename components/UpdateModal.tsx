@@ -2,8 +2,6 @@
  * This file defines the `UpdateModal` component, which checks for new application
  * versions available on GitHub and prompts the user to update if a newer version is found.
  * It fetches release information from the GitHub API and displays a modal with update details.
- *
- * @packageDocumentation
  */
 
 import { Colors } from "@/constants/Colors";

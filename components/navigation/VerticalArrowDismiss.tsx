@@ -2,8 +2,6 @@
  * This file defines the `VerticalDismiss` component, which enables a vertical
  * dismissal gesture for its child content. It uses `react-native-reanimated` for smooth
  * animations and `expo-router` for navigation.
- *
- * @packageDocumentation
  */
 
 import { triggerHaptic } from "@/helpers/haptics";

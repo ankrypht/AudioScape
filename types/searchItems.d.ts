@@ -2,8 +2,6 @@
  * This file defines TypeScript interfaces for various data structures
  * related to search results and content from the YouTube API. These interfaces
  * ensure type safety and consistency when handling data across the application.
- *
- * @packageDocumentation
  */
 
 /**

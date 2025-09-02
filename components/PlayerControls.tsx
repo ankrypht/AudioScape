@@ -2,8 +2,6 @@
  * This file defines various reusable components for controlling music playback,
  * including play/pause, skip, repeat, add to playlist, and download buttons.
  * These components interact with `react-native-track-player` and Redux store for state management.
- *
- * @packageDocumentation
  */
 
 import { Colors } from "@/constants/Colors";

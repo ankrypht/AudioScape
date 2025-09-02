@@ -3,8 +3,6 @@
  * song lyrics throughout the application. It fetches synchronized lyrics from the `lrclib-api`
  * based on the currently active track and makes them available to any component wrapped
  * within the `LyricsProvider`.
- *
- * @packageDocumentation
  */
 
 import React, {

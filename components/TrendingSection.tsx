@@ -2,8 +2,6 @@
  * This file defines the `TrendingSection` component, which displays a horizontally
  * scrollable grid of trending songs. Each song is presented with its rank, artwork, title, and artist,
  * and includes an option to open a menu for additional actions.
- *
- * @packageDocumentation
  */
 
 import { Colors } from "@/constants/Colors";

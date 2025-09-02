@@ -1,8 +1,6 @@
 /**
  * This file centralizes the import and export of image assets used throughout the application.
  * It provides resolved URIs for images, making them easily accessible and consistent.
- *
- * @packageDocumentation
  */
 
 import unknownTrackImage from "@/assets/images/unknown_track.png";

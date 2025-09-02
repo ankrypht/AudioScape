@@ -2,8 +2,6 @@
  * This file contains a custom React hook for extracting prominent colors from an image.
  * It uses the `react-native-image-colors` library to analyze an image from a given URI (URL or local file path) and
  * provides the extracted color palette.
- *
- * @packageDocumentation
  */
 
 import { Colors } from "@/constants/Colors";

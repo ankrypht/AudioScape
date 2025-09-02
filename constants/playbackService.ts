@@ -2,8 +2,6 @@
  * This file defines the background playback service for `react-native-track-player`.
  * It registers event listeners for remote control commands (e.g., from lock screen, headphones)
  * and maps them to corresponding TrackPlayer actions.
- *
- * @packageDocumentation
  */
 
 import TrackPlayer, { Event } from "react-native-track-player";

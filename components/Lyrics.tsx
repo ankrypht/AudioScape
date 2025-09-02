@@ -2,8 +2,6 @@
  * This file defines the `Lyrics` component, which displays a single line of song lyrics.
  * It dynamically highlights the current lyric line based on the playback seek time, providing
  * a synchronized karaoke-like experience.
- *
- * @packageDocumentation
  */
 
 import React from "react";

@@ -2,8 +2,6 @@
  * This file defines the `DeletePlaylistDialog` component, a modal dialog
  * that prompts the user for confirmation before deleting a playlist. It integrates
  * with the Redux store to perform the deletion and provides visual feedback.
- *
- * @packageDocumentation
  */
 
 import { Colors } from "@/constants/Colors";

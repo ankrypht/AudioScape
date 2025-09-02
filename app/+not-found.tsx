@@ -1,8 +1,6 @@
 /**
  * This file defines the 404 "Not Found" screen for the application.
  * It is displayed when a user navigates to a route that does not exist.
- *
- * @packageDocumentation
  */
 
 import { Link, Stack } from "expo-router";

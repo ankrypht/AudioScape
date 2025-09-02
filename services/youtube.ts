@@ -3,8 +3,6 @@
  * with YouTube's internal API (Innertube). It handles fetching video information, stream URLs,
  * search results, and processing various page data types like albums and artists.
  * It includes necessary polyfills to ensure compatibility with the React Native environment.
- *
- * @packageDocumentation
  */
 
 // === START === Polyfills for youtubei.js in React Native

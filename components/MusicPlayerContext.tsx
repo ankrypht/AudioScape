@@ -3,8 +3,6 @@
  * which encapsulate the core logic for music playback within the application.
  * It manages the state of the music player, handles interactions with `react-native-track-player`,
  * fetches song information, manages playlists (both online and downloaded), and handles network status.
- *
- * @packageDocumentation
  */
 
 import React, {

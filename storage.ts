@@ -2,8 +2,6 @@
  * This file initializes and exports the `MMKV` storage instance.
  * `MMKV` is a high-performance, encrypted key-value store for mobile applications,
  * used here for persistent storage of application data.
- *
- * @packageDocumentation
  */
 
 import { MMKV } from "react-native-mmkv";

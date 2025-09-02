@@ -3,8 +3,6 @@
  * It is responsible for setting up global contexts and providers such as Redux, music player,
  * lyrics, safe area, and gesture handling. It also handles font loading, TrackPlayer initialization,
  * splash screen management, and defines the main navigation stack for the app.
- *
- * @packageDocumentation
  */
 
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";

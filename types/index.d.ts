@@ -1,8 +1,6 @@
 /**
  * This file contains TypeScript declaration modules for various file types.
  * These declarations allow TypeScript to understand and correctly type imports of non-code assets.
- *
- * @packageDocumentation
  */
 
 /**

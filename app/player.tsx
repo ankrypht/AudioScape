@@ -3,8 +3,6 @@
  * It displays the currently active track's artwork, title, artist, playback controls,
  * and progress. It also integrates features like favoriting, downloading, and navigating
  * to the queue and lyrics screens.
- *
- * @packageDocumentation
  */
 
 import { MovingText } from "@/components/MovingText";

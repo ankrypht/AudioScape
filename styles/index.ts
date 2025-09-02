@@ -1,8 +1,6 @@
 /**
  * This file defines global styles used across the AudioScape application.
  * It centralizes common styling patterns to ensure consistency and reusability.
- *
- * @packageDocumentation
  */
 
 import { fontSize } from "@/constants/tokens";

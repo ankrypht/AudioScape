@@ -2,8 +2,6 @@
  * This file manages the downloading and local storage of songs and their artwork.
  * It handles file system operations, sends download
  * progress notifications, and updates the Redux store to reflect the state of downloaded tracks.
- *
- * @packageDocumentation
  */
 
 import {

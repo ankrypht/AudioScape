@@ -2,8 +2,6 @@
  * This file defines the `MenuModal` component, a context-sensitive modal
  * that provides various actions for songs, playlists, and albums. Actions include
  * playing, adding to queue, downloading, and deleting, dynamically displayed based on the item type.
- *
- * @packageDocumentation
  */
 
 import { useMusicPlayer } from "@/components/MusicPlayerContext";

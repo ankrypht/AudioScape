@@ -1,8 +1,6 @@
 /**
  * This file defines the color palette used throughout the AudioScape application.
  * It centralizes color definitions to ensure consistency and easy modification of the app's theme.
- *
- * @packageDocumentation
  */
 
 export const Colors = {

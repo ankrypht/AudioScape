@@ -2,8 +2,6 @@
  * This file contains a custom React hook for managing the repeat mode of the
  * `react-native-track-player`. It allows components to get and set the current repeat mode
  * (e.g., Off, Track, Queue).
- *
- * @packageDocumentation
  */
 
 import { useCallback, useEffect, useState } from "react";

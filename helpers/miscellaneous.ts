@@ -1,7 +1,5 @@
 /**
  * This file contains miscellaneous helper functions used throughout the application.
- *
- * @packageDocumentation
  */
 import Color, { ColorInstance } from "color";
 

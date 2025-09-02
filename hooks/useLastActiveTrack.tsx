@@ -2,8 +2,6 @@
  * This file contains a custom React hook that keeps track of the last active track
  * in the music player. This is useful for scenarios where you need to reference the previously
  * playing track even after the player has stopped and the active track becomes undefined.
- *
- * @packageDocumentation
  */
 
 import { useEffect, useState } from "react";

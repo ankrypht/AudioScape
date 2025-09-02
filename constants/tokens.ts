@@ -2,8 +2,6 @@
  * This file defines design tokens for the AudioScape application, such as font sizes
  * and padding values. Using design tokens ensures consistent styling across the application
  * and simplifies theme management.
- *
- * @packageDocumentation
  */
 
 import { moderateScale } from "react-native-size-matters/extend";

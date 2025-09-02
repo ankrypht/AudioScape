@@ -2,8 +2,6 @@
  * This file defines the `MessageModal` component, which displays a dynamic message
  * fetched from a Firebase Firestore database. The modal can be configured to show once per message ID
  * and supports clickable links within its content.
- *
- * @packageDocumentation
  */
 
 import { Colors } from "@/constants/Colors";

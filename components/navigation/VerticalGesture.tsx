@@ -3,8 +3,6 @@
  * dismiss its child content (e.g., a music player screen) by swiping downwards.
  * It leverages `react-native-gesture-handler` for gesture recognition and
  * `react-native-reanimated` for smooth, performant animations.
- *
- * @packageDocumentation
  */
 
 import React, { ReactNode } from "react";

@@ -2,8 +2,6 @@
  * This file defines the `PlayerProgressBar` component, which displays the current
  * playback progress of a song using a seekable slider. It also shows the elapsed, remaining,
  * and total time of the track.
- *
- * @packageDocumentation
  */
 
 import { fontSize } from "@/constants/tokens";

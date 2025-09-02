@@ -2,8 +2,6 @@
  * This file defines the `QueueModal` component, a modal screen that displays
  * the current playback queue of songs. Users can view the order of upcoming tracks,
  * see the currently playing song, and jump to any song in the queue.
- *
- * @packageDocumentation
  */
 
 import VerticalDismiss from "@/components/navigation/VerticalArrowDismiss";

@@ -2,8 +2,6 @@
  * This file contains a custom React hook for logging various states and events
  * from the `react-native-track-player`. This is primarily a debugging tool to help monitor
  * the player's behavior during development.
- *
- * @packageDocumentation
  */
 
 import { Event, useTrackPlayerEvents } from "react-native-track-player";

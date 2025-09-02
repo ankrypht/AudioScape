@@ -2,8 +2,6 @@
  * This file contains a custom React hook that handles clicks on the music player
  * notification. When the notification is tapped, it deep-links back into the app and navigates
  * the user to the main player screen.
- *
- * @packageDocumentation
  */
 
 import { useEffect, useRef } from "react";

@@ -2,8 +2,6 @@
  * This file defines the `MovingText` component, which displays text that can
  * automatically marquee (scroll) horizontally if its content exceeds a specified length.
  * This is useful for displaying long titles or artist names in a compact space.
- *
- * @packageDocumentation
  */
 
 import { Text, TextStyle, StyleProp } from "react-native";

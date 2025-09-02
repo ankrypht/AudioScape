@@ -1,8 +1,6 @@
 /**
  * This file defines the `TabBarIcon` component, a reusable component for rendering
  * icons in a tab bar. It uses `Ionicons` from `@expo/vector-icons` and applies default styling.
- *
- * @packageDocumentation
  */
 
 import Ionicons from "@expo/vector-icons/Ionicons";

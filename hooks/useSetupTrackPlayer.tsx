@@ -2,8 +2,6 @@
  * This file contains a custom React hook for initializing and configuring the
  * `react-native-track-player`. This setup is essential for the music player to function
  * correctly and should be run once when the app starts.
- *
- * @packageDocumentation
  */
 
 import { useEffect, useRef } from "react";

@@ -2,8 +2,6 @@
  * This file defines the `QuickPicksSection` component, which displays a horizontally
  * scrollable list of recommended songs, often referred to as "Quick Picks".
  * It shows song artwork, title, and artist, and indicates the currently playing track.
- *
- * @packageDocumentation
  */
 
 import React, { useMemo } from "react";

@@ -1,8 +1,6 @@
 /**
  * This file defines the `CreatePlaylistModal` component, a modal screen
  * that allows users to create a new playlist by providing a name.
- *
- * @packageDocumentation
  */
 
 import { Colors } from "@/constants/Colors";

@@ -2,8 +2,6 @@
  * This file defines the `AddToPlaylistModal` component, a modal screen
  * that allows users to add the currently playing or selected song to an existing playlist
  * or create a new one. It integrates with the Redux store for playlist management.
- *
- * @packageDocumentation
  */
 
 import CreatePlaylistModal from "@/app/(modals)/createPlaylist";
