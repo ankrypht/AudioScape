@@ -2,17 +2,17 @@
  * This Redux slice manages the application's music library state, including
  * favorite tracks, user-created playlists, and downloaded songs. It also handles
  * persistence of this data to the device's file system using `expo-file-system`.
- *
- * @packageDocumentation
  */
 
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import * as DocumentPicker from "expo-document-picker";
 import { useDispatch, useSelector } from "react-redux";
+import { Platform } from "react-native";
 
 /**
- * Defines the structure of the entire library state managed by Redux.
- */
+ * Defines the structure of the entire library state managed by Redux. */
 export interface LibraryState {
   favoriteTracks: Song[];
   playlists: Record<string, Song[]>;
@@ -21,8 +21,7 @@ export interface LibraryState {
 }
 
 /**
- * Defines the metadata structure for a song that has been downloaded to the device.
- */
+ * Defines the metadata structure for a song that has been downloaded to the device. */
 export interface DownloadedSongMetadata {
   id: string;
   title: string;
@@ -34,8 +33,7 @@ export interface DownloadedSongMetadata {
 }
 
 /**
- * The initial state for the library slice.
- */
+ * The initial state for the library slice. */
 const initialState: LibraryState = {
   favoriteTracks: [],
   playlists: {},
@@ -49,8 +47,7 @@ const dataFilePath = `${FileSystem.documentDirectory}libraryData.json`;
 /**
  * Saves the current library state to a JSON file on the device's file system.
  * @param data - The `LibraryState` object to be saved.
- * @returns {Promise<void>} A promise that resolves when the data is saved.
- */
+ * @returns {Promise<void>} A promise that resolves when the data is saved. */
 const saveToFile = async (data: LibraryState) => {
   try {
     const jsonData = JSON.stringify(data);
@@ -62,8 +59,7 @@ const saveToFile = async (data: LibraryState) => {
 
 /**
  * Ensures that the library data file exists. If it doesn't, it creates the file
- * with the `initialState` data.
- */
+ * with the `initialState` data. */
 const ensureFileExists = async () => {
   try {
     const fileInfo = await FileSystem.getInfoAsync(dataFilePath);
@@ -277,8 +273,7 @@ const useAppSelector: <T>(selector: (state: RootState) => T) => T = useSelector;
 
 /**
  * A custom hook to interact with favorite tracks in the Redux store.
- * @returns An object containing `favoriteTracks` and `toggleFavoriteTrack` function.
- */
+ * @returns An object containing `favoriteTracks` and `toggleFavoriteTrack` function. */
 export const useFavorites = () => {
   const favoriteTracks = useAppSelector(
     (state) => state.library.favoriteTracks,
@@ -294,8 +289,7 @@ export const useFavorites = () => {
 
 /**
  * A custom hook to interact with playlists in the Redux store.
- * @returns An object containing `playlists` and functions to manage them.
- */
+ * @returns An object containing `playlists` and functions to manage them. */
 export const usePlaylists = () => {
   const playlists = useAppSelector((state) => state.library.playlists);
   const dispatch = useAppDispatch();
@@ -327,8 +321,7 @@ export const usePlaylists = () => {
 
 /**
  * A custom hook to get all downloaded tracks from the Redux store.
- * @returns An array of `DownloadedSongMetadata`.
- */
+ * @returns An array of `DownloadedSongMetadata`. */
 export const useDownloadedTracks = () => {
   return useAppSelector((state) => state.library.downloadedTracks);
 };
@@ -336,8 +329,7 @@ export const useDownloadedTracks = () => {
 /**
  * A custom hook to check if a specific song is downloaded.
  * @param songId The ID of the song to check.
- * @returns A boolean indicating whether the song is downloaded.
- */
+ * @returns A boolean indicating whether the song is downloaded. */
 export const useIsSongDownloaded = (songId: string) => {
   const downloadedTracks = useAppSelector(
     (state) => state.library.downloadedTracks,
@@ -348,8 +340,7 @@ export const useIsSongDownloaded = (songId: string) => {
 /**
  * A custom hook to check if a specific song is currently downloading.
  * @param songId The ID of the song to check
- * @returns True if the song is downloading, false otherwise.
- */
+ * @returns True if the song is downloading, false otherwise. */
 export const useIsSongDownloading = (songId: string) => {
   const downloadingTracks = useAppSelector(
     (state) => state.library.activeDownloads,
@@ -362,8 +353,7 @@ export const useIsSongDownloading = (songId: string) => {
 /**
  * A custom hook to get the details of a specific downloaded song.
  * @param songId The ID of the song to get details for.
- * @returns The `DownloadedSongMetadata` object for the song, or `undefined` if not found.
- */
+ * @returns The `DownloadedSongMetadata` object for the song, or `undefined` if not found. */
 export const useDownloadedTrackDetails = (songId: string) => {
   const downloadedTracks = useAppSelector(
     (state) => state.library.downloadedTracks,
@@ -373,8 +363,7 @@ export const useDownloadedTrackDetails = (songId: string) => {
 
 /**
  * A custom hook to get a list of currently active song downloads with their progress.
- * @returns An array of song objects with an added `progress` property.
- */
+ * @returns An array of song objects with an added `progress` property. */
 export const useActiveDownloads = () => {
   const activeDownloads = useAppSelector(
     (state) => state.library.activeDownloads,
@@ -388,8 +377,7 @@ export const useActiveDownloads = () => {
 /**
  * Loads the saved library data from the file system into the Redux store.
  * If loading fails, it initializes the state with empty arrays/objects.
- * @param dispatch The Redux dispatch function.
- */
+ * @param dispatch The Redux dispatch function. */
 const loadStoredData = async (dispatch: AppDispatch) => {
   try {
     const storedData = await FileSystem.readAsStringAsync(dataFilePath);
@@ -409,11 +397,154 @@ const loadStoredData = async (dispatch: AppDispatch) => {
 
 /**
  * Initializes the music library by ensuring the data file exists and then loading
- * any previously saved data into the Redux store.
- */
+ * any previously saved data into the Redux store. */
 export const initializeLibrary = async () => {
   await ensureFileExists();
   loadStoredData(store.dispatch);
+};
+
+/**
+ * Exports the library data file (`libraryData.json`).
+ * On Android, it uses the Storage Access Framework to allow the user to select a
+ * directory to save the file. On iOS and other platforms, it uses the native
+ * sharing UI.
+ *
+ * @returns {Promise<void>} A promise that resolves when the export action is
+ *   completed or dismissed. */
+export const exportLibraryData = async () => {
+  if (Platform.OS === "android") {
+    try {
+      const permissions =
+        await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+      if (permissions.granted) {
+        const data = await FileSystem.readAsStringAsync(dataFilePath);
+        const uri = permissions.directoryUri;
+        const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+          uri,
+          "libraryData.json",
+          "application/json",
+        );
+        await FileSystem.writeAsStringAsync(fileUri, data);
+        console.log("Library data exported successfully to:", fileUri);
+      } else {
+        console.log("File system permissions not granted.");
+        // You might want to inform the user that permission is required.
+      }
+    } catch (err) {
+      console.error("Error exporting library data on Android:", err);
+      throw err; // Re-throw the error to be handled by the calling UI component
+    }
+  } else {
+    // Fallback to original method for iOS and other platforms
+    try {
+      const isSharingAvailable = await Sharing.isAvailableAsync();
+      if (!isSharingAvailable) {
+        console.error("Sharing is not available on this device.");
+        // The UI component should handle this error.
+        throw new Error("Sharing is not available on this device.");
+      }
+
+      await Sharing.shareAsync(dataFilePath, {
+        mimeType: "application/json",
+        dialogTitle: "Export Library Data",
+        UTI: "public.json", // Uniform Type Identifier for JSON on iOS
+      });
+    } catch (error) {
+      console.error("Error exporting library data:", error);
+      throw error; // Re-throw for the UI component
+    }
+  }
+};
+
+/**
+ * Imports library data from a user-selected JSON file. It merges the imported
+ * `favoriteTracks` and `playlists` with the existing data, avoiding duplicates.
+ * Data related to downloads is ignored as requested.
+ *
+ * @returns {Promise<void>} A promise that resolves when the import and data
+ *   update process is complete. */
+export const importLibraryData = async () => {
+  try {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "application/json",
+      copyToCacheDirectory: true,
+    });
+
+    if (result.canceled) {
+      // User cancelled the picker, so we do nothing.
+      return;
+    }
+
+    const fileContent = await FileSystem.readAsStringAsync(
+      result.assets[0].uri,
+    );
+    const importedData = JSON.parse(fileContent) as Partial<LibraryState>;
+
+    // Ensure the library file exists before we try to read and merge.
+    await ensureFileExists();
+    const currentDataString = await FileSystem.readAsStringAsync(dataFilePath);
+    const currentData = JSON.parse(currentDataString) as LibraryState;
+
+    // Merge favorite tracks, avoiding duplicates.
+    if (
+      importedData.favoriteTracks &&
+      Array.isArray(importedData.favoriteTracks)
+    ) {
+      const existingFavIds = new Set(
+        currentData.favoriteTracks.map((t) => t.id),
+      );
+      const newFavorites = importedData.favoriteTracks.filter(
+        (t) => t.id && !existingFavIds.has(t.id),
+      );
+      currentData.favoriteTracks.push(...newFavorites);
+    }
+
+    // Merge playlists, and tracks within playlists, avoiding duplicates.
+    if (importedData.playlists && typeof importedData.playlists === "object") {
+      for (const playlistName in importedData.playlists) {
+        if (
+          Object.prototype.hasOwnProperty.call(
+            importedData.playlists,
+            playlistName,
+          )
+        ) {
+          const importedTracks = importedData.playlists[playlistName];
+
+          if (Array.isArray(importedTracks)) {
+            if (!currentData.playlists[playlistName]) {
+              // If playlist doesn't exist locally, create it.
+              currentData.playlists[playlistName] = importedTracks.filter(
+                (t) => t.id,
+              ); // Ensure tracks have IDs
+            } else {
+              // If playlist exists, merge tracks, avoiding duplicates.
+              const existingTrackIds = new Set(
+                currentData.playlists[playlistName].map((t) => t.id),
+              );
+              const newTracks = importedTracks.filter(
+                (t) => t.id && !existingTrackIds.has(t.id),
+              );
+              currentData.playlists[playlistName].push(...newTracks);
+            }
+          }
+        }
+      }
+    }
+
+    // Save the newly merged data back to the file.
+    await saveToFile(currentData);
+
+    // Reload the data into the Redux store to reflect changes in the UI.
+    await loadStoredData(store.dispatch);
+
+    console.log("Library data imported successfully.");
+    // Optionally, you can show a success message to the user.
+    // alert("Library data imported successfully!");
+  } catch (error) {
+    console.error("Error importing library data:", error);
+    // Optionally, you can show an error message to the user.
+    // alert("An error occurred while importing library data.");
+  }
 };
 
 export { store };
