@@ -29,6 +29,7 @@ export default {
     adaptiveIcon: {
       foregroundImage: "./assets/images/adaptive-icon-foreground.png",
       backgroundImage: "./assets/images/adaptive-icon-background.png",
+      monochromeImage: "./assets/images/adaptive-icon-monochrome.png",
     },
     backgroundColor: "#000",
     edgeToEdgeEnabled: true,
@@ -43,7 +44,7 @@ export default {
       "expo-notifications",
       {
         icon: "./assets/images/notification-icon.png",
-        color: "#d17603",
+        color: "#000",
       },
     ],
     "react-native-edge-to-edge",
