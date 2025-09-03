@@ -215,8 +215,10 @@ export function processSearchPageData(searchResultsAll: any): SearchPageData {
   let topResult: TopResult | null = null;
   if (topResultSection) {
     topResult = {
-      type:
-        topResultSection.subtitle?.runs?.[0]?.text?.toLowerCase() || "unknown",
+      type: topResultSection.title.text.toLowerCase().includes("radio")
+        ? "radio"
+        : topResultSection.subtitle?.runs?.[0]?.text?.toLowerCase() ||
+          "unknown",
       id:
         topResultSection.title.endpoint.payload.browseId ||
         topResultSection.title.endpoint.payload.videoId,
@@ -253,11 +255,13 @@ export function processAlbumPageData(albumResponse: any): AlbumPageData {
       albumResponse?.header?.thumbnail?.contents?.[0]?.url ??
       "https://placehold.co/50",
     songs:
-      albumResponse?.contents?.map((song: any) => ({
-        id: song?.id,
-        title: song?.title,
-        duration: song?.duration?.text,
-      })) ?? [],
+      albumResponse?.contents
+        ?.filter((item: any) => item?.id && item?.title)
+        .map((song: any) => ({
+          id: song?.id,
+          title: song?.title,
+          duration: song?.duration?.text,
+        })) ?? [],
   };
 }
 
@@ -277,14 +281,16 @@ export function processPlaylistPageData(
       playlistResponse?.header?.thumbnail?.contents?.[0]?.url ??
       "https://placehold.co/50",
     songs:
-      playlistResponse?.contents?.map((song: any) => ({
-        id: song?.id,
-        title: song?.title,
-        duration: song?.duration?.seconds,
-        thumbnail:
-          song?.thumbnail?.contents?.[0]?.url ?? "https://placehold.co/50",
-        artist: song?.authors?.[0]?.name ?? "Unknown Artist",
-      })) ?? [],
+      playlistResponse?.contents
+        ?.filter((item: any) => item?.id && item?.title)
+        .map((song: any) => ({
+          id: song?.id,
+          title: song?.title,
+          duration: song?.duration?.seconds,
+          thumbnail:
+            song?.thumbnail?.contents?.[0]?.url ?? "https://placehold.co/50",
+          artist: song?.authors?.[0]?.name ?? "Unknown Artist",
+        })) ?? [],
   };
 }
 

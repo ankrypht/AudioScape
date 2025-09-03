@@ -202,7 +202,7 @@ export default function SearchScreen() {
               },
             });
           }
-          if (item.type === "playlist") {
+          if (item.type === "playlist" || item.type === "radio") {
             router.push({
               pathname: "/(tabs)/search/playlist",
               params: {
@@ -215,9 +215,7 @@ export default function SearchScreen() {
         <FastImage
           source={{ uri: item.thumbnail }}
           style={
-            item.type === "song" || item.type === "artist"
-              ? styles.songThumbnail
-              : styles.videoThumbnail
+            item.type === "video" ? styles.videoThumbnail : styles.songThumbnail
           }
         />
         {activeTrack?.id === item.id && (
@@ -244,7 +242,8 @@ export default function SearchScreen() {
       {(item.type === "song" ||
         item.type === "video" ||
         item.type === "album" ||
-        item.type === "playlist") && (
+        item.type === "playlist" ||
+        item.type === "radio") && (
         <TouchableOpacity
           onPress={() => {
             triggerHaptic();
@@ -274,7 +273,7 @@ export default function SearchScreen() {
                 params: { albumData: albumData, type: "album" },
               });
             }
-            if (item.type === "playlist") {
+            if (item.type === "playlist" || item.type === "radio") {
               const remotePlaylistData = JSON.stringify({
                 name: item.title,
                 thumbnail: item.thumbnail,
