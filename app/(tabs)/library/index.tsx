@@ -36,7 +36,8 @@ import { useActiveTrack } from "react-native-track-player";
 
 /**
  * `LibraryScreen` component.
- * Displays the user's library. */
+ * Displays the user's library.
+ */
 export default function LibraryScreen() {
   const { playlists, createNewPlaylist } = usePlaylists();
   const router = useRouter();

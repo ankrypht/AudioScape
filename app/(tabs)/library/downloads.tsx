@@ -34,7 +34,8 @@ import { useActiveTrack } from "react-native-track-player";
 
 /**
  * `DownloadsScreen` component.
- * Displays a list of downloaded songs and active downloads. */
+ * Displays a list of downloaded songs and active downloads.
+ */
 const DownloadsScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);

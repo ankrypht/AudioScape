@@ -32,7 +32,8 @@ import { useActiveTrack } from "react-native-track-player";
 
 /**
  * `PlaylistView` component.
- * Displays the songs within a specific playlist. */
+ * Displays the songs within a specific playlist.
+ */
 const PlaylistView = () => {
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
   const [showHeaderTitle, setShowHeaderTitle] = useState<boolean>(false);

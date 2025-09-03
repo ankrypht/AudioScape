@@ -40,14 +40,16 @@ import { useActiveTrack } from "react-native-track-player";
 
 /**
  * @interface SearchSuggestions
- * @description Defines the structure for a search suggestion item. */
+ * @description Defines the structure for a search suggestion item.
+ */
 interface SearchSuggestions {
   text: string;
 }
 
 /**
  * `SearchScreen` component.
- * Provides a search interface for music content. */
+ * Provides a search interface for music content.
+ */
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<SearchPageData>();

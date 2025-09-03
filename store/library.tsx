@@ -12,7 +12,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Platform } from "react-native";
 
 /**
- * Defines the structure of the entire library state managed by Redux. */
+ * Defines the structure of the entire library state managed by Redux.
+ */
 export interface LibraryState {
   favoriteTracks: Song[];
   playlists: Record<string, Song[]>;
@@ -21,7 +22,8 @@ export interface LibraryState {
 }
 
 /**
- * Defines the metadata structure for a song that has been downloaded to the device. */
+ * Defines the metadata structure for a song that has been downloaded to the device.
+ */
 export interface DownloadedSongMetadata {
   id: string;
   title: string;
@@ -33,7 +35,8 @@ export interface DownloadedSongMetadata {
 }
 
 /**
- * The initial state for the library slice. */
+ * The initial state for the library slice.
+ */
 const initialState: LibraryState = {
   favoriteTracks: [],
   playlists: {},
@@ -47,7 +50,8 @@ const dataFilePath = `${FileSystem.documentDirectory}libraryData.json`;
 /**
  * Saves the current library state to a JSON file on the device's file system.
  * @param data - The `LibraryState` object to be saved.
- * @returns {Promise<void>} A promise that resolves when the data is saved. */
+ * @returns {Promise<void>} A promise that resolves when the data is saved.
+ */
 const saveToFile = async (data: LibraryState) => {
   try {
     const jsonData = JSON.stringify(data);
@@ -59,7 +63,8 @@ const saveToFile = async (data: LibraryState) => {
 
 /**
  * Ensures that the library data file exists. If it doesn't, it creates the file
- * with the `initialState` data. */
+ * with the `initialState` data.
+ */
 const ensureFileExists = async () => {
   try {
     const fileInfo = await FileSystem.getInfoAsync(dataFilePath);
@@ -273,7 +278,8 @@ const useAppSelector: <T>(selector: (state: RootState) => T) => T = useSelector;
 
 /**
  * A custom hook to interact with favorite tracks in the Redux store.
- * @returns An object containing `favoriteTracks` and `toggleFavoriteTrack` function. */
+ * @returns An object containing `favoriteTracks` and `toggleFavoriteTrack` function.
+ */
 export const useFavorites = () => {
   const favoriteTracks = useAppSelector(
     (state) => state.library.favoriteTracks,
@@ -289,7 +295,8 @@ export const useFavorites = () => {
 
 /**
  * A custom hook to interact with playlists in the Redux store.
- * @returns An object containing `playlists` and functions to manage them. */
+ * @returns An object containing `playlists` and functions to manage them.
+ */
 export const usePlaylists = () => {
   const playlists = useAppSelector((state) => state.library.playlists);
   const dispatch = useAppDispatch();
@@ -321,7 +328,8 @@ export const usePlaylists = () => {
 
 /**
  * A custom hook to get all downloaded tracks from the Redux store.
- * @returns An array of `DownloadedSongMetadata`. */
+ * @returns An array of `DownloadedSongMetadata`.
+ */
 export const useDownloadedTracks = () => {
   return useAppSelector((state) => state.library.downloadedTracks);
 };
@@ -329,7 +337,8 @@ export const useDownloadedTracks = () => {
 /**
  * A custom hook to check if a specific song is downloaded.
  * @param songId The ID of the song to check.
- * @returns A boolean indicating whether the song is downloaded. */
+ * @returns A boolean indicating whether the song is downloaded.
+ */
 export const useIsSongDownloaded = (songId: string) => {
   const downloadedTracks = useAppSelector(
     (state) => state.library.downloadedTracks,
@@ -340,7 +349,8 @@ export const useIsSongDownloaded = (songId: string) => {
 /**
  * A custom hook to check if a specific song is currently downloading.
  * @param songId The ID of the song to check
- * @returns True if the song is downloading, false otherwise. */
+ * @returns True if the song is downloading, false otherwise.
+ */
 export const useIsSongDownloading = (songId: string) => {
   const downloadingTracks = useAppSelector(
     (state) => state.library.activeDownloads,
@@ -353,7 +363,8 @@ export const useIsSongDownloading = (songId: string) => {
 /**
  * A custom hook to get the details of a specific downloaded song.
  * @param songId The ID of the song to get details for.
- * @returns The `DownloadedSongMetadata` object for the song, or `undefined` if not found. */
+ * @returns The `DownloadedSongMetadata` object for the song, or `undefined` if not found.
+ */
 export const useDownloadedTrackDetails = (songId: string) => {
   const downloadedTracks = useAppSelector(
     (state) => state.library.downloadedTracks,
@@ -363,7 +374,8 @@ export const useDownloadedTrackDetails = (songId: string) => {
 
 /**
  * A custom hook to get a list of currently active song downloads with their progress.
- * @returns An array of song objects with an added `progress` property. */
+ * @returns An array of song objects with an added `progress` property.
+ */
 export const useActiveDownloads = () => {
   const activeDownloads = useAppSelector(
     (state) => state.library.activeDownloads,
@@ -377,7 +389,8 @@ export const useActiveDownloads = () => {
 /**
  * Loads the saved library data from the file system into the Redux store.
  * If loading fails, it initializes the state with empty arrays/objects.
- * @param dispatch The Redux dispatch function. */
+ * @param dispatch The Redux dispatch function.
+ */
 const loadStoredData = async (dispatch: AppDispatch) => {
   try {
     const storedData = await FileSystem.readAsStringAsync(dataFilePath);
@@ -397,7 +410,8 @@ const loadStoredData = async (dispatch: AppDispatch) => {
 
 /**
  * Initializes the music library by ensuring the data file exists and then loading
- * any previously saved data into the Redux store. */
+ * any previously saved data into the Redux store.
+ */
 export const initializeLibrary = async () => {
   await ensureFileExists();
   loadStoredData(store.dispatch);
@@ -410,7 +424,8 @@ export const initializeLibrary = async () => {
  * sharing UI.
  *
  * @returns {Promise<void>} A promise that resolves when the export action is
- *   completed or dismissed. */
+ *   completed or dismissed.
+ */
 export const exportLibraryData = async () => {
   if (Platform.OS === "android") {
     try {
@@ -462,7 +477,8 @@ export const exportLibraryData = async () => {
  * Data related to downloads is ignored as requested.
  *
  * @returns {Promise<void>} A promise that resolves when the import and data
- *   update process is complete. */
+ *   update process is complete.
+ */
 export const importLibraryData = async () => {
   try {
     const result = await DocumentPicker.getDocumentAsync({

@@ -28,7 +28,8 @@ import { useActiveTrack } from "react-native-track-player";
 
 /**
  * `FavoritesScreen` component.
- * Displays a list of favorite songs. */
+ * Displays a list of favorite songs.
+ */
 const FavoritesScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);

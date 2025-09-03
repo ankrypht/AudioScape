@@ -37,28 +37,32 @@ import InnertubeClass from "youtubei.js";
 
 /**
  * @interface FeedType
- * @description Represents the structure of the home or explore feed from YouTube Music. */
+ * @description Represents the structure of the home or explore feed from YouTube Music.
+ */
 interface FeedType {
   sections?: (MusicCarouselShelf | MusicTasteBuilderShelf)[];
 }
 
 /**
  * @interface MusicCarouselShelf
- * @description Represents a carousel section containing music items. */
+ * @description Represents a carousel section containing music items.
+ */
 interface MusicCarouselShelf {
   contents?: any[];
 }
 
 /**
  * @interface MusicTasteBuilderShelf
- * @description Represents a taste builder section (currently empty interface). */
+ * @description Represents a taste builder section (currently empty interface).
+ */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface MusicTasteBuilderShelf {}
 
 /**
  * Type guard to check if a section is a `MusicCarouselShelf`.
  * @param section The section to check.
- * @returns True if the section has a `contents` property, false otherwise. */
+ * @returns True if the section has a `contents` property, false otherwise.
+ */
 function isMusicCarouselShelf(
   section: MusicCarouselShelf | MusicTasteBuilderShelf,
 ): section is MusicCarouselShelf {
@@ -67,7 +71,8 @@ function isMusicCarouselShelf(
 
 /**
  * `HomeScreen` component.
- * Displays the main home feed with Quick Picks and Trending sections. */
+ * Displays the main home feed with Quick Picks and Trending sections.
+ */
 export default function HomeScreen() {
   const [quickPicksResults, setQuickPicksResults] = useState<Song[]>([]);
   const [trendingResults, setTrendingResults] = useState<Song[]>([]);

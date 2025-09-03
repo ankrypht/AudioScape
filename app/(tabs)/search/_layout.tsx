@@ -9,7 +9,8 @@ import { Stack } from "expo-router";
 /**
  * `HomeStackLayout` component.
  * Configures the stack navigator for the home tab, hiding headers for all screens.
- * @returns The rendered stack layout for the home tab. */
+ * @returns The rendered stack layout for the home tab.
+ */
 export default function SearchStackLayout() {
   return (
     <Stack>
