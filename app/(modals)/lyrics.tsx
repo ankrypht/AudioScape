@@ -5,7 +5,13 @@
  */
 
 import React, { useEffect, useState, useMemo } from "react";
-import { View, Text, useWindowDimensions, ViewStyle } from "react-native";
+import {
+  View,
+  Text,
+  useWindowDimensions,
+  ViewStyle,
+  ActivityIndicator,
+} from "react-native";
 import { useProgress, useActiveTrack } from "react-native-track-player";
 import { useImageColors } from "@/hooks/useImageColors";
 import { Colors } from "@/constants/Colors";
@@ -47,7 +53,8 @@ const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
  */
 export default function LyricsModal() {
   useKeepAwake(); // Keep the screen awake while lyrics are displayed.
-  const { lyrics, heights, updateHeight } = useLyricsContext();
+  const { lyrics, heights, updateHeight, isFetchingLyrics } =
+    useLyricsContext();
   const { height } = useWindowDimensions();
   const { top, bottom } = useSafeAreaInsets();
   const { position } = useProgress(250); // Get playback position, updated every 250ms.
@@ -250,41 +257,48 @@ export default function LyricsModal() {
             />
 
             {/* Scrollable lyrics content */}
-            <Animated.ScrollView
-              style={styles.scrollView}
-              overScrollMode={"never"}
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={false} // Disable manual scrolling, controlled by animation.
-              contentContainerStyle={{ flexGrow: 1, paddingBottom: 25 }}
-              onLayout={(event) => {
-                const layout = event.nativeEvent.layout;
-                setScrollLayout({ y: layout.y, height: layout.height });
-              }}
-            >
-              <Animated.View style={scrollViewStyle}>
-                {lyrics.map((line, index) => (
-                  <View
-                    key={`${index}_${line.startTime ?? 0}_${line.text}`}
-                    onLayout={(event) => {
-                      const { height: layoutHeight } = event.nativeEvent.layout;
-                      updateHeight(index, layoutHeight); // Measure and update height of each lyric line.
-                    }}
-                  >
-                    <Lyrics
-                      data={line}
-                      seekTime={positionShared}
-                      nextLineStartTime={
-                        index < lyrics.length - 1
-                          ? lyrics[index + 1]?.startTime
-                          : undefined
-                      }
-                    />
-                  </View>
-                ))}
-                {/* Spacer at the bottom to allow last lyrics to scroll to center */}
-                <View style={{ height: 0.3 * height }} />
-              </Animated.View>
-            </Animated.ScrollView>
+            {isFetchingLyrics ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={Colors.text} />
+              </View>
+            ) : (
+              <Animated.ScrollView
+                style={styles.scrollView}
+                overScrollMode={"never"}
+                showsVerticalScrollIndicator={false}
+                scrollEnabled={false} // Disable manual scrolling, controlled by animation.
+                contentContainerStyle={{ flexGrow: 1, paddingBottom: 25 }}
+                onLayout={(event) => {
+                  const layout = event.nativeEvent.layout;
+                  setScrollLayout({ y: layout.y, height: layout.height });
+                }}
+              >
+                <Animated.View style={scrollViewStyle}>
+                  {lyrics.map((line, index) => (
+                    <View
+                      key={`${index}_${line.startTime ?? 0}_${line.text}`}
+                      onLayout={(event) => {
+                        const { height: layoutHeight } =
+                          event.nativeEvent.layout;
+                        updateHeight(index, layoutHeight); // Measure and update height of each lyric line.
+                      }}
+                    >
+                      <Lyrics
+                        data={line}
+                        seekTime={positionShared}
+                        nextLineStartTime={
+                          index < lyrics.length - 1
+                            ? lyrics[index + 1]?.startTime
+                            : undefined
+                        }
+                      />
+                    </View>
+                  ))}
+                  {/* Spacer at the bottom to allow last lyrics to scroll to center */}
+                  <View style={{ height: 0.3 * height }} />
+                </Animated.View>
+              </Animated.ScrollView>
+            )}
 
             {/* Bottom gradient overlay for fading effect */}
             <LinearGradient
@@ -388,5 +402,10 @@ const styles = ScaledSheet.create({
     width: "100%",
     paddingHorizontal: "5%",
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

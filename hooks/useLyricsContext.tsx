@@ -11,6 +11,7 @@ import React, {
   useContext,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import {
   useTrackPlayerEvents,
@@ -35,7 +36,7 @@ export type LyricLine = {
  */
 export type LyricsContextType = {
   lyrics: LyricLine[]; // The array of lyric lines for the current track.
-  isLyricsLoaded: boolean; // A flag indicating if the lyrics have been loaded.
+  isFetchingLyrics: boolean; // A flag indicating if the lyrics are being fetched.
   heights: number[]; // An array to store the rendered height of each lyric line.
   updateHeight: (index: number, height: number) => void; // Function to update a specific line's height.
   resetHeights: (length: number) => void; // Function to reset the heights array.
@@ -52,61 +53,72 @@ export const LyricsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
-  const [isLyricsLoaded, setIsLyricsLoaded] = useState(false);
+  const [isFetchingLyrics, setIsFetchingLyrics] = useState(false);
   const [heights, setHeights] = useState<number[]>([]);
   const [lastLoadedTrackId, setLastLoadedTrackId] = useState<string | null>(
     null,
   );
 
   const activeTrack = useActiveTrack();
+  const activeTrackIdRef = useRef(activeTrack?.id);
+  activeTrackIdRef.current = activeTrack?.id;
 
   /**
    * Fetches lyrics for the currently active track.
    */
   const fetchLyrics = useCallback(async () => {
-    if (!activeTrack) return;
+    const trackForFetch = activeTrack;
+    if (!trackForFetch) return;
 
     // Avoid refetching if lyrics for the current track are already loaded.
-    if (lastLoadedTrackId === activeTrack.id) {
+    if (lastLoadedTrackId === trackForFetch.id) {
       return;
     }
 
-    setLastLoadedTrackId(activeTrack.id);
-    setIsLyricsLoaded(false);
+    setLastLoadedTrackId(trackForFetch.id);
+    setIsFetchingLyrics(true);
 
     try {
-      if (activeTrack.title && activeTrack.artist) {
+      if (trackForFetch.title && trackForFetch.artist) {
         const searchParams: Query = {
-          track_name: activeTrack.title,
-          artist_name: activeTrack.artist,
+          track_name: trackForFetch.title,
+          artist_name: trackForFetch.artist,
         };
 
-        if (activeTrack.duration !== undefined) {
-          searchParams.duration = activeTrack.duration * 1000; // Convert to milliseconds.
+        if (trackForFetch.duration !== undefined) {
+          searchParams.duration = trackForFetch.duration * 1000; // Convert to milliseconds.
         }
 
         const syncedLyrics = await client.getSynced(searchParams);
 
-        if (syncedLyrics && syncedLyrics.length > 0) {
-          const sortedLyrics = [...syncedLyrics].sort(
-            (a, b) => (a.startTime || 0) - (b.startTime || 0),
-          );
-          setLyrics(sortedLyrics);
-          setHeights(new Array(sortedLyrics.length).fill(0));
-        } else {
+        if (activeTrackIdRef.current === trackForFetch.id) {
+          if (syncedLyrics && syncedLyrics.length > 0) {
+            const sortedLyrics = [...syncedLyrics].sort(
+              (a, b) => (a.startTime || 0) - (b.startTime || 0),
+            );
+            setLyrics(sortedLyrics);
+            setHeights(new Array(sortedLyrics.length).fill(0));
+          } else {
+            setLyrics([{ text: "No lyrics available", startTime: 0 }]);
+            setHeights([0]);
+          }
+        }
+      } else {
+        if (activeTrackIdRef.current === trackForFetch.id) {
           setLyrics([{ text: "No lyrics available", startTime: 0 }]);
           setHeights([0]);
         }
-      } else {
-        setLyrics([{ text: "No lyrics available", startTime: 0 }]);
-        setHeights([0]);
       }
     } catch (error) {
       console.error("Error fetching lyrics:", error);
-      setLyrics([{ text: "Error loading lyrics", startTime: 0 }]);
-      setHeights([0]);
+      if (activeTrackIdRef.current === trackForFetch.id) {
+        setLyrics([{ text: "Error loading lyrics", startTime: 0 }]);
+        setHeights([0]);
+      }
     } finally {
-      setIsLyricsLoaded(true);
+      if (activeTrackIdRef.current === trackForFetch.id) {
+        setIsFetchingLyrics(false);
+      }
     }
   }, [activeTrack, lastLoadedTrackId]);
 
@@ -146,7 +158,7 @@ export const LyricsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const contextValue: LyricsContextType = {
     lyrics,
-    isLyricsLoaded,
+    isFetchingLyrics,
     heights,
     updateHeight,
     resetHeights,
