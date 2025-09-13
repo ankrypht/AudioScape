@@ -34,6 +34,7 @@ The root directory contains essential configuration files, documentation, and th
 - `📁 constants/`: Stores constant values like colors, tokens, and static data.
 - `📁 helpers/`: Contains helper functions for various tasks.
 - `📁 hooks/`: Includes custom React hooks for shared logic.
+- `📁 plugins/`: Contains custom Expo config plugins.
 - `📁 services/`: Manages interactions with external APIs (e.g., YouTube).
 - `📁 store/`: Contains the Redux store for state management.
 - `📁 styles/`: Defines global styles for the application.
@@ -147,6 +148,13 @@ This directory contains custom React hooks to encapsulate and reuse stateful log
 - `📄 useSetupTrackPlayer.tsx`: Initializes and configures `react-native-track-player`.
 - `📄 useTrackPlayerFavorite.tsx`: Manages the logic for favoriting/unfavoriting tracks.
 - `📄 useTrackPlayerRepeatMode.tsx`: Manages the repeat mode (none, track, queue).
+
+### `plugins`
+
+This directory contains custom [Expo config plugins](https://docs.expo.dev/guides/config-plugins/) that modify the native project configuration during the prebuild process.
+
+- `📄 withAbiSplit.js`: A config plugin to enable ABI splitting for Android builds, reducing the final APK size by creating separate builds for different CPU architectures.
+- `📄 withIconXml.js`: A config plugin to modify Android's XML drawables, likely for customizing notification icons or other specific image resources.
 
 ### `services`
 
