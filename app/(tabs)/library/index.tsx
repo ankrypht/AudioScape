@@ -221,7 +221,6 @@ export default function LibraryScreen() {
       <FlashList
         data={playlistArray}
         renderItem={renderPlaylist}
-        estimatedItemSize={moderateScale(75)}
         contentContainerStyle={{
           paddingTop: headerHeight,
           paddingBottom: verticalScale(190) + bottom,
@@ -241,7 +240,6 @@ export default function LibraryScreen() {
               data={sections}
               renderItem={renderSection}
               keyExtractor={(item) => item.name}
-              estimatedItemSize={50}
               scrollEnabled={false}
             />
 

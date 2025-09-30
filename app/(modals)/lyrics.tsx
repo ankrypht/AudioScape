@@ -38,6 +38,7 @@ import {
   verticalScale,
 } from "react-native-size-matters/extend";
 import FastImage from "@d11/react-native-fast-image";
+import { unknownTrackImageUri } from "@/constants/images";
 
 const THRESHOLD = 150; // Threshold for lyric line activation in milliseconds.
 const GRADIENT_HEIGHT = 50; // Height of the top and bottom gradient overlays.
@@ -64,7 +65,7 @@ export default function LyricsModal() {
   const activeTrack = useActiveTrack();
   // Get image colors from the active track's artwork for background.
   const { imageColors } = useImageColors(
-    activeTrack?.artwork ?? "https://placehold.co/50",
+    activeTrack?.artwork ?? unknownTrackImageUri,
   );
 
   // Memoized dominant color with ensured readability against white text.
@@ -235,7 +236,7 @@ export default function LyricsModal() {
             <View style={styles.trackInfoContainer}>
               <FastImage
                 source={{
-                  uri: activeTrack?.artwork ?? "https://placehold.co/50",
+                  uri: activeTrack?.artwork ?? unknownTrackImageUri,
                   priority: FastImage.priority.high,
                 }}
                 style={styles.artworkImage}

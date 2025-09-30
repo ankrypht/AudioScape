@@ -244,7 +244,6 @@ const DownloadsScreen = () => {
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
           extraData={activeTrack}
-          estimatedItemSize={moderateScale(75)}
           contentContainerStyle={{
             paddingBottom: verticalScale(190) + bottom,
           }}

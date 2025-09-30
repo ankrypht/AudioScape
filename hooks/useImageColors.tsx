@@ -5,7 +5,7 @@
  */
 
 import { Colors } from "@/constants/Colors";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { useEffect, useState } from "react";
 import { getColors } from "react-native-image-colors";
 import { AndroidImageColors } from "react-native-image-colors/build/types";
@@ -59,7 +59,11 @@ export const useImageColors = (imageUrl: string) => {
         fallback: Colors.background, // Fallback color if extraction fails.
         cache: true, // Enable caching to avoid re-processing the same image.
         key: imageUrl, // Unique key for caching.
-      }).then((colors) => setImageColors(colors as AndroidImageColors));
+      })
+        .then((colors) => setImageColors(colors as AndroidImageColors))
+        .catch((error) => {
+          console.error("Failed to get image colors:", error);
+        });
     };
     fetchColors();
   }, [imageUrl]); // Re-run the effect if the imageUrl changes.

@@ -13,7 +13,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import LoaderKit from "react-native-loader-kit";
-import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
+import { ScaledSheet } from "react-native-size-matters/extend";
 import { useActiveTrack } from "react-native-track-player";
 
 /**
@@ -112,7 +112,6 @@ export const QuickPicksSection: React.FC<QuickPicksSectionProps> = ({
           showsHorizontalScrollIndicator={false}
           extraData={activeTrack}
           contentContainerStyle={{ paddingLeft: 13 }}
-          estimatedItemSize={moderateScale(100)}
           keyExtractor={(col) => `${col.top.id}-${col.bottom?.id || "none"}`}
           renderItem={({ item }) => (
             <View style={styles.column}>

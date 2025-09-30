@@ -201,7 +201,6 @@ export default function QueueModal() {
                 renderItem={renderSongItem}
                 extraData={activeTrackId}
                 showsVerticalScrollIndicator={false}
-                estimatedItemSize={moderateScale(75)}
                 contentContainerStyle={{
                   paddingBottom: bottom + 10,
                 }}

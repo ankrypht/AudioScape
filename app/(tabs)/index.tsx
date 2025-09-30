@@ -9,7 +9,7 @@ import { useMusicPlayer } from "@/components/MusicPlayerContext";
 import { QuickPicksSection } from "@/components/QuickPicksSection";
 import { TrendingSection } from "@/components/TrendingSection";
 import { Colors } from "@/constants/Colors";
-import { transparentIconUri } from "@/constants/images";
+import { transparentIconUri, unknownTrackImageUri } from "@/constants/images";
 import { triggerHaptic } from "@/helpers/haptics";
 import { innertube } from "@/services/youtube";
 import FastImage from "@d11/react-native-fast-image";
@@ -109,7 +109,7 @@ export default function HomeScreen() {
               title: item.title,
               artist: item.artists?.[0]?.name ?? "Unknown Artist",
               thumbnail:
-                item.thumbnail?.contents?.[0]?.url ?? "https://placehold.co/50",
+                item.thumbnail?.contents?.[0]?.url ?? unknownTrackImageUri,
             }));
           setQuickPicksResults(formattedResults);
         } else {
@@ -164,7 +164,7 @@ export default function HomeScreen() {
               thumbnail:
                 item.thumbnail?.contents?.[0]?.url ??
                 item.thumbnail?.[0]?.url ??
-                "https://placehold.co/50",
+                unknownTrackImageUri,
             }));
           setTrendingResults(formattedResults);
         } else {

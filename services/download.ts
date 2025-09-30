@@ -4,6 +4,7 @@
  * progress notifications, and updates the Redux store to reflect the state of downloaded tracks.
  */
 
+import { unknownTrackImageUri } from "@/constants/images";
 import {
   addDownloadedTrack,
   DownloadedSongMetadata,
@@ -12,7 +13,7 @@ import {
   setSongDownloading,
   store,
 } from "@/store/library";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Notifications from "expo-notifications";
 import { ToastAndroid } from "react-native";
 
@@ -239,7 +240,7 @@ export const downloadAndSaveSong = async (
             id: song.id,
             title: song.title,
             artist: song.artist,
-            thumbnail: song.thumbnailUrl ?? "https://placehold.co/50",
+            thumbnail: song.thumbnailUrl ?? unknownTrackImageUri,
           },
           progress: progressPercent,
         }),

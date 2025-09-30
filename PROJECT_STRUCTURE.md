@@ -13,6 +13,8 @@ The root directory contains essential configuration files, documentation, and th
 - `📄 .env-guideline-sizes`: A guideline for the sizes of environment variables.
 - `📄 .env.example`: An example file outlining the necessary environment variables.
 - `📄 .gitignore`: Specifies files and folders that Git should ignore.
+- `📄 .prettierignore`: Specifies files and folders that Prettier should ignore.
+- `📄 CHANGELOG.md`: A log of all notable changes to the project.
 - `📄 app.config.js`: Core configuration for the Expo app, including name, version, icon, and plugins.
 - `📄 babel.config.js`: Configuration for Babel, the JavaScript compiler.
 - `📄 eas.json`: Configuration for Expo Application Services (EAS) for building and deploying the app.

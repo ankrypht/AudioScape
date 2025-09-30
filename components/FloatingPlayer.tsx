@@ -22,6 +22,7 @@ import { TouchableOpacity, View, ViewProps } from "react-native";
 import { ScaledSheet, moderateScale } from "react-native-size-matters/extend";
 import { useActiveTrack, useProgress } from "react-native-track-player";
 import { Colors } from "@/constants/Colors";
+import { unknownTrackImageUri } from "@/constants/images";
 
 /**
  * `FloatingPlayer` component displays a compact music player at the bottom of the screen.
@@ -37,7 +38,7 @@ export const FloatingPlayer = ({ style }: ViewProps) => {
   const { position, duration } = useProgress(250);
   // Hook to extract dominant colors from the track's artwork.
   const { imageColors } = useImageColors(
-    activeTrack?.artwork ?? "https://placehold.co/50",
+    activeTrack?.artwork ?? unknownTrackImageUri,
   );
 
   // Determine the dominant color for the player's background.

@@ -179,7 +179,6 @@ const FavoritesScreen = () => {
           renderItem={renderItem}
           extraData={activeTrack}
           keyExtractor={(item) => item.id}
-          estimatedItemSize={moderateScale(75)}
           contentContainerStyle={{
             paddingBottom: verticalScale(190) + bottom,
           }}

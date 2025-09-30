@@ -5,6 +5,7 @@
  */
 
 import { Colors } from "@/constants/Colors";
+import { unknownTrackImageUri } from "@/constants/images";
 import { triggerHaptic } from "@/helpers/haptics";
 import { useTrackPlayerRepeatMode } from "@/hooks/useTrackPlayerRepeatMode";
 import { downloadAndSaveSong } from "@/services/download";
@@ -213,7 +214,7 @@ export const AddToPlaylistButton = ({ iconSize = moderateScale(30) }) => {
                     id: activeTrack.id,
                     title: activeTrack.title || "",
                     artist: activeTrack.artist || "",
-                    thumbnail: activeTrack.artwork || "https://placehold.co/50",
+                    thumbnail: activeTrack.artwork || unknownTrackImageUri,
                   }),
                 }
               : undefined,

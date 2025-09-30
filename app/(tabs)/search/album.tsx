@@ -250,10 +250,7 @@ export default function AlbumPageScreen() {
 
           <Text
             numberOfLines={1}
-            style={[
-              styles.headerText,
-              !showHeaderTitle && { color: "transparent" },
-            ]}
+            style={[styles.headerText, !showHeaderTitle && { opacity: 0 }, ,]}
           >
             {albumData?.title}
           </Text>
@@ -274,7 +271,6 @@ export default function AlbumPageScreen() {
           renderItem={renderSongItem}
           keyExtractor={(item: any) => item.id}
           ListHeaderComponent={ListHeader}
-          estimatedItemSize={moderateScale(50)}
           contentContainerStyle={{
             paddingHorizontal: 15,
             paddingBottom: verticalScale(190) + bottom,

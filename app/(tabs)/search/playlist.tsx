@@ -234,10 +234,7 @@ const PlaylistView = () => {
 
           <Text
             numberOfLines={1}
-            style={[
-              styles.headerText,
-              !showHeaderTitle && { color: "transparent" },
-            ]}
+            style={[styles.headerText, !showHeaderTitle && { opacity: 0 }]}
           >
             {playlistData?.title}
           </Text>
@@ -260,7 +257,6 @@ const PlaylistView = () => {
           keyExtractor={(item: any) => item.id}
           extraData={activeTrack}
           ListHeaderComponent={ListHeader}
-          estimatedItemSize={moderateScale(75)}
           contentContainerStyle={{
             paddingHorizontal: 15,
             paddingBottom: verticalScale(190) + bottom,

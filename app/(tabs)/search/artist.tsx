@@ -404,7 +404,7 @@ export default function ArtistPageScreen() {
 
   return (
     <FlashList
-      style={styles.container}
+      style={StyleSheet.flatten(styles.container)}
       contentContainerStyle={{
         paddingBottom: verticalScale(138) + bottom,
       }}
@@ -413,7 +413,6 @@ export default function ArtistPageScreen() {
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={ListHeader}
-      estimatedItemSize={moderateScale(70)}
     />
   );
 }

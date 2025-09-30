@@ -21,7 +21,6 @@ import {
   Alert,
   FlatList,
   Keyboard,
-  SafeAreaView,
   ScrollView,
   Text,
   TextInput,
@@ -616,7 +615,7 @@ export default function SearchScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: top }]}>
+    <View style={[styles.container, { paddingTop: top }]}>
       {/* Search bar input component */}
       <Searchbar
         placeholder="Search for a song"
@@ -743,7 +742,7 @@ export default function SearchScreen() {
           </ScrollView>
         )
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 

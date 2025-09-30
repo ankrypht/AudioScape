@@ -42,6 +42,7 @@ import {
   verticalScale,
 } from "react-native-size-matters/extend";
 import { useActiveTrack } from "react-native-track-player";
+import { unknownTrackImageUri } from "@/constants/images";
 
 /**
  * `PlayerScreen` component.
@@ -53,7 +54,7 @@ const PlayerScreen = () => {
 
   // Extract dominant colors from the active track's artwork for the background gradient.
   const { imageColors } = useImageColors(
-    activeTrack?.artwork ?? "https://placehold.co/50",
+    activeTrack?.artwork ?? unknownTrackImageUri,
   );
 
   // Get safe area insets to adjust UI elements for notches and system bars.

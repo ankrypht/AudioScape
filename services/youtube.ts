@@ -8,6 +8,7 @@
 // === START === Polyfills for youtubei.js in React Native
 // The following section includes polyfills and global assignments required for youtubei.js
 // to function correctly in a non-browser environment like React Native.
+import { unknownTrackImageUri } from "@/constants/images";
 import { decode, encode } from "base-64";
 import "event-target-polyfill";
 import { MMKV } from "react-native-mmkv";
@@ -130,7 +131,7 @@ export async function getInfo(
       artwork:
         item.thumbnail && item.thumbnail[0]
           ? item.thumbnail[0].url
-          : "https://placehold.co/512x512/000000/FFFFFF?text=Music",
+          : unknownTrackImageUri,
       duration: item.duration,
     };
     return res;
@@ -164,9 +165,7 @@ export function processItems(
     .map((item) => {
       const baseItem: BaseItem = {
         id: item.id,
-        thumbnail:
-          item.thumbnail?.contents?.[0]?.url ??
-          "https://placehold.co/100x100/333/fff?text=?",
+        thumbnail: item.thumbnail?.contents?.[0]?.url ?? unknownTrackImageUri,
       };
       switch (type) {
         case "song":
@@ -224,8 +223,7 @@ export function processSearchPageData(searchResultsAll: any): SearchPageData {
         topResultSection.title.endpoint.payload.videoId,
       title: topResultSection.title.text,
       thumbnail:
-        topResultSection.thumbnail.contents[0]?.url ??
-        "https://placehold.co/50",
+        topResultSection.thumbnail.contents[0]?.url ?? unknownTrackImageUri,
       subtitle: topResultSection.subtitle.text,
       artist: topResultSection.subtitle?.runs?.[2]?.text ?? "Unknown Artist",
     };
@@ -253,7 +251,7 @@ export function processAlbumPageData(albumResponse: any): AlbumPageData {
     second_subtitle: albumResponse?.header?.second_subtitle?.text,
     thumbnail:
       albumResponse?.header?.thumbnail?.contents?.[0]?.url ??
-      "https://placehold.co/50",
+      "unknownTrackImageUri",
     songs:
       albumResponse?.contents
         ?.filter((item: any) => item?.id && item?.title)
@@ -279,7 +277,7 @@ export function processPlaylistPageData(
     second_subtitle: playlistResponse?.header?.second_subtitle?.text,
     thumbnail:
       playlistResponse?.header?.thumbnail?.contents?.[0]?.url ??
-      "https://placehold.co/50",
+      "unknownTrackImageUri",
     songs:
       playlistResponse?.contents
         ?.filter((item: any) => item?.id && item?.title)
@@ -288,7 +286,7 @@ export function processPlaylistPageData(
           title: song?.title,
           duration: song?.duration?.seconds,
           thumbnail:
-            song?.thumbnail?.contents?.[0]?.url ?? "https://placehold.co/50",
+            song?.thumbnail?.contents?.[0]?.url ?? "unknownTrackImageUri",
           artist: song?.authors?.[0]?.name ?? "Unknown Artist",
         })) ?? [],
   };
@@ -311,7 +309,7 @@ function processArtistPageDataItem(
         id: item.id,
         title: item.title.text,
         subtitle: item.subtitle?.text ?? "",
-        thumbnail: item.thumbnail?.[0]?.url ?? "https://placehold.co/50",
+        thumbnail: item.thumbnail?.[0]?.url ?? "unknownTrackImageUri",
       };
 
       if (type === "album") {
@@ -352,7 +350,7 @@ export function processArtistPageData(artistPage: any): ArtistPageData {
     description: artistPage.header?.description?.text ?? "",
     thumbnail:
       artistPage.header?.thumbnail?.contents?.[0]?.url ??
-      "https://placehold.co/50",
+      "unknownTrackImageUri",
     albums: processArtistPageDataItem(findSection(["Albums"]), "album"),
     songs: processItems(findSection(["Top songs", "Songs"]), "song"),
     singlesAndEPs: processArtistPageDataItem(

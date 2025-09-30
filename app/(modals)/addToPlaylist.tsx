@@ -146,7 +146,6 @@ export default function AddToPlaylistModal() {
                 keyExtractor={(item) => item.name}
                 renderItem={(props) => renderPlaylistItem(props, handleDismiss)}
                 showsVerticalScrollIndicator={false}
-                estimatedItemSize={70}
                 contentContainerStyle={{
                   paddingBottom: bottom + 10,
                 }}
