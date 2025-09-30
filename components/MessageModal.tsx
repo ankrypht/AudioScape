@@ -159,7 +159,6 @@ const styles = ScaledSheet.create({
     paddingVertical: "8@ms",
     paddingHorizontal: "16@ms",
     borderRadius: 50,
-    flex: 1,
     marginHorizontal: 5,
   },
   modalButtonText: {
