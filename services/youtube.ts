@@ -77,6 +77,7 @@ export const innertube: Promise<Innertube> = (async () => {
     po_token: poToken,
     visitor_data: visitorData,
     generate_session_locally: true,
+    player_id: "0004de42",
   });
 
   console.log("[MusicPlayer] Innertube instance created successfully.");
