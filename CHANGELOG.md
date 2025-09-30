@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.10.0](https://github.com/ankrypht/AudioScape/compare/v1.9.0...v1.10.0) (2025-09-30)
+
+
+### Features
+
+* upgrade Expo SDK from 53 to 54 ([874a06a](https://github.com/ankrypht/AudioScape/commit/874a06aba480f5254524d8a0c561ff21f07fd921))
+
+
+### Bug Fixes
+
+* **modals:** dismiss button not showing ([0766150](https://github.com/ankrypht/AudioScape/commit/07661505724971fcb02d3b05387a7430417d3697))
+* playback error ([9e85c3c](https://github.com/ankrypht/AudioScape/commit/9e85c3cd50a8c7bddb50cda661af698506f6277f))
+
 ## [1.9.0](https://github.com/ankrypht/AudioScape/compare/v1.8.0...v1.9.0) (2025-09-13)
 
 
