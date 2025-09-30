@@ -20,6 +20,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: expo
 
+      - name: Checkout repository
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v5
+
       - name: Convert to Draft
         if: ${{ steps.release.outputs.release_created }}
         run: |
