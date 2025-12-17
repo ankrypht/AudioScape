@@ -15,8 +15,12 @@ import { MMKV } from "react-native-mmkv";
 import { Track } from "react-native-track-player";
 import "react-native-url-polyfill/auto";
 import "text-encoding-polyfill";
-import "web-streams-polyfill";
-import { Innertube } from "youtubei.js";
+import { TransformStream } from "web-streams-polyfill";
+import { Innertube, Platform, Types } from "youtubei.js";
+
+if (typeof global.TransformStream === "undefined") {
+  global.TransformStream = TransformStream;
+}
 
 // Polyfill for btoa and atob, which are not available in React Native's JavaScriptCore.
 if (!global.btoa) {
@@ -26,6 +30,24 @@ if (!global.btoa) {
 if (!global.atob) {
   global.atob = decode;
 }
+Platform.shim.eval = async (
+  data: Types.BuildScriptResult,
+  env: Record<string, Types.VMPrimative>,
+) => {
+  const properties = [];
+
+  if (env.n) {
+    properties.push(`n: exportedVars.nFunction("${env.n}")`);
+  }
+
+  if (env.sig) {
+    properties.push(`sig: exportedVars.sigFunction("${env.sig}")`);
+  }
+
+  const code = `${data.output}\nreturn { ${properties.join(", ")} }`;
+
+  return new Function(code)();
+};
 
 // Assign MMKV storage to the global scope for youtubei.js to use for caching.
 // @ts-expect-error
@@ -208,14 +230,14 @@ export function processItems(
  */
 export function processSearchPageData(searchResultsAll: any): SearchPageData {
   // Find the "Top result" section in the search response.
-  const topResultSection = searchResultsAll.contents?.find(
-    (c: any) => c.header?.title?.text === "Top result",
+  const topResultSection = searchResultsAll.contents.find(
+    (c: any) => c?.type === "MusicCardShelf",
   );
 
   let topResult: TopResult | null = null;
   if (topResultSection) {
     topResult = {
-      type: topResultSection.title.text.toLowerCase().includes("radio")
+      type: topResultSection.title?.text?.toLowerCase().includes("radio")
         ? "radio"
         : topResultSection.subtitle?.runs?.[0]?.text?.toLowerCase() ||
           "unknown",
@@ -230,13 +252,31 @@ export function processSearchPageData(searchResultsAll: any): SearchPageData {
     };
   }
 
-  // Process each category of search results.
+  // Find the "Songs", "Videos", "Albums", and "Artists" sections in the search response.
+  const results = searchResultsAll.contents.find(
+    (c: any) => c?.type === "MusicShelf",
+  );
+
   return {
     topResult,
-    songs: processItems(searchResultsAll.songs?.contents || [], "song"),
-    videos: processItems(searchResultsAll.videos?.contents || [], "video"),
-    albums: processItems(searchResultsAll.albums?.contents || [], "album"),
-    artists: processItems(searchResultsAll.artists?.contents || [], "artist"),
+    songs: processItems(
+      results.contents.filter((c: any) => c?.item_type === "song") || [],
+      "song",
+    ),
+    videos: processItems(
+      results.contents.filter((c: any) => c?.item_type === "video") || [],
+      "video",
+    ),
+    albums: processItems(
+      searchResultsAll.contents[1]?.contents.filter(
+        (c: any) => c?.item_type === "album",
+      ) || [],
+      "album",
+    ),
+    artists: processItems(
+      results.contents.filter((c: any) => c?.item_type === "artist") || [],
+      "artist",
+    ),
   };
 }
 

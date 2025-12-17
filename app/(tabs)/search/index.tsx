@@ -190,7 +190,7 @@ export default function SearchScreen() {
               params: { id: item.id, subtitle: item.subtitle },
             });
           }
-          if (item.type === "album") {
+          if (item.type === "album" || item.type === "ep") {
             router.push({
               pathname: "/(tabs)/search/album",
               params: {
