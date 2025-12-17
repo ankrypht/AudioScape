@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> Currently the music streaming is not working. YouTube changed some stuff and now its harder to get streaming urls (within react-native). I am trying to find a solution and hopefully it will be fixed soon.
+
 <div align="center">
     <img src="./assets/images/transparent-icon.png" width="180" height="180" style="display: block; margin: 0 auto"/>
     <h1>AudioScape</h1>
