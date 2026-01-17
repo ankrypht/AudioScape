@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.1](https://github.com/ankrypht/AudioScape/compare/v1.10.0...v1.10.1) (2026-01-17)
+
+
+### Bug Fixes
+
+* search not working ([ad8fd93](https://github.com/ankrypht/AudioScape/commit/ad8fd93567820bad4752f5194bc82154d4947cd5))
+
 ## [1.10.0](https://github.com/ankrypht/AudioScape/compare/v1.9.0...v1.10.0) (2025-09-30)
 
 
